@@ -1,4 +1,5 @@
 import "./globals.css";
+import { SessionBanner } from "@/components/session-banner";
 
 export const metadata = {
   title: "ASP Study Hub",
@@ -8,7 +9,10 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="ko">
-      <body>{children}</body>
+      <body>
+        <SessionBanner />
+        {children}
+      </body>
     </html>
   );
 }

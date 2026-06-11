@@ -9,7 +9,8 @@
     "start": "next start",
     "lint": "eslint .",
     "validate:data": "node scripts/validate-data.mjs",
-    "scan:public-content": "node scripts/scan-public-content.mjs"
+    "scan:public-content": "node scripts/scan-public-content.mjs",
+    "test:security": "node scripts/security-check.mjs"
   },
   "dependencies": {
     "lucide-react": "^0.468.0",

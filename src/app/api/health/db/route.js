@@ -1,13 +1,15 @@
-import { NextResponse } from "next/server";
+import { jsonResponse } from "@/lib/api";
 import { ensureSchema, getSql, isDatabaseConfigured } from "@/lib/db";
+
+export const dynamic = "force-dynamic";
 
 export async function GET() {
   if (!isDatabaseConfigured()) {
-    return NextResponse.json({ ok: false, configured: false, error: "database_not_configured" }, { status: 503 });
+    return jsonResponse({ ok: false, configured: false, error: "database_not_configured" }, { status: 503 });
   }
 
   await ensureSchema();
   const sql = getSql();
   const [result] = await sql`select 1 as ok`;
-  return NextResponse.json({ ok: result.ok === 1, configured: true });
+  return jsonResponse({ ok: result.ok === 1, configured: true });
 }

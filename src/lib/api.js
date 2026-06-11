@@ -1,8 +1,22 @@
 import { NextResponse } from "next/server";
 import { aspData } from "@/lib/data";
 
-export function jsonError(error, status = 400, extra = {}) {
-  return NextResponse.json({ error, ...extra }, { status });
+export const noStoreHeaders = {
+  "Cache-Control": "no-store, max-age=0",
+};
+
+export function jsonResponse(body, init = {}) {
+  return NextResponse.json(body, {
+    ...init,
+    headers: {
+      ...noStoreHeaders,
+      ...(init.headers || {}),
+    },
+  });
+}
+
+export function jsonError(error, status = 400, extra = {}, headers = {}) {
+  return jsonResponse({ error, ...extra }, { status, headers });
 }
 
 export async function readJson(request) {
@@ -28,4 +42,14 @@ export function assertKnownTarget(scope, targetId) {
   };
 
   return targetSets[scope]?.has(targetId) || false;
+}
+
+export function normalizeText(value, { field = "text", max = 2000 } = {}) {
+  if (typeof value !== "string") return { error: `invalid_${field}` };
+
+  const normalized = value.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, "").trim();
+  if (!normalized) return { error: `empty_${field}` };
+  if ([...normalized].length > max) return { error: `${field}_too_long`, max };
+
+  return { value: normalized };
 }

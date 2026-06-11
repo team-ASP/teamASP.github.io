@@ -1,9 +1,11 @@
 import { randomUUID } from "node:crypto";
-import { NextResponse } from "next/server";
 import { aspData } from "@/lib/data";
-import { can, getSessionFromRequest } from "@/lib/auth";
-import { jsonError, readJson, requireFields } from "@/lib/api";
+import { can, getSessionFromRequest, verifyCsrf } from "@/lib/auth";
+import { jsonError, jsonResponse, normalizeText, readJson, requireFields } from "@/lib/api";
 import { ensureSchema, getSql, isDatabaseConfigured, toPublicReview, writeAuditEvent } from "@/lib/db";
+import { checkRateLimit, getRateLimitKey } from "@/lib/rate-limit";
+
+export const dynamic = "force-dynamic";
 
 function getStaticReviewItems() {
   return aspData.reviewQueue.map((item) => ({
@@ -22,17 +24,23 @@ export async function GET(request) {
   };
 
   if (!isDatabaseConfigured()) {
-    return NextResponse.json({ configured: false, items: getStaticReviewItems(), permissions });
+    return jsonResponse({ configured: false, items: getStaticReviewItems(), permissions });
   }
 
   await ensureSchema();
   const sql = getSql();
   const rows = await sql`select * from review_items order by created_at desc limit 100`;
-  return NextResponse.json({ configured: true, items: [...rows.map(toPublicReview), ...getStaticReviewItems()], permissions });
+  return jsonResponse({ configured: true, items: [...rows.map(toPublicReview), ...getStaticReviewItems()], permissions });
 }
 
 export async function POST(request) {
   const session = getSessionFromRequest(request);
+  if (!verifyCsrf(request)) return jsonError("csrf_failed", 403);
+
+  const limit = checkRateLimit(getRateLimitKey(request, session, "review"), { limit: 20, windowMs: 60_000 });
+  if (!limit.ok) {
+    return jsonError("rate_limited", 429, { retryAfter: limit.retryAfter }, { "Retry-After": String(limit.retryAfter) });
+  }
   if (!isDatabaseConfigured()) return jsonError("database_not_configured", 503);
 
   const payload = await readJson(request);
@@ -72,20 +80,22 @@ async function submitDraftForReview(payload, session) {
     summary: draft.title,
   });
 
-  return NextResponse.json({ item: toPublicReview(review) }, { status: 201 });
+  return jsonResponse({ item: toPublicReview(review) }, { status: 201 });
 }
 
 async function reviewItem(payload, session) {
   if (!can(session.role, "review")) return jsonError("forbidden", 403);
   const missing = requireFields(payload, ["reviewId"]);
   if (missing.length) return jsonError("missing_fields", 400, { missing });
+  const note = payload.note ? normalizeText(payload.note, { field: "note", max: 2000 }) : { value: "" };
+  if (note.error) return jsonError(note.error, 400, note.max ? { max: note.max } : {});
 
   const nextStatus = payload.action === "approve" ? "published" : "changes-requested";
   await ensureSchema();
   const sql = getSql();
   const [review] = await sql`
     update review_items
-    set status = ${nextStatus}, reviewer_login = ${session.login}, review_note = ${payload.note || ""}, reviewed_at = now()
+    set status = ${nextStatus}, reviewer_login = ${session.login}, review_note = ${note.value}, reviewed_at = now()
     where id = ${payload.reviewId}
     returning *
   `;
@@ -100,5 +110,5 @@ async function reviewItem(payload, session) {
     summary: review.title,
   });
 
-  return NextResponse.json({ item: toPublicReview(review) });
+  return jsonResponse({ item: toPublicReview(review) });
 }

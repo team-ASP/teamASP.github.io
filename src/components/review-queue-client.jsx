@@ -4,12 +4,20 @@ import { useEffect, useState } from "react";
 
 export function ReviewQueueClient({ initialItems }) {
   const [payload, setPayload] = useState({ items: initialItems, permissions: { canReview: false } });
+  const [session, setSession] = useState(null);
   const [message, setMessage] = useState("");
 
   useEffect(() => {
-    fetch("/api/review-queue")
-      .then((response) => response.json())
-      .then((data) => setPayload(data))
+    const requestOptions = { cache: "no-store", credentials: "same-origin" };
+    Promise.all([fetch("/api/review-queue", requestOptions), fetch("/api/me", requestOptions)])
+      .then(async ([queueResponse, meResponse]) => {
+        const [queue, me] = await Promise.all([queueResponse.json(), meResponse.json()]);
+        return { queue, me };
+      })
+      .then(({ queue, me }) => {
+        setPayload(queue);
+        setSession(me);
+      })
       .catch(() => setMessage("검수 큐를 불러오지 못했습니다."));
   }, []);
 
@@ -17,7 +25,9 @@ export function ReviewQueueClient({ initialItems }) {
     setMessage("");
     const response = await fetch("/api/review-queue", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      cache: "no-store",
+      credentials: "same-origin",
+      headers: { "Content-Type": "application/json", "X-CSRF-Token": session?.csrfToken || "" },
       body: JSON.stringify({ action, reviewId }),
     });
     const data = await response.json();

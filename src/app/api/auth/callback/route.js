@@ -1,12 +1,16 @@
 import { NextResponse } from "next/server";
 import {
   buildEditableScopes,
+  createCsrfToken,
+  getCsrfCookieName,
   getOAuthStateCookieName,
   getRoleForGitHubLogin,
   getSessionCookieName,
   isAuthConfigured,
   signSession,
 } from "@/lib/auth";
+
+export const dynamic = "force-dynamic";
 
 async function fetchGitHubJson(url, options) {
   const response = await fetch(url, {
@@ -87,6 +91,13 @@ export async function GET(request) {
     response.cookies.delete(getOAuthStateCookieName());
     response.cookies.set(getSessionCookieName(), sessionValue, {
       httpOnly: true,
+      maxAge: 60 * 60 * 24 * 7,
+      path: "/",
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+    });
+    response.cookies.set(getCsrfCookieName(), createCsrfToken(), {
+      httpOnly: false,
       maxAge: 60 * 60 * 24 * 7,
       path: "/",
       sameSite: "lax",

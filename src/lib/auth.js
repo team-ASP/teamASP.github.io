@@ -3,6 +3,7 @@ import { aspData } from "@/lib/data";
 
 const sessionCookieName = "asp_session";
 const oauthStateCookieName = "asp_oauth_state";
+const csrfCookieName = "asp_csrf";
 const roleRank = { viewer: 0, editor: 1, maintainer: 2, admin: 3 };
 
 function base64UrlEncode(value) {
@@ -29,8 +30,16 @@ export function getSessionCookieName() {
   return sessionCookieName;
 }
 
+export function getCsrfCookieName() {
+  return csrfCookieName;
+}
+
 export function createOAuthState() {
   return randomBytes(24).toString("base64url");
+}
+
+export function createCsrfToken() {
+  return randomBytes(32).toString("base64url");
 }
 
 export function getRequiredRole(action) {
@@ -77,9 +86,13 @@ export function verifySession(value) {
     return null;
   }
 
-  const payload = JSON.parse(base64UrlDecode(body));
-  if (payload.expiresAt && Date.now() > payload.expiresAt) return null;
-  return payload;
+  try {
+    const payload = JSON.parse(base64UrlDecode(body));
+    if (payload.expiresAt && Date.now() > payload.expiresAt) return null;
+    return payload;
+  } catch {
+    return null;
+  }
 }
 
 export function getViewerSession() {
@@ -108,7 +121,18 @@ export function getSessionFromRequest(request) {
     editableScopes: session.editableScopes || [],
     authProvider: "github",
     authEnabled: true,
+    csrfToken: request.cookies.get(csrfCookieName)?.value || "",
   };
+}
+
+export function verifyCsrf(request) {
+  const cookieToken = request.cookies.get(csrfCookieName)?.value || "";
+  const headerToken = request.headers.get("x-csrf-token") || "";
+  if (!cookieToken || !headerToken) return false;
+
+  const cookieBuffer = Buffer.from(cookieToken);
+  const headerBuffer = Buffer.from(headerToken);
+  return cookieBuffer.length === headerBuffer.length && timingSafeEqual(cookieBuffer, headerBuffer);
 }
 
 export function buildEditableScopes(role) {

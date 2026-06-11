@@ -7,7 +7,7 @@ export function AuditLogClient() {
   const [message, setMessage] = useState("");
 
   useEffect(() => {
-    fetch("/api/audit-events")
+    fetch("/api/audit-events", { cache: "no-store", credentials: "same-origin" })
       .then((response) => response.json().then((data) => ({ ok: response.ok, data })))
       .then(({ ok, data }) => {
         if (!ok) {

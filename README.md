@@ -17,8 +17,10 @@ npm run dev
 - `src/components/study-hub.jsx`: 공개 운영 대시보드 UI
 - `src/lib/data.js`: 프로젝트, 세션, 태스크, 로그, 권한 정책 데이터
 - `src/lib/auth.js`: GitHub OAuth, signed session, role/scope 판정 유틸리티
+- `src/lib/rate-limit.js`: 쓰기 API abuse 방지를 위한 서버 측 요청 제한
 - `scripts/validate-data.mjs`: 도메인 데이터 검증 스크립트
 - `scripts/scan-public-content.mjs`: 공개 콘텐츠 secret pattern scan
+- `scripts/security-check.mjs`: CSRF, rate limit, 보안 헤더 등 회귀 검사
 - `.github/workflows/validate.yml`: PR/push 검증 workflow
 - `src/legacy`: 이전 정적 프로토타입 백업
 - `docs/product-roadmap.md`: 스터디/프로젝트 운영 허브로 전환하기 위한 Epic, User Story, Task, MafiaSimulation 3개월 예시 계획
@@ -30,6 +32,7 @@ npm run dev
 ## 주요 경로
 
 - `/`: 공개 운영 대시보드
+- `/workspace`: 로그인 세션, 작업 보드, 세션 일정, 의사결정 로그, 아카이브 체크리스트를 묶은 협업 워크스페이스
 - `/projects`, `/projects/mafia-simulation`: 프로젝트 목록과 상세 계획
 - `/sessions`, `/tasks`, `/logs`, `/archive`: 운영 기록 화면
 - `/governance`, `/review`: 권한 정책과 검수 큐
@@ -46,3 +49,12 @@ npm run dev
 3. GitHub App 또는 OAuth App 등록
 4. Vercel environment variables에 server-only secret 등록
 5. Editor UI, Review Queue, audit log 저장소 구현
+
+## 검증 명령
+
+```bash
+npm run validate:data
+npm run scan:public-content
+npm run test:security
+npm run build
+```

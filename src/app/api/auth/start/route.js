@@ -1,9 +1,12 @@
 import { NextResponse } from "next/server";
 import { createOAuthState, getOAuthStateCookieName, isAuthConfigured } from "@/lib/auth";
+import { jsonResponse } from "@/lib/api";
+
+export const dynamic = "force-dynamic";
 
 export async function GET(request) {
   if (!isAuthConfigured()) {
-    return NextResponse.json(
+    return jsonResponse(
       {
         error: "auth_not_configured",
         message: "GitHub auth needs GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET, and SESSION_SECRET.",

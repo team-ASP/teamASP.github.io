@@ -13,7 +13,8 @@ export function DraftComposer({ targetId }) {
   useEffect(() => {
     let alive = true;
     async function load() {
-      const [meResponse, draftsResponse] = await Promise.all([fetch("/api/me"), fetch("/api/drafts")]);
+      const requestOptions = { cache: "no-store", credentials: "same-origin" };
+      const [meResponse, draftsResponse] = await Promise.all([fetch("/api/me", requestOptions), fetch("/api/drafts", requestOptions)]);
       const [me, draftsPayload] = await Promise.all([meResponse.json(), draftsResponse.json()]);
       if (!alive) return;
       setSession(me);
@@ -31,7 +32,9 @@ export function DraftComposer({ targetId }) {
     setMessage("");
     const response = await fetch("/api/drafts", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      cache: "no-store",
+      credentials: "same-origin",
+      headers: { "Content-Type": "application/json", "X-CSRF-Token": session?.csrfToken || "" },
       body: JSON.stringify({ type, targetId, title, body }),
     });
     const payload = await response.json();
@@ -49,7 +52,9 @@ export function DraftComposer({ targetId }) {
     setMessage("");
     const response = await fetch("/api/review-queue", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      cache: "no-store",
+      credentials: "same-origin",
+      headers: { "Content-Type": "application/json", "X-CSRF-Token": session?.csrfToken || "" },
       body: JSON.stringify({ action: "submit-draft", draftId: id }),
     });
     const payload = await response.json();

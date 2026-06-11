@@ -1,8 +1,9 @@
-import { NextResponse } from "next/server";
 import { aspData } from "@/lib/data";
 import { can, getSessionFromRequest } from "@/lib/auth";
 import { ensureSchema, getSql, isDatabaseConfigured, toPublicAuditEvent } from "@/lib/db";
-import { jsonError } from "@/lib/api";
+import { jsonError, jsonResponse } from "@/lib/api";
+
+export const dynamic = "force-dynamic";
 
 export async function GET(request) {
   const session = getSessionFromRequest(request);
@@ -19,11 +20,11 @@ export async function GET(request) {
   }));
 
   if (!isDatabaseConfigured()) {
-    return NextResponse.json({ configured: false, items: staticEvents });
+    return jsonResponse({ configured: false, items: staticEvents });
   }
 
   await ensureSchema();
   const sql = getSql();
   const rows = await sql`select * from audit_events order by created_at desc limit 100`;
-  return NextResponse.json({ configured: true, items: [...rows.map(toPublicAuditEvent), ...staticEvents] });
+  return jsonResponse({ configured: true, items: [...rows.map(toPublicAuditEvent), ...staticEvents] });
 }

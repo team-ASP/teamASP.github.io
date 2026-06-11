@@ -1,12 +1,14 @@
 import { randomUUID } from "node:crypto";
-import { NextResponse } from "next/server";
 import { aspData } from "@/lib/data";
-import { assertKnownTarget, jsonError, readJson, requireFields } from "@/lib/api";
-import { can, getSessionFromRequest } from "@/lib/auth";
+import { assertKnownTarget, jsonResponse, jsonError, normalizeText, readJson, requireFields } from "@/lib/api";
+import { can, getSessionFromRequest, verifyCsrf } from "@/lib/auth";
 import { ensureSchema, getSql, isDatabaseConfigured, toPublicComment, writeAuditEvent } from "@/lib/db";
+import { checkRateLimit, getRateLimitKey } from "@/lib/rate-limit";
 
 const validScopes = new Set(["project", "session", "task", "log", "archive"]);
 const validVisibility = new Set(["public", "team-only", "maintainer-only"]);
+
+export const dynamic = "force-dynamic";
 
 export async function GET(request) {
   const session = getSessionFromRequest(request);
@@ -33,7 +35,7 @@ export async function GET(request) {
     }));
 
   if (!isDatabaseConfigured()) {
-    return NextResponse.json({ configured: false, items: staticComments });
+    return jsonResponse({ configured: false, items: staticComments });
   }
 
   await ensureSchema();
@@ -49,13 +51,21 @@ export async function GET(request) {
     order by created_at asc
   `;
 
-  return NextResponse.json({ configured: true, items: [...staticComments, ...rows.map(toPublicComment)] });
+  return jsonResponse({ configured: true, items: [...staticComments, ...rows.map(toPublicComment)] });
 }
 
 export async function POST(request) {
   const session = getSessionFromRequest(request);
   if (!can(session.role, "comment")) {
     return jsonError("forbidden", 403);
+  }
+  if (!verifyCsrf(request)) {
+    return jsonError("csrf_failed", 403);
+  }
+
+  const limit = checkRateLimit(getRateLimitKey(request, session, "comments"), { limit: 20, windowMs: 60_000 });
+  if (!limit.ok) {
+    return jsonError("rate_limited", 429, { retryAfter: limit.retryAfter }, { "Retry-After": String(limit.retryAfter) });
   }
   if (!isDatabaseConfigured()) {
     return jsonError("database_not_configured", 503);
@@ -70,13 +80,15 @@ export async function POST(request) {
 
   const visibility = payload.visibility || "team-only";
   if (!validVisibility.has(visibility)) return jsonError("invalid_visibility", 400);
+  const body = normalizeText(payload.body, { field: "body", max: 2000 });
+  if (body.error) return jsonError(body.error, 400, body.max ? { max: body.max } : {});
 
   await ensureSchema();
   const sql = getSql();
   const id = randomUUID();
   const [comment] = await sql`
     insert into comments (id, scope, target_id, visibility, body, author_login, author_name)
-    values (${id}, ${payload.scope}, ${payload.targetId}, ${visibility}, ${payload.body}, ${session.login}, ${session.name || session.login})
+    values (${id}, ${payload.scope}, ${payload.targetId}, ${visibility}, ${body.value}, ${session.login}, ${session.name || session.login})
     returning *
   `;
 
@@ -88,5 +100,5 @@ export async function POST(request) {
     summary: `Created ${visibility} comment`,
   });
 
-  return NextResponse.json({ item: toPublicComment(comment) }, { status: 201 });
+  return jsonResponse({ item: toPublicComment(comment) }, { status: 201 });
 }

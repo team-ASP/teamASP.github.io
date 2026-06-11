@@ -7,7 +7,7 @@ export function AuthStatus() {
 
   useEffect(() => {
     let alive = true;
-    fetch("/api/me")
+    fetch("/api/me", { cache: "no-store", credentials: "same-origin" })
       .then((response) => response.json())
       .then((payload) => {
         if (alive) setSession(payload);
@@ -19,6 +19,12 @@ export function AuthStatus() {
       alive = false;
     };
   }, []);
+
+  async function logout(event) {
+    event.preventDefault();
+    await fetch("/api/auth/logout", { method: "POST", cache: "no-store", credentials: "same-origin" });
+    window.location.assign("/");
+  }
 
   if (!session) {
     return (
@@ -47,7 +53,7 @@ export function AuthStatus() {
           </a>
         )}
         {session.authenticated && (
-          <form action="/api/auth/logout" method="post">
+          <form onSubmit={logout}>
             <button className="action-button secondary" type="submit">
               로그아웃
             </button>

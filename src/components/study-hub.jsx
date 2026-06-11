@@ -103,6 +103,10 @@ export function StudyHub({ data }) {
             <FileText aria-hidden="true" />
             <span>Project URL</span>
           </Link>
+          <Link className="nav-link" href="/workspace">
+            <ClipboardList aria-hidden="true" />
+            <span>Workspace</span>
+          </Link>
           <Link className="nav-link" href="/admin/audit">
             <ShieldCheck aria-hidden="true" />
             <span>Audit</span>
@@ -110,8 +114,8 @@ export function StudyHub({ data }) {
         </nav>
         <section className="access-panel">
           <span className="eyebrow">Access</span>
-          <strong>Viewer mode</strong>
-          <p>GitHub 로그인 연동 전까지 공개 데이터와 검수 대기 항목을 읽기 전용으로 확인합니다.</p>
+          <strong>GitHub organization 권한</strong>
+          <p>상단 세션 바에서 현재 권한을 확인합니다. team-ASP 멤버는 로그인 후 draft, comment, review 흐름을 사용할 수 있습니다.</p>
         </section>
       </aside>
 

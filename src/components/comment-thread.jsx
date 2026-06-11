@@ -14,7 +14,11 @@ export function CommentThread({ scope, targetId }) {
   useEffect(() => {
     let alive = true;
     async function load() {
-      const [meResponse, commentsResponse] = await Promise.all([fetch("/api/me"), fetch(`/api/comments?${query}`)]);
+      const requestOptions = { cache: "no-store", credentials: "same-origin" };
+      const [meResponse, commentsResponse] = await Promise.all([
+        fetch("/api/me", requestOptions),
+        fetch(`/api/comments?${query}`, requestOptions),
+      ]);
       const [me, commentsPayload] = await Promise.all([meResponse.json(), commentsResponse.json()]);
       if (!alive) return;
       setSession(me);
@@ -32,7 +36,9 @@ export function CommentThread({ scope, targetId }) {
     setMessage("");
     const response = await fetch("/api/comments", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      cache: "no-store",
+      credentials: "same-origin",
+      headers: { "Content-Type": "application/json", "X-CSRF-Token": session?.csrfToken || "" },
       body: JSON.stringify({ scope, targetId, visibility, body }),
     });
     const payload = await response.json();
