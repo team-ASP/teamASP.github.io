@@ -32,7 +32,7 @@ npm run dev
 ## 주요 경로
 
 - `/`: 공개 운영 대시보드
-- `/workspace`: 로그인 세션, 작업 보드, 세션 일정, 의사결정 로그, 아카이브 체크리스트를 묶은 협업 워크스페이스
+- `/workspace`: 사이드바 기반 팀 워크스페이스. Overview, Planning board, Editor, Review, Archive를 분리하고 로그인 멤버는 태스크 상태와 Draft를 편집할 수 있습니다.
 - `/projects`, `/projects/mafia-simulation`: 프로젝트 목록과 상세 계획
 - `/sessions`, `/tasks`, `/logs`, `/archive`: 운영 기록 화면
 - `/governance`, `/review`: 권한 정책과 검수 큐
@@ -40,7 +40,7 @@ npm run dev
 - `/api/me`: 현재 세션과 권한 조회
 - `/api/auth/start`: GitHub OAuth 시작. 환경 변수가 없으면 503을 반환합니다.
 - `/api/health/db`: DB 연결과 schema 준비 상태 확인
-- `/api/comments`, `/api/drafts`, `/api/review-queue`, `/api/audit-events`: 편집/검수/감사 API
+- `/api/comments`, `/api/drafts`, `/api/task-updates`, `/api/review-queue`, `/api/audit-events`: 편집/검수/감사 API
 
 ## 다음 단계
 

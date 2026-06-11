@@ -32,7 +32,12 @@ for (const file of sourceFiles) {
   assert(!/NEXT_PUBLIC_[A-Z0-9_]*(SECRET|TOKEN|KEY)/.test(body), `${file}: secret-like values must not be public env vars`);
 }
 
-for (const file of ["src/app/api/comments/route.js", "src/app/api/drafts/route.js", "src/app/api/review-queue/route.js"]) {
+for (const file of [
+  "src/app/api/comments/route.js",
+  "src/app/api/drafts/route.js",
+  "src/app/api/review-queue/route.js",
+  "src/app/api/task-updates/route.js",
+]) {
   const body = read(file);
   assert(body.includes("verifyCsrf"), `${file}: mutating route must verify CSRF token`);
   assert(body.includes("checkRateLimit"), `${file}: mutating route must rate-limit writes`);

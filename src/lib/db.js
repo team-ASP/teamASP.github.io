@@ -85,6 +85,19 @@ export async function ensureSchema() {
   await sql`create index if not exists review_items_status_idx on review_items (status, created_at desc)`;
 
   await sql`
+    create table if not exists task_updates (
+      id text primary key,
+      task_id text not null,
+      status text not null,
+      note text not null default '',
+      author_login text not null,
+      author_name text not null,
+      created_at timestamptz not null default now()
+    )
+  `;
+  await sql`create index if not exists task_updates_task_idx on task_updates (task_id, created_at desc)`;
+
+  await sql`
     create table if not exists audit_events (
       id text primary key,
       actor_login text not null,
@@ -156,6 +169,18 @@ export function toPublicReview(row) {
     reviewNote: row.review_note,
     createdAt: row.created_at,
     reviewedAt: row.reviewed_at,
+  };
+}
+
+export function toPublicTaskUpdate(row) {
+  return {
+    id: row.id,
+    taskId: row.task_id,
+    status: row.status,
+    note: row.note,
+    authorLogin: row.author_login,
+    authorName: row.author_name,
+    createdAt: row.created_at,
   };
 }
 
