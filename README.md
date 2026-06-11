@@ -1,34 +1,45 @@
-# title_mockA
+# ASP Study Hub
 
-React 기반으로 작성한 다중 페이지 정보 교류 허브 템플릿입니다. 실제 콘텐츠 값은 `title_mockA`, `description_mockA`, `category_mockA` 같은 교체용 mock 값으로 구성했습니다.
+ASP 팀의 스터디와 프로젝트를 계획, 진행, 정리, 아카이빙하기 위한 운영 허브입니다. 현재 코드는 Vercel 배포를 목표로 하는 Next.js App Router 구조로 전환 중입니다.
 
 ## 로컬 확인
 
-`index.html`을 브라우저에서 바로 열 수 있습니다.
-
-또는 간단한 정적 서버로 확인할 수 있습니다.
-
 ```bash
-python3 -m http.server 5173
+npm install
+npm run dev
 ```
 
-브라우저에서 `http://127.0.0.1:5173/`을 열면 됩니다.
+브라우저에서 `http://localhost:3000/`을 열면 됩니다.
 
 ## 구조
 
-- `index.html`: React UMD CDN과 앱 진입점
-- `src/data.js`: 페이지, 카드, 일정, 자료, 멤버, 뱃지 mock 데이터
-- `src/app.js`: React 컴포넌트와 페이지 전환, 검색, 모달, 상세 패널 동작
-- `src/styles.css`: 레이아웃과 반응형 스타일
-- `docs/deployment-plan.md`: GitHub 업로드 및 GitHub Pages 배포 계획
+- `src/app`: Next.js App Router 페이지와 API route
+- `src/components/study-hub.jsx`: 공개 운영 대시보드 UI
+- `src/lib/data.js`: 프로젝트, 세션, 태스크, 로그, 권한 정책 데이터
+- `src/lib/auth.js`: GitHub OAuth, signed session, role/scope 판정 유틸리티
+- `scripts/validate-data.mjs`: 도메인 데이터 검증 스크립트
+- `scripts/scan-public-content.mjs`: 공개 콘텐츠 secret pattern scan
+- `.github/workflows/validate.yml`: PR/push 검증 workflow
+- `src/legacy`: 이전 정적 프로토타입 백업
+- `docs/product-roadmap.md`: 스터디/프로젝트 운영 허브로 전환하기 위한 Epic, User Story, Task, MafiaSimulation 3개월 예시 계획
+- `docs/product-policies.md`: GitHub 로그인, 권한, 편집, 검수, 보안, 감사 로그, 사용 정책
+- `docs/vercel-hosting-automation-plan.md`: Vercel 호스팅, GitHub Actions 자동화, Preview/Production 배포 전략
+- `docs/deployment-plan.md`: 현재 정적 프로토타입에서 Vercel 기반 동적 사이트로 전환하는 배포 계획
 - `docs/github-member-sync.md`: GitHub organization 멤버 동기화 방식
+
+## 주요 경로
+
+- `/`: 공개 운영 대시보드
+- `/projects`, `/projects/mafia-simulation`: 프로젝트 목록과 상세 계획
+- `/sessions`, `/tasks`, `/logs`, `/archive`: 운영 기록 화면
+- `/governance`, `/review`: 권한 정책과 검수 큐
+- `/api/me`: 현재 세션과 권한 조회
+- `/api/auth/start`: GitHub OAuth 시작. 환경 변수가 없으면 503을 반환합니다.
 
 ## 다음 단계
 
-최종 컨펌 이후:
-
-1. `team-ASP` 조직에 새 repository 생성
-2. 현재 폴더를 repository root로 정리
-3. `main` 브랜치 push
-4. GitHub Pages를 `main` branch 또는 GitHub Actions로 활성화
-5. 필요 시 커스텀 도메인 연결
+1. Vercel project를 `team-ASP/teamASP.github.io`에 연결
+2. GitHub Actions validation을 branch protection required check로 설정
+3. GitHub App 또는 OAuth App 등록
+4. Vercel environment variables에 server-only secret 등록
+5. Editor UI, Review Queue, audit log 저장소 구현
