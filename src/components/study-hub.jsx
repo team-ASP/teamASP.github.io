@@ -17,6 +17,7 @@ import {
   ShieldCheck,
   Users,
 } from "lucide-react";
+import Link from "next/link";
 import { useMemo, useState } from "react";
 
 const navItems = [
@@ -98,6 +99,14 @@ export function StudyHub({ data }) {
               </button>
             );
           })}
+          <Link className="nav-link" href="/projects/mafia-simulation">
+            <FileText aria-hidden="true" />
+            <span>Project URL</span>
+          </Link>
+          <Link className="nav-link" href="/admin/audit">
+            <ShieldCheck aria-hidden="true" />
+            <span>Audit</span>
+          </Link>
         </nav>
         <section className="access-panel">
           <span className="eyebrow">Access</span>

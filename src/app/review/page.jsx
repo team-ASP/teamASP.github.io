@@ -1,6 +1,6 @@
 import Link from "next/link";
+import { ReviewQueueClient } from "@/components/review-queue-client";
 import { aspData } from "@/lib/data";
-import { getMemberName, getStatusLabel } from "@/lib/lookups";
 
 export const metadata = {
   title: "Review Queue | ASP Study Hub",
@@ -20,19 +20,7 @@ export default function ReviewQueuePage() {
         </Link>
       </header>
 
-      <section className="card-grid">
-        {aspData.reviewQueue.map((item) => (
-          <article key={item.id} className="panel">
-            <span className="eyebrow">{item.type}</span>
-            <h2>{item.title}</h2>
-            <p>Owner: {getMemberName(item.ownerId)}</p>
-            <div className="meta-row">
-              <span>{getStatusLabel(item.status)}</span>
-              <span>{item.target}</span>
-            </div>
-          </article>
-        ))}
-      </section>
+      <ReviewQueueClient initialItems={aspData.reviewQueue} />
     </main>
   );
 }

@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { CommentThread } from "@/components/comment-thread";
+import { DraftComposer } from "@/components/draft-composer";
 import {
   formatDate,
   getMemberName,
@@ -125,6 +127,11 @@ export default async function ProjectDetailPage({ params }) {
           <p>필수 항목: {archive?.required.join(", ")}</p>
           <p>남은 항목: {archive?.missing.join(", ")}</p>
         </article>
+      </section>
+
+      <section className="dashboard-grid">
+        <CommentThread scope="project" targetId={project.id} />
+        <DraftComposer targetId={project.id} />
       </section>
     </main>
   );

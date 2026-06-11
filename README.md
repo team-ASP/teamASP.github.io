@@ -33,8 +33,11 @@ npm run dev
 - `/projects`, `/projects/mafia-simulation`: 프로젝트 목록과 상세 계획
 - `/sessions`, `/tasks`, `/logs`, `/archive`: 운영 기록 화면
 - `/governance`, `/review`: 권한 정책과 검수 큐
+- `/admin/audit`: Admin 감사 로그
 - `/api/me`: 현재 세션과 권한 조회
 - `/api/auth/start`: GitHub OAuth 시작. 환경 변수가 없으면 503을 반환합니다.
+- `/api/health/db`: DB 연결과 schema 준비 상태 확인
+- `/api/comments`, `/api/drafts`, `/api/review-queue`, `/api/audit-events`: 편집/검수/감사 API
 
 ## 다음 단계
 

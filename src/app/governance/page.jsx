@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AuthStatus } from "@/components/auth-status";
 import { aspData } from "@/lib/data";
 
 export const metadata = {
@@ -23,6 +24,8 @@ export default function GovernancePage() {
           </Link>
         </div>
       </header>
+
+      <AuthStatus />
 
       <section className="card-grid">
         {aspData.policies.roles.map((item) => (

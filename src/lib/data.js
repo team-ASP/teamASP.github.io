@@ -26,8 +26,8 @@ export const aspData = {
     },
     {
       id: "admin",
-      name: "ASP Admin",
-      github: "team-ASP-admin",
+      name: "Bu-seung So",
+      github: "bootkorea",
       role: "Admin",
       focus: "권한, 배포, 보안, 감사 로그",
       siteRole: "admin",
