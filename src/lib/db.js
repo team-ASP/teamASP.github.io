@@ -98,6 +98,25 @@ export async function ensureSchema() {
   await sql`create index if not exists task_updates_task_idx on task_updates (task_id, created_at desc)`;
 
   await sql`
+    create table if not exists backlog_items (
+      id text primary key,
+      project_id text not null,
+      title text not null,
+      description text not null default '',
+      type text not null default 'task',
+      status text not null default 'todo',
+      priority text not null default 'medium',
+      owner_login text not null,
+      author_login text not null,
+      author_name text not null,
+      due_date date,
+      created_at timestamptz not null default now(),
+      updated_at timestamptz not null default now()
+    )
+  `;
+  await sql`create index if not exists backlog_items_project_idx on backlog_items (project_id, status, updated_at desc)`;
+
+  await sql`
     create table if not exists audit_events (
       id text primary key,
       actor_login text not null,
@@ -181,6 +200,24 @@ export function toPublicTaskUpdate(row) {
     authorLogin: row.author_login,
     authorName: row.author_name,
     createdAt: row.created_at,
+  };
+}
+
+export function toPublicBacklogItem(row) {
+  return {
+    id: row.id,
+    projectId: row.project_id,
+    title: row.title,
+    description: row.description,
+    type: row.type,
+    status: row.status,
+    priority: row.priority,
+    ownerLogin: row.owner_login,
+    authorLogin: row.author_login,
+    authorName: row.author_name,
+    due: row.due_date,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
   };
 }
 

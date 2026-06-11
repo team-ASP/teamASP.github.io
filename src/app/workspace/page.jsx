@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { WorkspaceClient } from "@/components/workspace-client";
 import { aspData } from "@/lib/data";
 
@@ -6,5 +7,9 @@ export const metadata = {
 };
 
 export default function WorkspacePage() {
-  return <WorkspaceClient data={aspData} />;
+  return (
+    <Suspense fallback={<main className="workspace-shell"><section className="workspace-main">Workspace 로딩 중</section></main>}>
+      <WorkspaceClient data={aspData} />
+    </Suspense>
+  );
 }

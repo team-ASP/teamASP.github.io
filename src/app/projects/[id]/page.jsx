@@ -1,7 +1,5 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { CommentThread } from "@/components/comment-thread";
-import { DraftComposer } from "@/components/draft-composer";
 import {
   formatDate,
   getMemberName,
@@ -34,104 +32,108 @@ export default async function ProjectDetailPage({ params }) {
   const tasks = getProjectTasks(project.id);
   const logs = getProjectLogs(project.id);
   const archive = getProjectArchive(project.id);
+  const doneCount = tasks.filter((task) => task.status === "done").length;
 
   return (
-    <main className="route-shell">
-      <header className="route-header">
+    <main className="project-detail-shell">
+      <header className="project-detail-hero">
         <div>
-          <span className="eyebrow">{getStatusLabel(project.status)}</span>
+          <span className="project-status">{getStatusLabel(project.status)}</span>
           <h1>{project.title}</h1>
           <p>{project.summary}</p>
         </div>
-        <div className="route-actions">
-          <a className="icon-link" href={project.repositoryUrl} target="_blank" rel="noreferrer">
+        <div className="project-detail-actions">
+          <Link className="primary" href={`/workspace?project=${project.id}`}>
+            Workspace
+          </Link>
+          <a href={project.repositoryUrl} target="_blank" rel="noreferrer">
             Repository
           </a>
-          <Link className="icon-link" href="/projects">
-            Projects
-          </Link>
+          <Link href="/projects">Projects</Link>
         </div>
       </header>
 
-      <section className="two-column">
-        <article className="panel">
+      <section className="project-stat-strip">
+        <article>
+          <span>기간</span>
+          <strong>{formatDate(project.period.start)} - {formatDate(project.period.end)}</strong>
+        </article>
+        <article>
+          <span>백로그</span>
+          <strong>{tasks.length} items</strong>
+        </article>
+        <article>
+          <span>완료</span>
+          <strong>{doneCount} items</strong>
+        </article>
+        <article>
+          <span>아카이브</span>
+          <strong>{archive?.missing.length || 0} remaining</strong>
+        </article>
+      </section>
+
+      <section className="project-detail-grid">
+        <article className="project-detail-panel">
           <span className="eyebrow">Goals</span>
-          <ul className="clean-list">
+          <div className="chip-list">
             {project.goals.map((goal) => (
-              <li key={goal}>{goal}</li>
+              <span key={goal}>{goal}</span>
             ))}
-          </ul>
+          </div>
         </article>
-        <article className="panel">
-          <span className="eyebrow">Success criteria</span>
-          <ul className="clean-list">
-            {project.successCriteria.map((criterion) => (
-              <li key={criterion}>{criterion}</li>
-            ))}
-          </ul>
-        </article>
-      </section>
-
-      <section className="timeline">
-        {project.milestones.map((milestone) => (
-          <article key={milestone.id} className="timeline-item">
-            <div>
-              <span className="eyebrow">Week {milestone.week}</span>
-              <h3>{milestone.title}</h3>
-              <p>{milestone.deliverables.join(" · ")}</p>
-            </div>
-            <span className="status-pill">{getStatusLabel(milestone.status)}</span>
-          </article>
-        ))}
-      </section>
-
-      <section className="dashboard-grid">
-        <article className="panel">
-          <span className="eyebrow">Sessions</span>
-          <div className="compact-list">
-            {sessions.map((session) => (
-              <article key={session.id}>
+        <article className="project-detail-panel">
+          <span className="eyebrow">Upcoming</span>
+          <div className="project-mini-list">
+            {sessions.slice(0, 2).map((session) => (
+              <div key={session.id}>
                 <strong>{session.title}</strong>
                 <span>{formatDate(session.date)} · {getMemberName(session.ownerId)}</span>
-              </article>
-            ))}
-          </div>
-        </article>
-        <article className="panel">
-          <span className="eyebrow">Tasks</span>
-          <div className="compact-list">
-            {tasks.map((task) => (
-              <article key={task.id}>
-                <strong>{task.title}</strong>
-                <span>{getStatusLabel(task.status)} · {formatDate(task.due)}</span>
-              </article>
+              </div>
             ))}
           </div>
         </article>
       </section>
 
-      <section className="dashboard-grid">
-        <article className="panel">
-          <span className="eyebrow">Logs</span>
-          <div className="compact-list">
-            {logs.map((log) => (
-              <article key={log.id}>
+      <section className="project-detail-panel">
+        <div className="project-section-title">
+          <div>
+            <span className="eyebrow">Roadmap</span>
+            <h2>마일스톤</h2>
+          </div>
+          <Link href={`/workspace?project=${project.id}`}>작업 관리로 이동</Link>
+        </div>
+        <div className="project-milestone-strip">
+          {project.milestones.map((milestone) => (
+            <article key={milestone.id}>
+              <span>Week {milestone.week}</span>
+              <strong>{milestone.title}</strong>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="project-detail-grid">
+        <article className="project-detail-panel">
+          <span className="eyebrow">Latest logs</span>
+          <div className="project-mini-list">
+            {logs.slice(0, 3).map((log) => (
+              <div key={log.id}>
                 <strong>{log.title}</strong>
                 <span>{log.type} · {formatDate(log.date)}</span>
-              </article>
+              </div>
             ))}
           </div>
         </article>
-        <article className="panel">
+        <article className="project-detail-panel">
           <span className="eyebrow">Archive checklist</span>
-          <p>필수 항목: {archive?.required.join(", ")}</p>
-          <p>남은 항목: {archive?.missing.join(", ")}</p>
+          <div className="chip-list compact">
+            {archive?.required.map((item) => (
+              <span key={item} className={archive.missing.includes(item) ? "missing" : "ready"}>
+                {item}
+              </span>
+            ))}
+          </div>
         </article>
-      </section>
-
-      <section className="dashboard-grid">
-        <CommentThread scope="project" targetId={project.id} />
-        <DraftComposer targetId={project.id} />
       </section>
     </main>
   );
