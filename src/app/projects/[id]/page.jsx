@@ -3,21 +3,23 @@ import { notFound } from "next/navigation";
 import {
   formatDate,
   getMemberName,
-  getProject,
   getProjectArchive,
   getProjectLogs,
   getProjectSessions,
   getProjectTasks,
   getStatusLabel,
 } from "@/lib/lookups";
+import { getProjectById } from "@/lib/projects";
 
 export function generateStaticParams() {
   return [{ id: "mafia-simulation" }];
 }
 
+export const dynamic = "force-dynamic";
+
 export async function generateMetadata({ params }) {
   const { id } = await params;
-  const project = getProject(id);
+  const project = await getProjectById(id);
   return {
     title: project ? `${project.title} | ASP Study Hub` : "Project | ASP Study Hub",
   };
@@ -25,14 +27,19 @@ export async function generateMetadata({ params }) {
 
 export default async function ProjectDetailPage({ params }) {
   const { id } = await params;
-  const project = getProject(id);
+  const project = await getProjectById(id);
   if (!project) notFound();
 
   const sessions = getProjectSessions(project.id);
   const tasks = getProjectTasks(project.id);
   const logs = getProjectLogs(project.id);
-  const archive = getProjectArchive(project.id);
+  const archive = getProjectArchive(project.id) || { required: ["Project brief", "Final report", "Presentation", "Demo link"], missing: [] };
   const doneCount = tasks.filter((task) => task.status === "done").length;
+  const milestones = project.milestones || [];
+  const goals = project.goals || [];
+  const periodLabel = project.period?.start && project.period?.end
+    ? `${formatDate(project.period.start)} - ${formatDate(project.period.end)}`
+    : "기간 미정";
 
   return (
     <main className="project-detail-shell">
@@ -56,7 +63,7 @@ export default async function ProjectDetailPage({ params }) {
       <section className="project-stat-strip">
         <article>
           <span>기간</span>
-          <strong>{formatDate(project.period.start)} - {formatDate(project.period.end)}</strong>
+          <strong>{periodLabel}</strong>
         </article>
         <article>
           <span>백로그</span>
@@ -76,9 +83,10 @@ export default async function ProjectDetailPage({ params }) {
         <article className="project-detail-panel">
           <span className="eyebrow">Goals</span>
           <div className="chip-list">
-            {project.goals.map((goal) => (
+            {goals.map((goal) => (
               <span key={goal}>{goal}</span>
             ))}
+            {goals.length === 0 && <span>Workspace에서 목표와 백로그를 쌓아가세요.</span>}
           </div>
         </article>
         <article className="project-detail-panel">
@@ -90,6 +98,7 @@ export default async function ProjectDetailPage({ params }) {
                 <span>{formatDate(session.date)} · {getMemberName(session.ownerId)}</span>
               </div>
             ))}
+            {sessions.length === 0 && <div><strong>아직 예정 세션이 없습니다.</strong><span>Workspace에서 기록을 먼저 작성하세요.</span></div>}
           </div>
         </article>
       </section>
@@ -103,12 +112,18 @@ export default async function ProjectDetailPage({ params }) {
           <Link href={`/workspace?project=${project.id}`}>작업 관리로 이동</Link>
         </div>
         <div className="project-milestone-strip">
-          {project.milestones.map((milestone) => (
+          {milestones.map((milestone) => (
             <article key={milestone.id}>
               <span>Week {milestone.week}</span>
               <strong>{milestone.title}</strong>
             </article>
           ))}
+          {milestones.length === 0 && (
+            <article>
+              <span>Planning</span>
+              <strong>Workspace 보드에서 마일스톤을 백로그로 구체화하세요.</strong>
+            </article>
+          )}
         </div>
       </section>
 
@@ -122,6 +137,7 @@ export default async function ProjectDetailPage({ params }) {
                 <span>{log.type} · {formatDate(log.date)}</span>
               </div>
             ))}
+            {logs.length === 0 && <div><strong>아직 기록이 없습니다.</strong><span>Editor에서 회의록과 실험 로그를 작성하세요.</span></div>}
           </div>
         </article>
         <article className="project-detail-panel">

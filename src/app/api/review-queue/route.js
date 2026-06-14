@@ -29,7 +29,7 @@ export async function GET(request) {
 
   await ensureSchema();
   const sql = getSql();
-  const rows = await sql`select * from review_items order by created_at desc limit 100`;
+  const rows = await sql`select * from review_items where deleted_at is null order by created_at desc limit 100`;
   return jsonResponse({ configured: true, items: [...rows.map(toPublicReview), ...getStaticReviewItems()], permissions });
 }
 
@@ -55,6 +55,43 @@ export async function POST(request) {
   return jsonError("invalid_action", 400);
 }
 
+export async function DELETE(request) {
+  const session = getSessionFromRequest(request);
+  if (!can(session.role, "review")) return jsonError("forbidden", 403);
+  if (!verifyCsrf(request)) return jsonError("csrf_failed", 403);
+
+  const limit = checkRateLimit(getRateLimitKey(request, session, "review"), { limit: 20, windowMs: 60_000 });
+  if (!limit.ok) {
+    return jsonError("rate_limited", 429, { retryAfter: limit.retryAfter }, { "Retry-After": String(limit.retryAfter) });
+  }
+  if (!isDatabaseConfigured()) return jsonError("database_not_configured", 503);
+
+  const payload = await readJson(request);
+  const missing = requireFields(payload, ["reviewId"]);
+  if (missing.length) return jsonError("missing_fields", 400, { missing });
+
+  await ensureSchema();
+  const sql = getSql();
+  const [review] = await sql`
+    update review_items
+    set deleted_at = now()
+    where id = ${payload.reviewId} and deleted_at is null
+    returning *
+  `;
+  if (!review) return jsonError("not_found", 404);
+  await sql`update drafts set status = 'draft', updated_at = now() where id = ${review.source_id} and deleted_at is null`;
+
+  await writeAuditEvent({
+    actorLogin: session.login,
+    action: "delete-review-item",
+    targetType: "review",
+    targetId: review.id,
+    summary: review.title,
+  });
+
+  return jsonResponse({ item: toPublicReview(review) });
+}
+
 async function submitDraftForReview(payload, session) {
   if (!can(session.role, "draft")) return jsonError("forbidden", 403);
   const missing = requireFields(payload, ["draftId"]);
@@ -62,7 +99,7 @@ async function submitDraftForReview(payload, session) {
 
   await ensureSchema();
   const sql = getSql();
-  const [draft] = await sql`select * from drafts where id = ${payload.draftId}`;
+  const [draft] = await sql`select * from drafts where id = ${payload.draftId} and deleted_at is null`;
   if (!draft) return jsonError("not_found", 404);
   if (draft.author_login !== session.login && !can(session.role, "review")) return jsonError("forbidden", 403);
 
@@ -96,7 +133,7 @@ async function reviewItem(payload, session) {
   const [review] = await sql`
     update review_items
     set status = ${nextStatus}, reviewer_login = ${session.login}, review_note = ${note.value}, reviewed_at = now()
-    where id = ${payload.reviewId}
+    where id = ${payload.reviewId} and deleted_at is null
     returning *
   `;
   if (!review) return jsonError("not_found", 404);

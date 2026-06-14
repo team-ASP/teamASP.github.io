@@ -1,7 +1,8 @@
 import { randomUUID } from "node:crypto";
-import { assertKnownTarget, jsonError, jsonResponse, normalizeText, readJson, requireFields } from "@/lib/api";
+import { jsonError, jsonResponse, normalizeText, readJson, requireFields } from "@/lib/api";
 import { can, getSessionFromRequest, verifyCsrf } from "@/lib/auth";
 import { ensureSchema, getSql, isDatabaseConfigured, toPublicDraft, writeAuditEvent } from "@/lib/db";
+import { projectExists } from "@/lib/projects";
 import { checkRateLimit, getRateLimitKey } from "@/lib/rate-limit";
 
 const validTypes = new Set(["session-note", "task-update", "experiment-log", "archive-note"]);
@@ -17,8 +18,8 @@ export async function GET(request) {
   await ensureSchema();
   const sql = getSql();
   const rows = can(session.role, "review")
-    ? await sql`select * from drafts order by updated_at desc limit 100`
-    : await sql`select * from drafts where author_login = ${session.login} order by updated_at desc limit 100`;
+    ? await sql`select * from drafts where deleted_at is null order by updated_at desc limit 100`
+    : await sql`select * from drafts where author_login = ${session.login} and deleted_at is null order by updated_at desc limit 100`;
 
   return jsonResponse({ configured: true, items: rows.map(toPublicDraft) });
 }
@@ -38,7 +39,7 @@ export async function POST(request) {
   const missing = requireFields(payload, ["type", "targetId", "title", "body"]);
   if (missing.length) return jsonError("missing_fields", 400, { missing });
   if (!validTypes.has(payload.type)) return jsonError("invalid_type", 400);
-  if (!assertKnownTarget("project", payload.targetId)) return jsonError("invalid_target", 400);
+  if (!(await projectExists(payload.targetId))) return jsonError("invalid_target", 400);
   const title = normalizeText(payload.title, { field: "title", max: 120 });
   const body = normalizeText(payload.body, { field: "body", max: 10000 });
   if (title.error) return jsonError(title.error, 400, title.max ? { max: title.max } : {});
@@ -81,7 +82,7 @@ export async function PATCH(request) {
 
   await ensureSchema();
   const sql = getSql();
-  const [existing] = await sql`select * from drafts where id = ${payload.id}`;
+  const [existing] = await sql`select * from drafts where id = ${payload.id} and deleted_at is null`;
   if (!existing) return jsonError("not_found", 404);
   if (existing.author_login !== session.login && !can(session.role, "review")) return jsonError("forbidden", 403);
 
@@ -104,6 +105,46 @@ export async function PATCH(request) {
   await writeAuditEvent({
     actorLogin: session.login,
     action: "update-draft",
+    targetType: draft.type,
+    targetId: draft.id,
+    summary: draft.title,
+  });
+
+  return jsonResponse({ item: toPublicDraft(draft) });
+}
+
+export async function DELETE(request) {
+  const session = getSessionFromRequest(request);
+  if (!can(session.role, "draft")) return jsonError("forbidden", 403);
+  if (!verifyCsrf(request)) return jsonError("csrf_failed", 403);
+
+  const limit = checkRateLimit(getRateLimitKey(request, session, "drafts"), { limit: 20, windowMs: 60_000 });
+  if (!limit.ok) {
+    return jsonError("rate_limited", 429, { retryAfter: limit.retryAfter }, { "Retry-After": String(limit.retryAfter) });
+  }
+  if (!isDatabaseConfigured()) return jsonError("database_not_configured", 503);
+
+  const payload = await readJson(request);
+  const missing = requireFields(payload, ["id"]);
+  if (missing.length) return jsonError("missing_fields", 400, { missing });
+
+  await ensureSchema();
+  const sql = getSql();
+  const [existing] = await sql`select * from drafts where id = ${payload.id} and deleted_at is null`;
+  if (!existing) return jsonError("not_found", 404);
+  if (existing.author_login !== session.login && !can(session.role, "review")) return jsonError("forbidden", 403);
+
+  const [draft] = await sql`
+    update drafts
+    set deleted_at = now(), updated_at = now()
+    where id = ${payload.id}
+    returning *
+  `;
+  await sql`update review_items set deleted_at = now() where source_id = ${payload.id} and deleted_at is null`;
+
+  await writeAuditEvent({
+    actorLogin: session.login,
+    action: "delete-draft",
     targetType: draft.type,
     targetId: draft.id,
     summary: draft.title,

@@ -703,6 +703,13 @@ a {
   line-height: 1.6;
 }
 
+.home-header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
 .home-github-link,
 .project-row-actions a,
 .project-detail-actions a,
@@ -871,6 +878,10 @@ a {
 
 .home-side section {
   padding: 0.95rem;
+}
+
+.project-admin-panel .workspace-form textarea {
+  min-height: 6.5rem;
 }
 
 .home-section-head svg {
@@ -1193,7 +1204,9 @@ a {
 
 .workspace-header-actions a,
 .workspace-row-actions button,
-.subtle-button {
+.subtle-button,
+.danger-button,
+.icon-button {
   min-height: 2.25rem;
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -1201,6 +1214,33 @@ a {
   color: var(--text);
   padding: 0.45rem 0.65rem;
   font-weight: 800;
+}
+
+.danger-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  border-color: #efc9cc;
+  color: #973542;
+  background: #fff7f7;
+}
+
+.danger-button svg,
+.icon-button svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.icon-button {
+  width: 2.25rem;
+  padding: 0;
+}
+
+.action-button.compact {
+  min-height: 2.35rem;
+  width: fit-content;
+  padding: 0.5rem 0.75rem;
 }
 
 .workspace-row-actions button:disabled {
@@ -1326,6 +1366,20 @@ a {
   line-height: 1.55;
 }
 
+.workspace-list a {
+  display: block;
+  width: fit-content;
+  max-width: 100%;
+  margin-top: 0.45rem;
+  color: var(--brand-strong);
+  overflow-wrap: anywhere;
+  font-weight: 800;
+}
+
+.workspace-list.compact {
+  margin-top: 1rem;
+}
+
 .process-board {
   display: grid;
   grid-template-columns: repeat(4, minmax(250px, 1fr));
@@ -1370,7 +1424,7 @@ a {
 
 .form-row {
   display: grid;
-  grid-template-columns: 160px 160px 180px;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   gap: 0.55rem;
 }
 
@@ -1417,6 +1471,12 @@ a {
   text-transform: uppercase;
 }
 
+.process-card-topline {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.55rem;
+}
+
 .process-card strong {
   display: block;
   margin-top: 0.3rem;
@@ -1435,6 +1495,10 @@ a {
   display: grid;
   gap: 0.45rem;
   margin-top: 0.75rem;
+}
+
+.process-edit.inline {
+  grid-template-columns: minmax(0, 1fr) auto;
 }
 
 .process-edit select,
@@ -1483,6 +1547,16 @@ a {
   line-height: 1.6;
 }
 
+.review-item input {
+  width: 100%;
+  margin-top: 0.55rem;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--text);
+  padding: 0.6rem 0.7rem;
+}
+
 .review-item {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
@@ -1515,6 +1589,54 @@ a {
   margin: 0;
   color: var(--muted);
   line-height: 1.5;
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgba(20, 27, 34, 0.42);
+}
+
+.modal-panel {
+  width: min(720px, 100%);
+  max-height: min(760px, calc(100vh - 2rem));
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 30px 70px rgba(22, 31, 41, 0.24);
+  padding: 1rem;
+}
+
+.modal-header,
+.modal-actions {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.modal-header {
+  margin-bottom: 1rem;
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: 1.35rem;
+}
+
+.modal-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.65rem;
+}
+
+.modal-actions {
+  align-items: center;
 }
 
 @media (max-width: 1020px) {
@@ -1562,7 +1684,8 @@ a {
   .milestone-list,
   .workspace-editor-grid,
   .form-row,
-  .archive-checklist {
+  .archive-checklist,
+  .modal-grid {
     grid-template-columns: 1fr;
   }
 
@@ -1604,6 +1727,7 @@ a {
   }
 
   .home-metrics,
+  .home-header-actions,
   .project-row-actions,
   .project-detail-actions {
     justify-content: flex-start;

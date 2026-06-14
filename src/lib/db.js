@@ -36,6 +36,26 @@ export async function ensureSchema() {
 
   const sql = getSql();
   await sql`
+    create table if not exists projects (
+      id text primary key,
+      title text not null,
+      type text not null default 'project',
+      status text not null default 'planning',
+      summary text not null default '',
+      repository_url text not null default '',
+      owner_login text not null,
+      author_login text not null,
+      author_name text not null,
+      period_start date,
+      period_end date,
+      created_at timestamptz not null default now(),
+      updated_at timestamptz not null default now(),
+      deleted_at timestamptz
+    )
+  `;
+  await sql`create index if not exists projects_status_idx on projects (status, updated_at desc)`;
+
+  await sql`
     create table if not exists comments (
       id text primary key,
       scope text not null,
@@ -62,9 +82,11 @@ export async function ensureSchema() {
       author_login text not null,
       author_name text not null,
       created_at timestamptz not null default now(),
-      updated_at timestamptz not null default now()
+      updated_at timestamptz not null default now(),
+      deleted_at timestamptz
     )
   `;
+  await sql`alter table drafts add column if not exists deleted_at timestamptz`;
   await sql`create index if not exists drafts_author_idx on drafts (author_login, updated_at desc)`;
 
   await sql`
@@ -79,9 +101,11 @@ export async function ensureSchema() {
       reviewer_login text,
       review_note text,
       created_at timestamptz not null default now(),
-      reviewed_at timestamptz
+      reviewed_at timestamptz,
+      deleted_at timestamptz
     )
   `;
+  await sql`alter table review_items add column if not exists deleted_at timestamptz`;
   await sql`create index if not exists review_items_status_idx on review_items (status, created_at desc)`;
 
   await sql`
@@ -111,10 +135,30 @@ export async function ensureSchema() {
       author_name text not null,
       due_date date,
       created_at timestamptz not null default now(),
-      updated_at timestamptz not null default now()
+      updated_at timestamptz not null default now(),
+      deleted_at timestamptz
     )
   `;
+  await sql`alter table backlog_items add column if not exists deleted_at timestamptz`;
   await sql`create index if not exists backlog_items_project_idx on backlog_items (project_id, status, updated_at desc)`;
+
+  await sql`
+    create table if not exists archive_items (
+      id text primary key,
+      project_id text not null,
+      title text not null,
+      kind text not null default 'artifact',
+      status text not null default 'needed',
+      url text not null default '',
+      notes text not null default '',
+      author_login text not null,
+      author_name text not null,
+      created_at timestamptz not null default now(),
+      updated_at timestamptz not null default now(),
+      deleted_at timestamptz
+    )
+  `;
+  await sql`create index if not exists archive_items_project_idx on archive_items (project_id, status, updated_at desc)`;
 
   await sql`
     create table if not exists audit_events (
@@ -155,6 +199,27 @@ export function toPublicComment(row) {
     body: row.body,
     authorLogin: row.author_login,
     authorName: row.author_name,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
+export function toPublicProject(row) {
+  return {
+    id: row.id,
+    title: row.title,
+    type: row.type,
+    status: row.status,
+    summary: row.summary,
+    repositoryUrl: row.repository_url,
+    ownerLogin: row.owner_login,
+    authorLogin: row.author_login,
+    authorName: row.author_name,
+    period: {
+      start: row.period_start,
+      end: row.period_end,
+    },
+    source: "database",
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -216,6 +281,22 @@ export function toPublicBacklogItem(row) {
     authorLogin: row.author_login,
     authorName: row.author_name,
     due: row.due_date,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
+export function toPublicArchiveItem(row) {
+  return {
+    id: row.id,
+    projectId: row.project_id,
+    title: row.title,
+    kind: row.kind,
+    status: row.status,
+    url: row.url,
+    notes: row.notes,
+    authorLogin: row.author_login,
+    authorName: row.author_name,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
