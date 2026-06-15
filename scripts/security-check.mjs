@@ -42,6 +42,7 @@ for (const file of [
   "src/app/api/content-overrides/route.js",
   "src/app/api/projects/route.js",
   "src/app/api/roadmap-items/route.js",
+  "src/app/api/static-content/promote/route.js",
   "src/app/api/task-updates/route.js",
 ]) {
   const body = read(file);

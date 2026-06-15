@@ -1267,6 +1267,13 @@ a {
   gap: 1rem;
 }
 
+.workspace-overview-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(340px, 0.9fr);
+  gap: 1rem;
+  align-items: start;
+}
+
 .workspace-board-layout {
   display: grid;
   gap: 1rem;
@@ -1390,6 +1397,70 @@ a {
   margin-top: 0;
 }
 
+.roadmap-timeline {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.roadmap-card {
+  display: grid;
+  grid-template-columns: 2.7rem minmax(0, 1fr);
+  gap: 0.8rem;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  padding: 0.8rem;
+}
+
+.roadmap-card.template,
+.decision-card.template {
+  border-style: dashed;
+  background: #fbfcfd;
+}
+
+.roadmap-marker {
+  position: relative;
+  display: grid;
+  justify-items: center;
+}
+
+.roadmap-marker::after {
+  content: "";
+  width: 1px;
+  min-height: calc(100% - 2.45rem);
+  margin-top: 0.35rem;
+  background: var(--line);
+}
+
+.roadmap-marker span {
+  width: 2.25rem;
+  height: 2.25rem;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--brand-strong);
+  font-size: 0.78rem;
+  font-weight: 950;
+}
+
+.roadmap-content {
+  min-width: 0;
+}
+
+.roadmap-content strong,
+.decision-body strong {
+  display: block;
+  line-height: 1.35;
+}
+
+.roadmap-content p {
+  margin: 0.45rem 0 0;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
 .roadmap-card.blocked {
   border-color: #efc9cc;
   background: #fff7f7;
@@ -1403,6 +1474,68 @@ a {
 .roadmap-card.done {
   border-color: #b9dcc9;
   background: #f1faf4;
+}
+
+.decision-ledger {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.decision-card {
+  display: grid;
+  grid-template-columns: 7.4rem minmax(0, 1fr);
+  gap: 0.85rem;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  padding: 0.85rem;
+}
+
+.decision-meta {
+  display: grid;
+  align-content: start;
+  gap: 0.4rem;
+  border-right: 1px solid var(--line);
+  padding-right: 0.8rem;
+}
+
+.decision-meta span,
+.decision-meta small,
+.card-kicker span {
+  width: fit-content;
+  max-width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--brand-strong);
+  padding: 0.18rem 0.48rem;
+  font-size: 0.74rem;
+  font-weight: 900;
+}
+
+.decision-meta time {
+  color: var(--muted);
+  font-size: 0.86rem;
+  font-weight: 800;
+}
+
+.decision-body {
+  min-width: 0;
+}
+
+.decision-body p,
+.decision-body small {
+  display: -webkit-box;
+  margin: 0.45rem 0 0;
+  color: var(--muted);
+  line-height: 1.5;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.decision-body small {
+  -webkit-line-clamp: 1;
 }
 
 .workspace-list a {
@@ -1746,6 +1879,7 @@ a {
 
   .workspace-nav,
   .workspace-summary,
+  .workspace-overview-grid,
   .milestone-list,
   .workspace-editor-grid,
   .form-row,
@@ -1756,6 +1890,19 @@ a {
 
   .process-board {
     grid-template-columns: repeat(4, minmax(260px, 1fr));
+  }
+
+  .decision-card {
+    grid-template-columns: 1fr;
+  }
+
+  .decision-meta {
+    grid-template-columns: repeat(3, max-content);
+    align-items: center;
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+    padding-right: 0;
+    padding-bottom: 0.65rem;
   }
 }
 

@@ -156,6 +156,8 @@ function emptyRoadmapItem(projectId) {
   return {
     id: "",
     projectId,
+    source: "database",
+    templateId: "",
     title: "",
     timeframe: "",
     status: "planned",
@@ -169,6 +171,8 @@ function emptyDecisionRecord(projectId) {
   return {
     id: "",
     projectId,
+    source: "database",
+    templateId: "",
     title: "",
     status: "proposed",
     context: "",
@@ -213,9 +217,22 @@ export function WorkspaceClient({ data }) {
   const [itemModal, setItemModal] = useState(null);
   const [contentOverrides, setContentOverrides] = useState([]);
   const [message, setMessage] = useState("");
+  const [formProjectId, setFormProjectId] = useState(project.id);
 
   const requestOptions = useMemo(() => ({ cache: "no-store", credentials: "same-origin" }), []);
   const sessionAuthenticated = session?.authenticated;
+
+  if (formProjectId !== project.id) {
+    setFormProjectId(project.id);
+    setDraftForm(emptyDraft(project.id));
+    setBacklogForm(emptyBacklogItem(project.id));
+    setRoadmapForm(emptyRoadmapItem(project.id));
+    setDecisionForm(emptyDecisionRecord(project.id));
+    setArchiveForm(emptyArchiveItem(project.id));
+    setRoadmapModalOpen(false);
+    setDecisionModalOpen(false);
+    setItemModal(null);
+  }
 
   useEffect(() => {
     let alive = true;
@@ -289,11 +306,6 @@ export function WorkspaceClient({ data }) {
         targetId: taskId,
         action: "hidden",
       })))]);
-      setDraftForm(emptyDraft(project.id));
-      setBacklogForm(emptyBacklogItem(project.id));
-      setRoadmapForm(emptyRoadmapItem(project.id));
-      setDecisionForm(emptyDecisionRecord(project.id));
-      setArchiveForm(emptyArchiveItem(project.id));
       if (
         sessionAuthenticated &&
         (!backlogPayload.configured ||
@@ -374,13 +386,27 @@ export function WorkspaceClient({ data }) {
   async function saveRoadmapItem(event) {
     event.preventDefault();
     setMessage("");
-    const isEdit = Boolean(roadmapForm.id);
-    const response = await mutate("/api/roadmap-items", isEdit ? "PATCH" : "POST", roadmapForm, session);
+    const isTemplateEdit = roadmapForm.source === "seed";
+    const isEdit = Boolean(roadmapForm.id) && !isTemplateEdit;
+    const response = isTemplateEdit
+      ? await mutate(
+          "/api/static-content/promote",
+          "POST",
+          { projectId: project.id, targetType: "roadmap", targetId: roadmapForm.templateId || roadmapForm.id, item: roadmapForm },
+          session,
+        )
+      : await mutate("/api/roadmap-items", isEdit ? "PATCH" : "POST", roadmapForm, session);
     if (!response.ok) return setMessage(response.error || "로드맵 항목 저장에 실패했습니다.");
     setRoadmapItems((items) => [response.item, ...items.filter((item) => item.id !== response.item.id)]);
+    if (response.override) {
+      setContentOverrides((items) => [
+        response.override,
+        ...items.filter((item) => !(item.targetType === "roadmap" && item.targetId === response.override.targetId)),
+      ]);
+    }
     setRoadmapForm(emptyRoadmapItem(project.id));
     setRoadmapModalOpen(false);
-    setMessage(`로드맵을 저장했습니다: ${response.item.title}`);
+    setMessage(isTemplateEdit ? `템플릿을 실제 로드맵으로 전환했습니다: ${response.item.title}` : `로드맵을 저장했습니다: ${response.item.title}`);
   }
 
   async function deleteRoadmapItem(item) {
@@ -389,12 +415,12 @@ export function WorkspaceClient({ data }) {
       const response = await mutate(
         "/api/content-overrides",
         "POST",
-        { projectId: project.id, targetType: "roadmap", targetId: item.id, reason: `Removed roadmap seed: ${item.title}` },
+        { projectId: project.id, targetType: "roadmap", targetId: item.id, reason: `Removed roadmap template: ${item.title}` },
         session,
       );
-      if (!response.ok) return setMessage(response.error || "Seed 로드맵 항목 제거에 실패했습니다.");
+      if (!response.ok) return setMessage(response.error || "템플릿 로드맵 항목 제외에 실패했습니다.");
       setContentOverrides((items) => [response.item, ...items.filter((candidate) => !(candidate.targetType === "roadmap" && candidate.targetId === item.id))]);
-      setMessage("Seed 로드맵 항목을 숨겼습니다.");
+      setMessage("기본 템플릿 로드맵을 이 프로젝트에서 제외했습니다.");
       return;
     }
 
@@ -408,13 +434,27 @@ export function WorkspaceClient({ data }) {
   async function saveDecisionRecord(event) {
     event.preventDefault();
     setMessage("");
-    const isEdit = Boolean(decisionForm.id);
-    const response = await mutate("/api/decision-records", isEdit ? "PATCH" : "POST", decisionForm, session);
+    const isTemplateEdit = decisionForm.source === "seed";
+    const isEdit = Boolean(decisionForm.id) && !isTemplateEdit;
+    const response = isTemplateEdit
+      ? await mutate(
+          "/api/static-content/promote",
+          "POST",
+          { projectId: project.id, targetType: "decision", targetId: decisionForm.templateId || decisionForm.id, item: decisionForm },
+          session,
+        )
+      : await mutate("/api/decision-records", isEdit ? "PATCH" : "POST", decisionForm, session);
     if (!response.ok) return setMessage(response.error || "의사결정 저장에 실패했습니다.");
     setDecisionRecords((items) => [response.item, ...items.filter((item) => item.id !== response.item.id)]);
+    if (response.override) {
+      setContentOverrides((items) => [
+        response.override,
+        ...items.filter((item) => !(item.targetType === "decision" && item.targetId === response.override.targetId)),
+      ]);
+    }
     setDecisionForm(emptyDecisionRecord(project.id));
     setDecisionModalOpen(false);
-    setMessage(`의사결정을 저장했습니다: ${response.item.title}`);
+    setMessage(isTemplateEdit ? `템플릿을 실제 의사결정으로 전환했습니다: ${response.item.title}` : `의사결정을 저장했습니다: ${response.item.title}`);
   }
 
   async function deleteDecisionRecord(item) {
@@ -423,12 +463,12 @@ export function WorkspaceClient({ data }) {
       const response = await mutate(
         "/api/content-overrides",
         "POST",
-        { projectId: project.id, targetType: "decision", targetId: item.id, reason: `Removed decision seed: ${item.title}` },
+        { projectId: project.id, targetType: "decision", targetId: item.id, reason: `Removed decision template: ${item.title}` },
         session,
       );
-      if (!response.ok) return setMessage(response.error || "Seed 의사결정 항목 제거에 실패했습니다.");
+      if (!response.ok) return setMessage(response.error || "템플릿 의사결정 제외에 실패했습니다.");
       setContentOverrides((items) => [response.item, ...items.filter((candidate) => !(candidate.targetType === "decision" && candidate.targetId === item.id))]);
-      setMessage("Seed 의사결정 항목을 숨겼습니다.");
+      setMessage("기본 템플릿 의사결정을 이 프로젝트에서 제외했습니다.");
       return;
     }
 
@@ -481,10 +521,10 @@ export function WorkspaceClient({ data }) {
     }
 
     const response = await mutate("/api/task-updates", "DELETE", { taskId: item.id, reason: "Removed from workspace board" }, session);
-    if (!response.ok) return setMessage(response.error || "Seed task 삭제에 실패했습니다.");
+    if (!response.ok) return setMessage(response.error || "템플릿 task 제외에 실패했습니다.");
     setContentOverrides((items) => [response.item, ...items.filter((candidate) => !(candidate.targetType === "task" && candidate.targetId === item.id))]);
     setItemModal(null);
-    setMessage("Seed task를 워크스페이스에서 숨겼습니다.");
+    setMessage("기본 템플릿 task를 이 프로젝트에서 제외했습니다.");
   }
 
   async function saveDraft(event) {
@@ -773,8 +813,13 @@ function OverviewPanel({
       status: milestone.status || "planned",
       summary: milestone.deliverables?.join(" · ") || "",
       source: "seed",
+      sourceLabel: "Template",
     }));
-  const roadmap = [...seedRoadmap, ...roadmapItems];
+  const roadmap = [...seedRoadmap, ...roadmapItems].sort((a, b) => {
+    const aDate = a.startDate || a.timeframe || a.createdAt || "";
+    const bDate = b.startDate || b.timeframe || b.createdAt || "";
+    return String(aDate).localeCompare(String(bDate));
+  });
   const seedDecisions = data.logs
     .filter((log) => log.projectId === project.id && log.type === "decision" && !hiddenDecisionIds.has(log.id))
     .map((log) => ({
@@ -788,13 +833,20 @@ function OverviewPanel({
       decidedAt: log.date,
       authorName: memberName(data, log.authorId),
       source: "seed",
+      sourceLabel: "Template",
     }));
-  const decisions = [...decisionRecords, ...seedDecisions];
+  const decisions = [...decisionRecords, ...seedDecisions].sort((a, b) => {
+    const aDate = a.decidedAt || a.updatedAt || a.createdAt || "";
+    const bDate = b.decidedAt || b.updatedAt || b.createdAt || "";
+    return String(bDate).localeCompare(String(aDate));
+  });
 
   function editRoadmap(item) {
     setRoadmapForm({
       id: item.id,
       projectId: project.id,
+      source: item.source || "database",
+      templateId: item.source === "seed" ? item.id : "",
       title: item.title,
       timeframe: item.timeframe || "",
       status: item.status || "planned",
@@ -809,6 +861,8 @@ function OverviewPanel({
     setDecisionForm({
       id: item.id,
       projectId: project.id,
+      source: item.source || "database",
+      templateId: item.source === "seed" ? item.id : "",
       title: item.title,
       status: item.status || "proposed",
       context: item.context || "",
@@ -839,7 +893,8 @@ function OverviewPanel({
         </article>
       </section>
 
-      <section className="workspace-section">
+      <div className="workspace-overview-grid">
+      <section className="workspace-section roadmap-section">
         <div className="workspace-section-head">
           <div>
             <span className="eyebrow">Roadmap</span>
@@ -855,22 +910,34 @@ function OverviewPanel({
             </button>
           )}
         </div>
-        <div className="milestone-list">
-          {roadmap.map((item) => (
-            <article key={`${item.source}-${item.id}`} className={`roadmap-card ${item.status}`}>
-              <div className="card-kicker">
-                <span>{item.timeframe || "No timeframe"}</span>
-                <span>{getStatusLabel(item.status)}</span>
+        <div className="roadmap-timeline">
+          {roadmap.map((item, index) => (
+            <article key={`${item.source}-${item.id}`} className={`roadmap-card ${item.status} ${item.source === "seed" ? "template" : ""}`}>
+              <div className="roadmap-marker" aria-hidden="true">
+                <span>{String(index + 1).padStart(2, "0")}</span>
               </div>
-              <strong>{item.title}</strong>
-              {item.summary && <p>{item.summary}</p>}
-              <div className="workspace-row-actions inline-left">
-                {canEdit && item.source !== "seed" && <button type="button" onClick={() => editRoadmap(item)}>수정</button>}
-                {((canEdit && item.source !== "seed") || (canAdmin && item.source === "seed")) && (
-                  <button type="button" onClick={() => deleteRoadmapItem(item)}>
-                    {item.source === "seed" ? "Seed 숨김" : "삭제"}
-                  </button>
-                )}
+              <div className="roadmap-content">
+                <div className="card-kicker">
+                  <span>{item.timeframe || "No timeframe"}</span>
+                  <span>{getStatusLabel(item.status)}</span>
+                  {item.source === "seed" && <span>Template</span>}
+                </div>
+                <strong>{item.title}</strong>
+                {item.summary && <p>{item.summary}</p>}
+                <div className="workspace-row-actions inline-left">
+                  {canEdit && item.source !== "seed" && <button type="button" onClick={() => editRoadmap(item)}>수정</button>}
+                  {canEdit && item.source !== "seed" && (
+                    <button type="button" onClick={() => deleteRoadmapItem(item)}>
+                      삭제
+                    </button>
+                  )}
+                  {canAdmin && item.source === "seed" && <button type="button" onClick={() => editRoadmap(item)}>템플릿 편집</button>}
+                  {canAdmin && item.source === "seed" && (
+                    <button type="button" onClick={() => deleteRoadmapItem(item)}>
+                      템플릿 제외
+                    </button>
+                  )}
+                </div>
               </div>
             </article>
           ))}
@@ -878,7 +945,7 @@ function OverviewPanel({
         </div>
       </section>
 
-      <section className="workspace-section">
+      <section className="workspace-section decision-section">
         <div className="workspace-section-head">
           <div>
             <span className="eyebrow">Decisions</span>
@@ -894,42 +961,53 @@ function OverviewPanel({
             </button>
           )}
         </div>
-        <div className="workspace-list">
+        <div className="decision-ledger">
           {decisions.map((item) => (
-            <article key={`${item.source}-${item.id}`} className="decision-card">
-              <div className="card-kicker">
+            <article key={`${item.source}-${item.id}`} className={`decision-card ${item.source === "seed" ? "template" : ""}`}>
+              <div className="decision-meta">
                 <span>{getStatusLabel(item.status)}</span>
-                <span>{formatDate(item.decidedAt || item.updatedAt || item.createdAt)}</span>
+                <time>{formatDate(item.decidedAt || item.updatedAt || item.createdAt)}</time>
+                {item.source === "seed" && <small>Template</small>}
               </div>
-              <strong>{item.title}</strong>
-              {item.context && <p>{item.context}</p>}
-              <p>{item.decision}</p>
-              {item.impact && <small>{item.impact}</small>}
-              <div className="workspace-row-actions inline-left">
-                {canEdit && item.source !== "seed" && <button type="button" onClick={() => editDecision(item)}>수정</button>}
-                {((canEdit && item.source !== "seed") || (canAdmin && item.source === "seed")) && (
-                  <button type="button" onClick={() => deleteDecisionRecord(item)}>
-                    {item.source === "seed" ? "Seed 숨김" : "삭제"}
-                  </button>
-                )}
+              <div className="decision-body">
+                <strong>{item.title}</strong>
+                {item.context && <p>{item.context}</p>}
+                <p>{item.decision}</p>
+                {item.impact && <small>{item.impact}</small>}
+                <div className="workspace-row-actions inline-left">
+                  {canEdit && item.source !== "seed" && <button type="button" onClick={() => editDecision(item)}>수정</button>}
+                  {canEdit && item.source !== "seed" && (
+                    <button type="button" onClick={() => deleteDecisionRecord(item)}>
+                      삭제
+                    </button>
+                  )}
+                  {canAdmin && item.source === "seed" && <button type="button" onClick={() => editDecision(item)}>템플릿 편집</button>}
+                  {canAdmin && item.source === "seed" && (
+                    <button type="button" onClick={() => deleteDecisionRecord(item)}>
+                      템플릿 제외
+                    </button>
+                  )}
+                </div>
               </div>
             </article>
           ))}
           {decisions.length === 0 && <p className="workspace-empty">배경, 결정 내용, 영향을 남겨 나중에 맥락을 잃지 않게 하세요.</p>}
         </div>
       </section>
+      </div>
     </div>
   );
 }
 
 function RoadmapModal({ form, projectId, saveRoadmapItem, setForm, setOpen }) {
+  const isTemplate = form.source === "seed";
   return (
     <div className="modal-backdrop" role="presentation">
       <section className="modal-panel" role="dialog" aria-modal="true" aria-label="로드맵 항목 편집">
         <header className="modal-header">
           <div>
             <span className="eyebrow">Roadmap</span>
-            <h2>{form.id ? "로드맵 항목 수정" : "로드맵 항목 추가"}</h2>
+            <h2>{isTemplate ? "로드맵 템플릿 편집" : form.id ? "로드맵 항목 수정" : "로드맵 항목 추가"}</h2>
           </div>
           <button className="icon-button" type="button" onClick={() => setOpen(false)} aria-label="닫기">
             <X aria-hidden="true" />
@@ -968,7 +1046,7 @@ function RoadmapModal({ form, projectId, saveRoadmapItem, setForm, setOpen }) {
           </label>
           <div className="modal-actions">
             <button className="subtle-button" type="button" onClick={() => setOpen(false)}>취소</button>
-            <button className="action-button compact" type="submit">저장</button>
+            <button className="action-button compact" type="submit">{isTemplate ? "전환 저장" : "저장"}</button>
           </div>
         </form>
       </section>
@@ -977,13 +1055,14 @@ function RoadmapModal({ form, projectId, saveRoadmapItem, setForm, setOpen }) {
 }
 
 function DecisionModal({ form, projectId, saveDecisionRecord, setForm, setOpen }) {
+  const isTemplate = form.source === "seed";
   return (
     <div className="modal-backdrop" role="presentation">
       <section className="modal-panel" role="dialog" aria-modal="true" aria-label="의사결정 기록 편집">
         <header className="modal-header">
           <div>
             <span className="eyebrow">Decision</span>
-            <h2>{form.id ? "의사결정 수정" : "의사결정 기록"}</h2>
+            <h2>{isTemplate ? "의사결정 템플릿 편집" : form.id ? "의사결정 수정" : "의사결정 기록"}</h2>
           </div>
           <button className="icon-button" type="button" onClick={() => setOpen(false)} aria-label="닫기">
             <X aria-hidden="true" />
@@ -1020,7 +1099,7 @@ function DecisionModal({ form, projectId, saveDecisionRecord, setForm, setOpen }
           </label>
           <div className="modal-actions">
             <button className="subtle-button" type="button" onClick={() => setOpen(false)}>취소</button>
-            <button className="action-button compact" type="submit">저장</button>
+            <button className="action-button compact" type="submit">{isTemplate ? "전환 저장" : "저장"}</button>
           </div>
         </form>
       </section>
@@ -1129,7 +1208,7 @@ function BoardItemModal({ data, item, canDelete, deleteTask, saveBoardModal, set
       <section className="modal-panel" role="dialog" aria-modal="true" aria-label="작업 상세 편집">
         <header className="modal-header">
           <div>
-            <span className="eyebrow">{isBacklog ? "Backlog item" : "Seed task"}</span>
+            <span className="eyebrow">{isBacklog ? "Backlog item" : "Template task"}</span>
             <h2>{item.title}</h2>
           </div>
           <button className="icon-button" type="button" onClick={() => setItemModal(null)} aria-label="닫기">
@@ -1309,7 +1388,7 @@ function ReviewPanel({ canReview, canAdmin, items, reviewItem, deleteReviewItem,
             )}
             {canAdmin && item.sourceType === "static" && (
               <div className="workspace-row-actions">
-                <button type="button" onClick={() => deleteReviewItem(item.id)}>Seed 항목 제거</button>
+                <button type="button" onClick={() => deleteReviewItem(item.id)}>템플릿 항목 제외</button>
               </div>
             )}
           </article>
@@ -1399,7 +1478,7 @@ function ArchivePanel({
               </article>
             );
           })}
-          {checklistItems.length === 0 && <p className="workspace-empty">남아 있는 seed 체크리스트 항목이 없습니다.</p>}
+          {checklistItems.length === 0 && <p className="workspace-empty">남아 있는 기본 체크리스트 항목이 없습니다.</p>}
         </div>
       </section>
 
