@@ -6,7 +6,7 @@ const validTaskStatuses = new Set(["todo", "in-progress", "review", "blocked", "
 const validLogTypes = new Set(["experiment", "decision", "issue", "retrospective", "resource", "presentation"]);
 const validReviewStatuses = new Set(["draft", "ready-for-review", "changes-requested", "published", "hidden", "archived"]);
 const validCommentScopes = new Set(["project", "session", "task", "log", "archive"]);
-const validCommentVisibility = new Set(["public", "team-only", "maintainer-only"]);
+const validCommentVisibility = new Set(["public", "team-only", "admin-only"]);
 const idPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 const errors = [];

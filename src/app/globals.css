@@ -1559,9 +1559,14 @@ a {
 
 .review-item {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  align-items: center;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
   gap: 0.8rem;
+}
+
+.review-item .workspace-row-actions {
+  grid-column: 2;
+  justify-content: flex-start;
 }
 
 .review-item svg,
@@ -1573,6 +1578,23 @@ a {
 
 .archive-checklist {
   grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.archive-checklist article {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.archive-checklist button {
+  min-height: 2rem;
+  border: 1px solid #efc9cc;
+  border-radius: 8px;
+  background: #fff7f7;
+  color: #973542;
+  padding: 0.35rem 0.55rem;
+  font-weight: 800;
 }
 
 .archive-checklist article.ready {
@@ -1610,6 +1632,10 @@ a {
   background: #fff;
   box-shadow: 0 30px 70px rgba(22, 31, 41, 0.24);
   padding: 1rem;
+}
+
+.modal-panel .workspace-form textarea {
+  min-height: 7rem;
 }
 
 .modal-header,

@@ -161,6 +161,22 @@ export async function ensureSchema() {
   await sql`create index if not exists archive_items_project_idx on archive_items (project_id, status, updated_at desc)`;
 
   await sql`
+    create table if not exists content_overrides (
+      id text primary key,
+      project_id text not null default '',
+      target_type text not null,
+      target_id text not null,
+      action text not null default 'hidden',
+      reason text not null default '',
+      actor_login text not null,
+      actor_name text not null,
+      created_at timestamptz not null default now(),
+      revoked_at timestamptz
+    )
+  `;
+  await sql`create index if not exists content_overrides_active_idx on content_overrides (project_id, target_type, target_id, action, created_at desc)`;
+
+  await sql`
     create table if not exists audit_events (
       id text primary key,
       actor_login text not null,
@@ -188,6 +204,68 @@ export async function writeAuditEvent({ actorLogin, action, targetType, targetId
     returning id, actor_login, action, target_type, target_id, summary, created_at
   `;
   return event;
+}
+
+export async function listContentOverrides({ projectId = "", targetType = "" } = {}) {
+  if (!isDatabaseConfigured()) return [];
+  await ensureSchema();
+  const sql = getSql();
+  if (projectId && targetType) {
+    const rows = await sql`
+      select *
+      from content_overrides
+      where project_id = ${projectId}
+        and target_type = ${targetType}
+        and action = 'hidden'
+        and revoked_at is null
+      order by created_at desc
+    `;
+    return rows.map(toPublicContentOverride);
+  }
+  if (targetType) {
+    const rows = await sql`
+      select *
+      from content_overrides
+      where target_type = ${targetType}
+        and action = 'hidden'
+        and revoked_at is null
+      order by created_at desc
+    `;
+    return rows.map(toPublicContentOverride);
+  }
+  const rows = await sql`
+    select *
+    from content_overrides
+    where project_id = ${projectId}
+      and action = 'hidden'
+      and revoked_at is null
+    order by created_at desc
+  `;
+  return rows.map(toPublicContentOverride);
+}
+
+export async function hideContentTarget({ projectId = "", targetType, targetId, reason = "", actorLogin, actorName }) {
+  if (!isDatabaseConfigured()) return null;
+  await ensureSchema();
+  const sql = getSql();
+  const [existing] = await sql`
+    select *
+    from content_overrides
+    where project_id = ${projectId}
+      and target_type = ${targetType}
+      and target_id = ${targetId}
+      and action = 'hidden'
+      and revoked_at is null
+    limit 1
+  `;
+  if (existing) return toPublicContentOverride(existing);
+
+  const [override] = await sql`
+    insert into content_overrides (id, project_id, target_type, target_id, action, reason, actor_login, actor_name)
+    values (${randomUUID()}, ${projectId}, ${targetType}, ${targetId}, 'hidden', ${reason}, ${actorLogin}, ${actorName})
+    returning *
+  `;
+  return toPublicContentOverride(override);
 }
 
 export function toPublicComment(row) {
@@ -299,6 +377,20 @@ export function toPublicArchiveItem(row) {
     authorName: row.author_name,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
+  };
+}
+
+export function toPublicContentOverride(row) {
+  return {
+    id: row.id,
+    projectId: row.project_id,
+    targetType: row.target_type,
+    targetId: row.target_id,
+    action: row.action,
+    reason: row.reason,
+    actorLogin: row.actor_login,
+    actorName: row.actor_name,
+    createdAt: row.created_at,
   };
 }
 

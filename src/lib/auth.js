@@ -4,7 +4,8 @@ import { aspData } from "@/lib/data";
 const sessionCookieName = "asp_session";
 const oauthStateCookieName = "asp_oauth_state";
 const csrfCookieName = "asp_csrf";
-const roleRank = { viewer: 0, editor: 1, maintainer: 2, admin: 3 };
+const roleRank = { viewer: 0, developer: 1, admin: 2 };
+const legacyRoleMap = { editor: "developer", maintainer: "developer" };
 
 function base64UrlEncode(value) {
   return Buffer.from(value).toString("base64url");
@@ -44,23 +45,31 @@ export function createCsrfToken() {
 
 export function getRequiredRole(action) {
   const map = {
-    comment: "editor",
-    draft: "editor",
-    review: "maintainer",
-    archive: "admin",
+    comment: "developer",
+    draft: "developer",
+    project: "developer",
+    review: "developer",
+    archive: "developer",
+    task: "developer",
     admin: "admin",
   };
   return map[action] || "viewer";
 }
 
 export function can(role, action) {
-  return roleRank[role] >= roleRank[getRequiredRole(action)];
+  return roleRank[normalizeRole(role)] >= roleRank[getRequiredRole(action)];
+}
+
+export function normalizeRole(role) {
+  if (legacyRoleMap[role]) return legacyRoleMap[role];
+  if (role === "admin" || role === "developer" || role === "viewer") return role;
+  return "viewer";
 }
 
 export function getRoleForGitHubLogin(login) {
   const normalized = login.toLowerCase();
   const member = aspData.members.find((candidate) => candidate.github.toLowerCase() === normalized);
-  return member?.siteRole || "editor";
+  return normalizeRole(member?.siteRole || "developer");
 }
 
 export function signSession(payload) {
@@ -110,15 +119,16 @@ export function getSessionFromRequest(request) {
   const token = request.cookies.get(sessionCookieName)?.value;
   const session = verifySession(token);
   if (!session) return getViewerSession();
+  const role = normalizeRole(session.role);
 
   return {
     authenticated: true,
-    role: session.role,
+    role,
     login: session.login,
     name: session.name,
     avatarUrl: session.avatarUrl,
     organization: session.organization,
-    editableScopes: session.editableScopes || [],
+    editableScopes: buildEditableScopes(role),
     authProvider: "github",
     authEnabled: true,
     csrfToken: request.cookies.get(csrfCookieName)?.value || "",
@@ -136,8 +146,8 @@ export function verifyCsrf(request) {
 }
 
 export function buildEditableScopes(role) {
-  if (role === "admin") return ["projects", "sessions", "tasks", "logs", "comments", "review", "archive", "admin"];
-  if (role === "maintainer") return ["projects", "sessions", "tasks", "logs", "comments", "review"];
-  if (role === "editor") return ["sessions", "tasks", "logs", "comments"];
+  const normalized = normalizeRole(role);
+  if (normalized === "admin") return ["projects", "sessions", "tasks", "logs", "comments", "review", "archive", "seed", "admin"];
+  if (normalized === "developer") return ["projects", "sessions", "tasks", "logs", "comments", "review", "archive"];
   return [];
 }

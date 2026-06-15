@@ -1,6 +1,6 @@
 "use client";
 
-import { Archive, ArrowRight, BookOpen, CalendarDays, Github, Plus, Search } from "lucide-react";
+import { Archive, ArrowRight, BookOpen, CalendarDays, Github, Plus, Search, X } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
@@ -30,6 +30,7 @@ export function StudyHub({ data }) {
   const [session, setSession] = useState(null);
   const [projects, setProjects] = useState(data.projects);
   const [projectForm, setProjectForm] = useState(initialProjectForm);
+  const [projectModalOpen, setProjectModalOpen] = useState(false);
   const [message, setMessage] = useState("");
 
   useEffect(() => {
@@ -58,7 +59,7 @@ export function StudyHub({ data }) {
     [projects, query],
   );
   const recentLogs = data.logs.slice(0, 3);
-  const canAdmin = session?.editableScopes?.includes("admin");
+  const canCreateProject = session?.editableScopes?.includes("projects");
 
   async function createProject(event) {
     event.preventDefault();
@@ -78,6 +79,7 @@ export function StudyHub({ data }) {
     }
     setProjects((items) => [body.item, ...items]);
     setProjectForm(initialProjectForm);
+    setProjectModalOpen(false);
     setMessage(`프로젝트를 추가했습니다: ${body.item.title}`);
   }
 
@@ -122,6 +124,12 @@ export function StudyHub({ data }) {
               <span className="eyebrow">Projects</span>
               <h2>진행 중인 프로젝트</h2>
             </div>
+            {canCreateProject && (
+              <button className="action-button compact" type="button" onClick={() => setProjectModalOpen(true)}>
+                <Plus aria-hidden="true" />
+                새 프로젝트
+              </button>
+            )}
           </div>
           {filteredProjects.map((project) => {
             const tasks = data.tasks.filter((task) => task.projectId === project.id);
@@ -152,68 +160,6 @@ export function StudyHub({ data }) {
         </div>
 
         <aside className="home-side">
-          <section className="project-admin-panel">
-            <div className="home-section-head">
-              <div>
-                <span className="eyebrow">Admin</span>
-                <h2>프로젝트 추가</h2>
-              </div>
-              <Plus aria-hidden="true" />
-            </div>
-            {canAdmin ? (
-              <form className="workspace-form" onSubmit={createProject}>
-                <label>
-                  <span>GitHub Repo URL</span>
-                  <input
-                    value={projectForm.repositoryUrl}
-                    onChange={(event) => setProjectForm((form) => ({ ...form, repositoryUrl: event.target.value }))}
-                    placeholder="https://github.com/team-ASP/repository"
-                  />
-                </label>
-                <label>
-                  <span>프로젝트명</span>
-                  <input
-                    value={projectForm.title}
-                    onChange={(event) => setProjectForm((form) => ({ ...form, title: event.target.value }))}
-                    placeholder="Repo URL만 입력하면 자동 보완"
-                  />
-                </label>
-                <label>
-                  <span>요약</span>
-                  <textarea
-                    value={projectForm.summary}
-                    onChange={(event) => setProjectForm((form) => ({ ...form, summary: event.target.value }))}
-                    placeholder="목표, 범위, 기대 산출물"
-                  />
-                </label>
-                <div className="form-row">
-                  <select value={projectForm.type} onChange={(event) => setProjectForm((form) => ({ ...form, type: event.target.value }))}>
-                    <option value="project">Project</option>
-                    <option value="study">Study</option>
-                    <option value="research">Research</option>
-                    <option value="product">Product</option>
-                  </select>
-                  <select value={projectForm.status} onChange={(event) => setProjectForm((form) => ({ ...form, status: event.target.value }))}>
-                    <option value="planning">Planning</option>
-                    <option value="active">Active</option>
-                    <option value="paused">Paused</option>
-                    <option value="completed">Completed</option>
-                  </select>
-                </div>
-                <div className="form-row">
-                  <input type="date" value={projectForm.periodStart} onChange={(event) => setProjectForm((form) => ({ ...form, periodStart: event.target.value }))} />
-                  <input type="date" value={projectForm.periodEnd} onChange={(event) => setProjectForm((form) => ({ ...form, periodEnd: event.target.value }))} />
-                </div>
-                <button className="action-button compact" type="submit">
-                  <Plus aria-hidden="true" />
-                  추가
-                </button>
-              </form>
-            ) : (
-              <p className="muted">Admin 권한으로 로그인하면 GitHub repo 기반 프로젝트를 추가할 수 있습니다.</p>
-            )}
-          </section>
-
           <section>
             <div className="home-section-head">
               <div>
@@ -269,6 +215,87 @@ export function StudyHub({ data }) {
           </section>
         </aside>
       </section>
+
+      {projectModalOpen && (
+        <div className="modal-backdrop" role="presentation">
+          <section className="modal-panel" role="dialog" aria-modal="true" aria-label="프로젝트 추가">
+            <header className="modal-header">
+              <div>
+                <span className="eyebrow">Project</span>
+                <h2>새 프로젝트 추가</h2>
+              </div>
+              <button className="icon-button" type="button" onClick={() => setProjectModalOpen(false)} aria-label="닫기">
+                <X aria-hidden="true" />
+              </button>
+            </header>
+            <form className="workspace-form" onSubmit={createProject}>
+              <label>
+                <span>GitHub Repo URL</span>
+                <input
+                  value={projectForm.repositoryUrl}
+                  onChange={(event) => setProjectForm((form) => ({ ...form, repositoryUrl: event.target.value }))}
+                  placeholder="https://github.com/team-ASP/repository"
+                />
+              </label>
+              <label>
+                <span>프로젝트명</span>
+                <input
+                  value={projectForm.title}
+                  onChange={(event) => setProjectForm((form) => ({ ...form, title: event.target.value }))}
+                  placeholder="Repo URL만 입력하면 자동 보완"
+                />
+              </label>
+              <label>
+                <span>요약</span>
+                <textarea
+                  value={projectForm.summary}
+                  onChange={(event) => setProjectForm((form) => ({ ...form, summary: event.target.value }))}
+                  placeholder="목표, 범위, 기대 산출물"
+                />
+              </label>
+              <div className="modal-grid">
+                <label>
+                  <span>유형</span>
+                  <select value={projectForm.type} onChange={(event) => setProjectForm((form) => ({ ...form, type: event.target.value }))}>
+                    <option value="project">Project</option>
+                    <option value="study">Study</option>
+                    <option value="research">Research</option>
+                    <option value="product">Product</option>
+                  </select>
+                </label>
+                <label>
+                  <span>상태</span>
+                  <select value={projectForm.status} onChange={(event) => setProjectForm((form) => ({ ...form, status: event.target.value }))}>
+                    <option value="planning">Planning</option>
+                    <option value="active">Active</option>
+                    <option value="paused">Paused</option>
+                    <option value="completed">Completed</option>
+                  </select>
+                </label>
+              </div>
+              <div className="modal-grid">
+                <label>
+                  <span>시작일</span>
+                  <input type="date" value={projectForm.periodStart} onChange={(event) => setProjectForm((form) => ({ ...form, periodStart: event.target.value }))} />
+                </label>
+                <label>
+                  <span>종료일</span>
+                  <input type="date" value={projectForm.periodEnd} onChange={(event) => setProjectForm((form) => ({ ...form, periodEnd: event.target.value }))} />
+                </label>
+              </div>
+              <div className="modal-actions">
+                <button className="subtle-button" type="button" onClick={() => setProjectModalOpen(false)}>
+                  취소
+                </button>
+                <button className="action-button compact" type="submit">
+                  <Plus aria-hidden="true" />
+                  추가
+                </button>
+              </div>
+            </form>
+          </section>
+        </div>
+      )}
     </main>
   );
 }

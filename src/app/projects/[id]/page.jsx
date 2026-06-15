@@ -137,7 +137,7 @@ export default async function ProjectDetailPage({ params }) {
                 <span>{log.type} · {formatDate(log.date)}</span>
               </div>
             ))}
-            {logs.length === 0 && <div><strong>아직 기록이 없습니다.</strong><span>Editor에서 회의록과 실험 로그를 작성하세요.</span></div>}
+            {logs.length === 0 && <div><strong>아직 기록이 없습니다.</strong><span>Developer가 회의록과 실험 로그를 작성할 수 있습니다.</span></div>}
           </div>
         </article>
         <article className="project-detail-panel">

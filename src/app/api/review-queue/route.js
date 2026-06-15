@@ -2,18 +2,20 @@ import { randomUUID } from "node:crypto";
 import { aspData } from "@/lib/data";
 import { can, getSessionFromRequest, verifyCsrf } from "@/lib/auth";
 import { jsonError, jsonResponse, normalizeText, readJson, requireFields } from "@/lib/api";
-import { ensureSchema, getSql, isDatabaseConfigured, toPublicReview, writeAuditEvent } from "@/lib/db";
+import { ensureSchema, getSql, hideContentTarget, isDatabaseConfigured, listContentOverrides, toPublicReview, writeAuditEvent } from "@/lib/db";
 import { checkRateLimit, getRateLimitKey } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
 
-function getStaticReviewItems() {
-  return aspData.reviewQueue.map((item) => ({
-    ...item,
-    sourceType: "static",
-    sourceId: item.target,
-    ownerLogin: item.ownerId,
-  }));
+function getStaticReviewItems(hiddenIds = new Set()) {
+  return aspData.reviewQueue
+    .filter((item) => !hiddenIds.has(item.id))
+    .map((item) => ({
+      ...item,
+      sourceType: "static",
+      sourceId: item.target,
+      ownerLogin: item.ownerId,
+    }));
 }
 
 export async function GET(request) {
@@ -21,6 +23,7 @@ export async function GET(request) {
   const permissions = {
     canReview: can(session.role, "review"),
     canArchive: can(session.role, "archive"),
+    canAdmin: can(session.role, "admin"),
   };
 
   if (!isDatabaseConfigured()) {
@@ -30,7 +33,8 @@ export async function GET(request) {
   await ensureSchema();
   const sql = getSql();
   const rows = await sql`select * from review_items where deleted_at is null order by created_at desc limit 100`;
-  return jsonResponse({ configured: true, items: [...rows.map(toPublicReview), ...getStaticReviewItems()], permissions });
+  const hiddenStaticReviewIds = new Set((await listContentOverrides({ projectId: "global", targetType: "review" })).map((item) => item.targetId));
+  return jsonResponse({ configured: true, items: [...rows.map(toPublicReview), ...getStaticReviewItems(hiddenStaticReviewIds)], permissions });
 }
 
 export async function POST(request) {
@@ -69,6 +73,41 @@ export async function DELETE(request) {
   const payload = await readJson(request);
   const missing = requireFields(payload, ["reviewId"]);
   if (missing.length) return jsonError("missing_fields", 400, { missing });
+
+  const staticReview = aspData.reviewQueue.find((item) => item.id === payload.reviewId);
+  if (staticReview) {
+    if (!can(session.role, "admin")) return jsonError("forbidden", 403);
+    const reason = payload.note ? normalizeText(payload.note, { field: "note", max: 500 }) : { value: "" };
+    if (reason.error) return jsonError(reason.error, 400, reason.max ? { max: reason.max } : {});
+
+    const item = await hideContentTarget({
+      projectId: "global",
+      targetType: "review",
+      targetId: staticReview.id,
+      reason: reason.value,
+      actorLogin: session.login,
+      actorName: session.name || session.login,
+    });
+
+    await writeAuditEvent({
+      actorLogin: session.login,
+      action: "hide-static-review",
+      targetType: "review",
+      targetId: staticReview.id,
+      summary: staticReview.title,
+    });
+
+    return jsonResponse({
+      item: {
+        ...staticReview,
+        sourceType: "static",
+        sourceId: staticReview.target,
+        ownerLogin: staticReview.ownerId,
+        status: "hidden",
+        override: item,
+      },
+    });
+  }
 
   await ensureSchema();
   const sql = getSql();

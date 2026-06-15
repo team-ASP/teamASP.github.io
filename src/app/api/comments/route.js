@@ -6,7 +6,7 @@ import { ensureSchema, getSql, isDatabaseConfigured, toPublicComment, writeAudit
 import { checkRateLimit, getRateLimitKey } from "@/lib/rate-limit";
 
 const validScopes = new Set(["project", "session", "task", "log", "archive"]);
-const validVisibility = new Set(["public", "team-only", "maintainer-only"]);
+const validVisibility = new Set(["public", "team-only", "admin-only"]);
 
 export const dynamic = "force-dynamic";
 
@@ -40,7 +40,7 @@ export async function GET(request) {
 
   await ensureSchema();
   const sql = getSql();
-  const visibilityFilter = session.authenticated ? ["public", "team-only", "maintainer-only"] : ["public"];
+  const visibilityFilter = session.role === "admin" ? ["public", "team-only", "admin-only"] : session.authenticated ? ["public", "team-only"] : ["public"];
   const rows = await sql`
     select *
     from comments

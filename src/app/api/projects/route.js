@@ -15,7 +15,7 @@ export async function GET() {
 
 export async function POST(request) {
   const session = getSessionFromRequest(request);
-  if (!can(session.role, "admin")) return jsonError("forbidden", 403);
+  if (!can(session.role, "project")) return jsonError("forbidden", 403);
   if (!verifyCsrf(request)) return jsonError("csrf_failed", 403);
 
   const limit = checkRateLimit(getRateLimitKey(request, session, "projects"), { limit: 12, windowMs: 60_000 });
@@ -63,7 +63,7 @@ export async function POST(request) {
 
 export async function PATCH(request) {
   const session = getSessionFromRequest(request);
-  if (!can(session.role, "admin")) return jsonError("forbidden", 403);
+  if (!can(session.role, "project")) return jsonError("forbidden", 403);
   if (!verifyCsrf(request)) return jsonError("csrf_failed", 403);
   if (!isDatabaseConfigured()) return jsonError("database_not_configured", 503);
 

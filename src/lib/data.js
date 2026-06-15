@@ -12,17 +12,17 @@ export const aspData = {
       id: "project-maintainer",
       name: "Project Maintainer",
       github: "team-ASP",
-      role: "Project Maintainer",
+      role: "Developer",
       focus: "프로젝트 계획, 리뷰, 아카이브 승인",
-      siteRole: "maintainer",
+      siteRole: "developer",
     },
     {
       id: "study-editor",
       name: "Study Editor",
       github: "team-ASP-member",
-      role: "Editor",
+      role: "Developer",
       focus: "세션 기록, 실험 로그, 태스크 업데이트",
-      siteRole: "editor",
+      siteRole: "developer",
     },
     {
       id: "admin",
@@ -249,10 +249,9 @@ export const aspData = {
   ],
   policies: {
     roles: [
-      { role: "Viewer", permission: "공개 콘텐츠 조회" },
-      { role: "Editor", permission: "팀 멤버의 draft, comment, task update" },
-      { role: "Project Maintainer", permission: "담당 프로젝트 review/publish" },
-      { role: "Admin", permission: "권한, 배포, 보안, archive finalization" },
+      { role: "Viewer", permission: "공개 프로젝트, 로그, 아카이브 조회" },
+      { role: "Developer", permission: "프로젝트 생성, 백로그와 기록 작성/수정/삭제, 리뷰와 아카이브 운영" },
+      { role: "Admin", permission: "Developer 권한 전체와 정적 seed 콘텐츠 숨김, 감사 로그, 시스템 정책 관리" },
     ],
     deployment:
       "Vercel Git Integration을 우선 사용하고, 더 강한 release gate가 필요해지면 GitHub Actions controlled deploy로 확장한다.",

@@ -12,6 +12,14 @@
 
 ## 2. Roles and Permissions
 
+현재 배포 구현은 역할을 `viewer`, `developer`, `admin` 세 단계로 단순화한다.
+
+- `viewer`: 로그인하지 않은 사용자. 공개 프로젝트, 로그, 아카이브를 읽을 수 있으나 쓰기 API를 사용할 수 없다.
+- `developer`: GitHub 로그인과 `team-ASP` organization membership이 확인된 사용자. 프로젝트 생성, 백로그 CRUD, draft 작성/삭제, review 처리, archive artifact 관리를 수행한다.
+- `admin`: Developer 권한 전체에 더해 정적 seed task/review/archive checklist 숨김, 감사 로그 확인, 시스템 정책 관리를 수행한다.
+
+과거 설계의 `Editor`와 `Project Maintainer`는 현재 구현에서 `developer`로 매핑한다. 기존 세부 정책 문구는 장기 확장 아이디어로 남기되, 실제 API 권한 판단은 위 세 역할을 기준으로 한다.
+
 ### Viewer
 
 대상:

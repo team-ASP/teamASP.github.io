@@ -135,6 +135,10 @@ function emptyArchiveItem(projectId) {
   };
 }
 
+function archiveChecklistTargetId(projectId, label) {
+  return `${projectId}:${label}`;
+}
+
 export function WorkspaceClient({ data }) {
   const searchParams = useSearchParams();
   const selectedProjectId = searchParams.get("project") || data.projects[0].id;
@@ -158,6 +162,7 @@ export function WorkspaceClient({ data }) {
   const [taskNotes, setTaskNotes] = useState({});
   const [reviewNotes, setReviewNotes] = useState({});
   const [itemModal, setItemModal] = useState(null);
+  const [contentOverrides, setContentOverrides] = useState([]);
   const [message, setMessage] = useState("");
 
   const requestOptions = useMemo(() => ({ cache: "no-store", credentials: "same-origin" }), []);
@@ -185,19 +190,21 @@ export function WorkspaceClient({ data }) {
     if (session === null) return undefined;
     let alive = true;
     async function loadProjectWorkspace() {
-      const [backlogResponse, taskResponse, draftsResponse, reviewResponse, archiveResponse] = await Promise.all([
+      const [backlogResponse, taskResponse, draftsResponse, reviewResponse, archiveResponse, overridesResponse] = await Promise.all([
         fetch(`/api/backlog-items?projectId=${project.id}`, requestOptions),
         fetch("/api/task-updates", requestOptions),
         sessionAuthenticated ? fetch("/api/drafts", requestOptions) : Promise.resolve(null),
         fetch("/api/review-queue", requestOptions),
         fetch(`/api/archive-items?projectId=${project.id}`, requestOptions),
+        fetch(`/api/content-overrides?projectId=${project.id}`, requestOptions),
       ]);
-      const [backlogPayload, taskPayload, draftPayload, reviewData, archivePayload] = await Promise.all([
+      const [backlogPayload, taskPayload, draftPayload, reviewData, archivePayload, overridesPayload] = await Promise.all([
         backlogResponse.json(),
         taskResponse.json(),
         draftsResponse ? draftsResponse.json() : Promise.resolve({ configured: true, items: [] }),
         reviewResponse.json(),
         archiveResponse.json(),
+        overridesResponse.json(),
       ]);
       if (!alive) return;
       const projectBacklog = backlogPayload.items || [];
@@ -212,6 +219,12 @@ export function WorkspaceClient({ data }) {
       setDrafts((draftPayload.items || []).filter((draft) => draft.targetId === project.id));
       setReviewPayload(reviewData);
       setArchiveItems(archivePayload.items || []);
+      setContentOverrides([...(overridesPayload.items || []), ...((taskPayload.hiddenTaskIds || []).map((taskId) => ({
+        projectId: project.id,
+        targetType: "task",
+        targetId: taskId,
+        action: "hidden",
+      })))]);
       setDraftForm(emptyDraft(project.id));
       setBacklogForm(emptyBacklogItem(project.id));
       setArchiveForm(emptyArchiveItem(project.id));
@@ -226,10 +239,18 @@ export function WorkspaceClient({ data }) {
   }, [data.tasks, project.id, requestOptions, session, sessionAuthenticated]);
 
   const taskUpdateMap = useMemo(() => new Map(taskUpdates.map((item) => [item.taskId, item])), [taskUpdates]);
+  const hiddenTaskIds = useMemo(
+    () => new Set(contentOverrides.filter((item) => item.targetType === "task").map((item) => item.targetId)),
+    [contentOverrides],
+  );
+  const hiddenArchiveChecklistIds = useMemo(
+    () => new Set(contentOverrides.filter((item) => item.targetType === "archive-checklist").map((item) => item.targetId)),
+    [contentOverrides],
+  );
   const tasks = useMemo(
     () =>
       [
-        ...data.tasks.filter((task) => task.projectId === project.id).map((task) => {
+        ...data.tasks.filter((task) => task.projectId === project.id && !hiddenTaskIds.has(task.id)).map((task) => {
           const latest = taskUpdateMap.get(task.id);
           return {
             ...task,
@@ -249,12 +270,13 @@ export function WorkspaceClient({ data }) {
           latestUpdate: null,
         })),
       ],
-    [backlogItems, data.tasks, project.id, taskUpdateMap],
+    [backlogItems, data.tasks, hiddenTaskIds, project.id, taskUpdateMap],
   );
 
   const progress = Math.round((tasks.filter((task) => task.status === "done").length / Math.max(tasks.length, 1)) * 100);
   const canEdit = session?.editableScopes?.some((scope) => ["projects", "tasks", "logs", "sessions"].includes(scope));
   const canReview = reviewPayload.permissions?.canReview;
+  const canAdmin = session?.editableScopes?.includes("admin");
 
   async function createBacklogItem(event) {
     event.preventDefault();
@@ -297,13 +319,22 @@ export function WorkspaceClient({ data }) {
     setMessage("작업을 저장했습니다.");
   }
 
-  async function deleteBacklogItem(id) {
+  async function deleteTask(item) {
     setMessage("");
-    const response = await mutate("/api/backlog-items", "DELETE", { id }, session);
-    if (!response.ok) return setMessage(response.error || "백로그 항목 삭제에 실패했습니다.");
-    setBacklogItems((items) => items.filter((item) => item.id !== id));
+    if (item.source === "backlog") {
+      const response = await mutate("/api/backlog-items", "DELETE", { id: item.id }, session);
+      if (!response.ok) return setMessage(response.error || "백로그 항목 삭제에 실패했습니다.");
+      setBacklogItems((items) => items.filter((candidate) => candidate.id !== item.id));
+      setItemModal(null);
+      setMessage("백로그 항목을 삭제했습니다.");
+      return;
+    }
+
+    const response = await mutate("/api/task-updates", "DELETE", { taskId: item.id, reason: "Removed from workspace board" }, session);
+    if (!response.ok) return setMessage(response.error || "Seed task 삭제에 실패했습니다.");
+    setContentOverrides((items) => [response.item, ...items.filter((candidate) => !(candidate.targetType === "task" && candidate.targetId === item.id))]);
     setItemModal(null);
-    setMessage("백로그 항목을 삭제했습니다.");
+    setMessage("Seed task를 워크스페이스에서 숨겼습니다.");
   }
 
   async function saveDraft(event) {
@@ -349,10 +380,24 @@ export function WorkspaceClient({ data }) {
 
   async function deleteReviewItem(reviewId) {
     setMessage("");
-    const response = await mutate("/api/review-queue", "DELETE", { reviewId }, session);
+    const response = await mutate("/api/review-queue", "DELETE", { reviewId, note: reviewNotes[reviewId] || "" }, session);
     if (!response.ok) return setMessage(response.error || "검수 항목 삭제에 실패했습니다.");
     setReviewPayload((current) => ({ ...current, items: current.items.filter((item) => item.id !== reviewId) }));
     setMessage("검수 큐에서 제거했습니다.");
+  }
+
+  async function deleteArchiveChecklistItem(label) {
+    setMessage("");
+    const targetId = archiveChecklistTargetId(project.id, label);
+    const response = await mutate(
+      "/api/content-overrides",
+      "POST",
+      { projectId: project.id, targetType: "archive-checklist", targetId, reason: `Removed archive checklist item: ${label}` },
+      session,
+    );
+    if (!response.ok) return setMessage(response.error || "아카이브 체크리스트 항목 삭제에 실패했습니다.");
+    setContentOverrides((items) => [response.item, ...items.filter((item) => item.targetId !== targetId)]);
+    setMessage(`아카이브 체크리스트에서 제거했습니다: ${label}`);
   }
 
   async function saveArchiveItem(event) {
@@ -454,6 +499,7 @@ export function WorkspaceClient({ data }) {
           <ReviewPanel
             canReview={canReview}
             items={(reviewPayload.items || []).filter((item) => item.target === project.id || item.sourceType === "static")}
+            canAdmin={canAdmin}
             reviewItem={reviewItem}
             deleteReviewItem={deleteReviewItem}
             reviewNotes={reviewNotes}
@@ -468,7 +514,10 @@ export function WorkspaceClient({ data }) {
             archive={archive}
             archiveForm={archiveForm}
             archiveItems={archiveItems}
+            canAdmin={canAdmin}
             deleteArchiveItem={deleteArchiveItem}
+            deleteArchiveChecklistItem={deleteArchiveChecklistItem}
+            hiddenArchiveChecklistIds={hiddenArchiveChecklistIds}
             saveArchiveItem={saveArchiveItem}
             setArchiveForm={setArchiveForm}
           />
@@ -479,8 +528,8 @@ export function WorkspaceClient({ data }) {
         <BoardItemModal
           data={data}
           item={itemModal}
-          canDelete={itemModal.source === "backlog"}
-          deleteBacklogItem={deleteBacklogItem}
+          canDelete={itemModal.source === "backlog" || (itemModal.source === "seed" && canAdmin)}
+          deleteTask={deleteTask}
           saveBoardModal={saveBoardModal}
           setItemModal={setItemModal}
           taskNotes={taskNotes}
@@ -560,7 +609,7 @@ function OverviewPanel({ data, project, tasks, archive, archiveItems, progress }
               <p>{log.summary}</p>
             </article>
           ))}
-          {decisions.length === 0 && <p className="workspace-empty">Editor에서 결정 사항을 기록으로 남기세요.</p>}
+          {decisions.length === 0 && <p className="workspace-empty">Developer가 결정 사항을 기록으로 남길 수 있습니다.</p>}
         </div>
       </section>
     </div>
@@ -661,7 +710,7 @@ function BoardPanel({ data, tasks, canEdit, backlogForm, taskStatuses, createBac
   );
 }
 
-function BoardItemModal({ data, item, canDelete, deleteBacklogItem, saveBoardModal, setItemModal, taskNotes, setTaskNotes }) {
+function BoardItemModal({ data, item, canDelete, deleteTask, saveBoardModal, setItemModal, taskNotes, setTaskNotes }) {
   const isBacklog = item.source === "backlog";
   return (
     <div className="modal-backdrop" role="presentation">
@@ -733,7 +782,7 @@ function BoardItemModal({ data, item, canDelete, deleteBacklogItem, saveBoardMod
           )}
           <div className="modal-actions">
             {canDelete && (
-              <button className="danger-button" type="button" onClick={() => deleteBacklogItem(item.id)}>
+              <button className="danger-button" type="button" onClick={() => deleteTask(item)}>
                 <Trash2 aria-hidden="true" />
                 삭제
               </button>
@@ -813,7 +862,7 @@ function EditorPanel({ canEdit, draftForm, drafts, projectId, saveDraft, deleteD
   );
 }
 
-function ReviewPanel({ canReview, items, reviewItem, deleteReviewItem, reviewNotes, setReviewNotes }) {
+function ReviewPanel({ canReview, canAdmin, items, reviewItem, deleteReviewItem, reviewNotes, setReviewNotes }) {
   return (
     <section className="workspace-section">
       <div className="workspace-section-head">
@@ -846,6 +895,11 @@ function ReviewPanel({ canReview, items, reviewItem, deleteReviewItem, reviewNot
                 <button type="button" onClick={() => deleteReviewItem(item.id)}>제거</button>
               </div>
             )}
+            {canAdmin && item.sourceType === "static" && (
+              <div className="workspace-row-actions">
+                <button type="button" onClick={() => deleteReviewItem(item.id)}>Seed 항목 제거</button>
+              </div>
+            )}
           </article>
         ))}
         {items.length === 0 && <p className="workspace-empty">검수 대기 항목이 없습니다.</p>}
@@ -854,8 +908,22 @@ function ReviewPanel({ canReview, items, reviewItem, deleteReviewItem, reviewNot
   );
 }
 
-function ArchivePanel({ canEdit, data, project, archive, archiveForm, archiveItems, deleteArchiveItem, saveArchiveItem, setArchiveForm }) {
+function ArchivePanel({
+  canEdit,
+  canAdmin,
+  data,
+  project,
+  archive,
+  archiveForm,
+  archiveItems,
+  deleteArchiveChecklistItem,
+  deleteArchiveItem,
+  hiddenArchiveChecklistIds,
+  saveArchiveItem,
+  setArchiveForm,
+}) {
   const projectLogs = data.logs.filter((log) => log.projectId === project.id);
+  const checklistItems = (archive?.required || []).filter((item) => !hiddenArchiveChecklistIds.has(archiveChecklistTargetId(project.id, item)));
   return (
     <div className="workspace-editor-grid">
       <section className="workspace-section">
@@ -903,15 +971,23 @@ function ArchivePanel({ canEdit, data, project, archive, archiveForm, archiveIte
           <p className="muted">로그인한 팀 멤버만 아카이브 항목을 관리할 수 있습니다.</p>
         )}
         <div className="archive-checklist">
-          {archive?.required.map((item) => {
+          {checklistItems.map((item) => {
             const missing = archive.missing.includes(item);
             return (
               <article key={item} className={missing ? "missing" : "ready"}>
-                <strong>{item}</strong>
-                <span>{missing ? "필요" : "준비됨"}</span>
+                <div>
+                  <strong>{item}</strong>
+                  <span>{missing ? "필요" : "준비됨"}</span>
+                </div>
+                {canAdmin && (
+                  <button type="button" onClick={() => deleteArchiveChecklistItem(item)}>
+                    삭제
+                  </button>
+                )}
               </article>
             );
           })}
+          {checklistItems.length === 0 && <p className="workspace-empty">남아 있는 seed 체크리스트 항목이 없습니다.</p>}
         </div>
       </section>
 

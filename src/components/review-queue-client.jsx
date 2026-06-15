@@ -42,6 +42,27 @@ export function ReviewQueueClient({ initialItems }) {
     setMessage(`${data.item.title} 상태가 변경되었습니다.`);
   }
 
+  async function remove(reviewId) {
+    setMessage("");
+    const response = await fetch("/api/review-queue", {
+      method: "DELETE",
+      cache: "no-store",
+      credentials: "same-origin",
+      headers: { "Content-Type": "application/json", "X-CSRF-Token": session?.csrfToken || "" },
+      body: JSON.stringify({ reviewId }),
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      setMessage(data.error || "검수 항목 제거에 실패했습니다.");
+      return;
+    }
+    setPayload((current) => ({
+      ...current,
+      items: current.items.filter((item) => item.id !== reviewId),
+    }));
+    setMessage("검수 큐에서 제거했습니다.");
+  }
+
   return (
     <section className="card-grid">
       {payload.items.map((item) => (
@@ -60,6 +81,16 @@ export function ReviewQueueClient({ initialItems }) {
               </button>
               <button className="action-button secondary" type="button" onClick={() => mutate("request-changes", item.id)}>
                 수정 요청
+              </button>
+              <button className="action-button secondary" type="button" onClick={() => remove(item.id)}>
+                제거
+              </button>
+            </div>
+          )}
+          {payload.permissions?.canAdmin && item.sourceType === "static" && (
+            <div className="hero-actions">
+              <button className="action-button secondary" type="button" onClick={() => remove(item.id)}>
+                Seed 항목 제거
               </button>
             </div>
           )}

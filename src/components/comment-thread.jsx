@@ -78,7 +78,7 @@ export function CommentThread({ scope, targetId }) {
           <select value={visibility} onChange={(event) => setVisibility(event.target.value)}>
             <option value="team-only">team-only</option>
             <option value="public">public</option>
-            <option value="maintainer-only">maintainer-only</option>
+            {session?.role === "admin" && <option value="admin-only">admin-only</option>}
           </select>
           <button className="action-button" type="submit">
             댓글 저장
