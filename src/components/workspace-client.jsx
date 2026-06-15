@@ -69,16 +69,33 @@ const archiveStatuses = [
   { value: "published", label: "Published" },
 ];
 
+const roadmapStatuses = [
+  { value: "planned", label: "Planned" },
+  { value: "in-progress", label: "In progress" },
+  { value: "blocked", label: "Blocked" },
+  { value: "done", label: "Done" },
+];
+
+const decisionStatuses = [
+  { value: "proposed", label: "Proposed" },
+  { value: "accepted", label: "Accepted" },
+  { value: "superseded", label: "Superseded" },
+];
+
 const statusLabels = {
   planning: "Planning",
   planned: "Planned",
   active: "Active",
   "in-progress": "In progress",
+  blocked: "Blocked",
   todo: "Todo",
   done: "Done",
   draft: "Draft",
   needed: "Needed",
   ready: "Ready",
+  proposed: "Proposed",
+  accepted: "Accepted",
+  superseded: "Superseded",
   "ready-for-review": "Ready for review",
   review: "Review",
   published: "Published",
@@ -135,6 +152,32 @@ function emptyArchiveItem(projectId) {
   };
 }
 
+function emptyRoadmapItem(projectId) {
+  return {
+    id: "",
+    projectId,
+    title: "",
+    timeframe: "",
+    status: "planned",
+    summary: "",
+    startDate: "",
+    endDate: "",
+  };
+}
+
+function emptyDecisionRecord(projectId) {
+  return {
+    id: "",
+    projectId,
+    title: "",
+    status: "proposed",
+    context: "",
+    decision: "",
+    impact: "",
+    decidedAt: "",
+  };
+}
+
 function archiveChecklistTargetId(projectId, label) {
   return `${projectId}:${label}`;
 }
@@ -152,12 +195,18 @@ export function WorkspaceClient({ data }) {
   const [session, setSession] = useState(null);
   const [taskUpdates, setTaskUpdates] = useState([]);
   const [backlogItems, setBacklogItems] = useState([]);
+  const [roadmapItems, setRoadmapItems] = useState([]);
+  const [decisionRecords, setDecisionRecords] = useState([]);
   const [archiveItems, setArchiveItems] = useState([]);
   const [drafts, setDrafts] = useState([]);
   const [reviewPayload, setReviewPayload] = useState({ items: data.reviewQueue, permissions: { canReview: false } });
   const [draftForm, setDraftForm] = useState(emptyDraft(project.id));
   const [backlogForm, setBacklogForm] = useState(emptyBacklogItem(project.id));
+  const [roadmapForm, setRoadmapForm] = useState(emptyRoadmapItem(project.id));
+  const [decisionForm, setDecisionForm] = useState(emptyDecisionRecord(project.id));
   const [archiveForm, setArchiveForm] = useState(emptyArchiveItem(project.id));
+  const [roadmapModalOpen, setRoadmapModalOpen] = useState(false);
+  const [decisionModalOpen, setDecisionModalOpen] = useState(false);
   const [taskStatuses, setTaskStatuses] = useState({});
   const [taskNotes, setTaskNotes] = useState({});
   const [reviewNotes, setReviewNotes] = useState({});
@@ -190,21 +239,34 @@ export function WorkspaceClient({ data }) {
     if (session === null) return undefined;
     let alive = true;
     async function loadProjectWorkspace() {
-      const [backlogResponse, taskResponse, draftsResponse, reviewResponse, archiveResponse, overridesResponse] = await Promise.all([
+      const [
+        backlogResponse,
+        taskResponse,
+        draftsResponse,
+        reviewResponse,
+        archiveResponse,
+        overridesResponse,
+        roadmapResponse,
+        decisionResponse,
+      ] = await Promise.all([
         fetch(`/api/backlog-items?projectId=${project.id}`, requestOptions),
         fetch("/api/task-updates", requestOptions),
         sessionAuthenticated ? fetch("/api/drafts", requestOptions) : Promise.resolve(null),
         fetch("/api/review-queue", requestOptions),
         fetch(`/api/archive-items?projectId=${project.id}`, requestOptions),
         fetch(`/api/content-overrides?projectId=${project.id}`, requestOptions),
+        fetch(`/api/roadmap-items?projectId=${project.id}`, requestOptions),
+        fetch(`/api/decision-records?projectId=${project.id}`, requestOptions),
       ]);
-      const [backlogPayload, taskPayload, draftPayload, reviewData, archivePayload, overridesPayload] = await Promise.all([
+      const [backlogPayload, taskPayload, draftPayload, reviewData, archivePayload, overridesPayload, roadmapPayload, decisionPayload] = await Promise.all([
         backlogResponse.json(),
         taskResponse.json(),
         draftsResponse ? draftsResponse.json() : Promise.resolve({ configured: true, items: [] }),
         reviewResponse.json(),
         archiveResponse.json(),
         overridesResponse.json(),
+        roadmapResponse.json(),
+        decisionResponse.json(),
       ]);
       if (!alive) return;
       const projectBacklog = backlogPayload.items || [];
@@ -219,6 +281,8 @@ export function WorkspaceClient({ data }) {
       setDrafts((draftPayload.items || []).filter((draft) => draft.targetId === project.id));
       setReviewPayload(reviewData);
       setArchiveItems(archivePayload.items || []);
+      setRoadmapItems(roadmapPayload.items || []);
+      setDecisionRecords(decisionPayload.items || []);
       setContentOverrides([...(overridesPayload.items || []), ...((taskPayload.hiddenTaskIds || []).map((taskId) => ({
         projectId: project.id,
         targetType: "task",
@@ -227,8 +291,18 @@ export function WorkspaceClient({ data }) {
       })))]);
       setDraftForm(emptyDraft(project.id));
       setBacklogForm(emptyBacklogItem(project.id));
+      setRoadmapForm(emptyRoadmapItem(project.id));
+      setDecisionForm(emptyDecisionRecord(project.id));
       setArchiveForm(emptyArchiveItem(project.id));
-      if (sessionAuthenticated && (!backlogPayload.configured || !taskPayload.configured || !draftPayload.configured || !archivePayload.configured)) {
+      if (
+        sessionAuthenticated &&
+        (!backlogPayload.configured ||
+          !taskPayload.configured ||
+          !draftPayload.configured ||
+          !archivePayload.configured ||
+          !roadmapPayload.configured ||
+          !decisionPayload.configured)
+      ) {
         setMessage("DB 연결이 활성화되어야 편집 내용이 저장됩니다.");
       }
     }
@@ -245,6 +319,14 @@ export function WorkspaceClient({ data }) {
   );
   const hiddenArchiveChecklistIds = useMemo(
     () => new Set(contentOverrides.filter((item) => item.targetType === "archive-checklist").map((item) => item.targetId)),
+    [contentOverrides],
+  );
+  const hiddenRoadmapIds = useMemo(
+    () => new Set(contentOverrides.filter((item) => item.targetType === "roadmap").map((item) => item.targetId)),
+    [contentOverrides],
+  );
+  const hiddenDecisionIds = useMemo(
+    () => new Set(contentOverrides.filter((item) => item.targetType === "decision").map((item) => item.targetId)),
     [contentOverrides],
   );
   const tasks = useMemo(
@@ -287,6 +369,74 @@ export function WorkspaceClient({ data }) {
     setTaskStatuses((items) => ({ ...items, [response.item.id]: response.item.status }));
     setBacklogForm(emptyBacklogItem(project.id));
     setMessage(`백로그에 추가했습니다: ${response.item.title}`);
+  }
+
+  async function saveRoadmapItem(event) {
+    event.preventDefault();
+    setMessage("");
+    const isEdit = Boolean(roadmapForm.id);
+    const response = await mutate("/api/roadmap-items", isEdit ? "PATCH" : "POST", roadmapForm, session);
+    if (!response.ok) return setMessage(response.error || "로드맵 항목 저장에 실패했습니다.");
+    setRoadmapItems((items) => [response.item, ...items.filter((item) => item.id !== response.item.id)]);
+    setRoadmapForm(emptyRoadmapItem(project.id));
+    setRoadmapModalOpen(false);
+    setMessage(`로드맵을 저장했습니다: ${response.item.title}`);
+  }
+
+  async function deleteRoadmapItem(item) {
+    setMessage("");
+    if (item.source === "seed") {
+      const response = await mutate(
+        "/api/content-overrides",
+        "POST",
+        { projectId: project.id, targetType: "roadmap", targetId: item.id, reason: `Removed roadmap seed: ${item.title}` },
+        session,
+      );
+      if (!response.ok) return setMessage(response.error || "Seed 로드맵 항목 제거에 실패했습니다.");
+      setContentOverrides((items) => [response.item, ...items.filter((candidate) => !(candidate.targetType === "roadmap" && candidate.targetId === item.id))]);
+      setMessage("Seed 로드맵 항목을 숨겼습니다.");
+      return;
+    }
+
+    const response = await mutate("/api/roadmap-items", "DELETE", { id: item.id }, session);
+    if (!response.ok) return setMessage(response.error || "로드맵 항목 삭제에 실패했습니다.");
+    setRoadmapItems((items) => items.filter((candidate) => candidate.id !== item.id));
+    if (roadmapForm.id === item.id) setRoadmapForm(emptyRoadmapItem(project.id));
+    setMessage("로드맵 항목을 삭제했습니다.");
+  }
+
+  async function saveDecisionRecord(event) {
+    event.preventDefault();
+    setMessage("");
+    const isEdit = Boolean(decisionForm.id);
+    const response = await mutate("/api/decision-records", isEdit ? "PATCH" : "POST", decisionForm, session);
+    if (!response.ok) return setMessage(response.error || "의사결정 저장에 실패했습니다.");
+    setDecisionRecords((items) => [response.item, ...items.filter((item) => item.id !== response.item.id)]);
+    setDecisionForm(emptyDecisionRecord(project.id));
+    setDecisionModalOpen(false);
+    setMessage(`의사결정을 저장했습니다: ${response.item.title}`);
+  }
+
+  async function deleteDecisionRecord(item) {
+    setMessage("");
+    if (item.source === "seed") {
+      const response = await mutate(
+        "/api/content-overrides",
+        "POST",
+        { projectId: project.id, targetType: "decision", targetId: item.id, reason: `Removed decision seed: ${item.title}` },
+        session,
+      );
+      if (!response.ok) return setMessage(response.error || "Seed 의사결정 항목 제거에 실패했습니다.");
+      setContentOverrides((items) => [response.item, ...items.filter((candidate) => !(candidate.targetType === "decision" && candidate.targetId === item.id))]);
+      setMessage("Seed 의사결정 항목을 숨겼습니다.");
+      return;
+    }
+
+    const response = await mutate("/api/decision-records", "DELETE", { id: item.id }, session);
+    if (!response.ok) return setMessage(response.error || "의사결정 삭제에 실패했습니다.");
+    setDecisionRecords((items) => items.filter((candidate) => candidate.id !== item.id));
+    if (decisionForm.id === item.id) setDecisionForm(emptyDecisionRecord(project.id));
+    setMessage("의사결정을 삭제했습니다.");
   }
 
   async function saveBoardModal(event) {
@@ -469,7 +619,28 @@ export function WorkspaceClient({ data }) {
 
         {message && <div className="workspace-message">{message}</div>}
 
-        {active === "overview" && <OverviewPanel data={data} project={project} tasks={tasks} archive={archive} archiveItems={archiveItems} progress={progress} />}
+        {active === "overview" && (
+          <OverviewPanel
+            archive={archive}
+            archiveItems={archiveItems}
+            canAdmin={canAdmin}
+            canEdit={canEdit}
+            data={data}
+            decisionRecords={decisionRecords}
+            deleteDecisionRecord={deleteDecisionRecord}
+            deleteRoadmapItem={deleteRoadmapItem}
+            hiddenDecisionIds={hiddenDecisionIds}
+            hiddenRoadmapIds={hiddenRoadmapIds}
+            project={project}
+            roadmapItems={roadmapItems}
+            setDecisionForm={setDecisionForm}
+            setDecisionModalOpen={setDecisionModalOpen}
+            setRoadmapForm={setRoadmapForm}
+            setRoadmapModalOpen={setRoadmapModalOpen}
+            tasks={tasks}
+            progress={progress}
+          />
+        )}
         {active === "board" && (
           <BoardPanel
             data={data}
@@ -536,6 +707,26 @@ export function WorkspaceClient({ data }) {
           setTaskNotes={setTaskNotes}
         />
       )}
+
+      {roadmapModalOpen && (
+        <RoadmapModal
+          form={roadmapForm}
+          saveRoadmapItem={saveRoadmapItem}
+          setForm={setRoadmapForm}
+          setOpen={setRoadmapModalOpen}
+          projectId={project.id}
+        />
+      )}
+
+      {decisionModalOpen && (
+        <DecisionModal
+          form={decisionForm}
+          saveDecisionRecord={saveDecisionRecord}
+          setForm={setDecisionForm}
+          setOpen={setDecisionModalOpen}
+          projectId={project.id}
+        />
+      )}
     </main>
   );
 }
@@ -552,9 +743,82 @@ async function mutate(url, method, body, session) {
   return { ok: response.ok, ...payload };
 }
 
-function OverviewPanel({ data, project, tasks, archive, archiveItems, progress }) {
-  const decisions = data.logs.filter((log) => log.projectId === project.id && log.type === "decision");
-  const milestones = project.milestones || [];
+function OverviewPanel({
+  archive,
+  archiveItems,
+  canAdmin,
+  canEdit,
+  data,
+  decisionRecords,
+  deleteDecisionRecord,
+  deleteRoadmapItem,
+  hiddenDecisionIds,
+  hiddenRoadmapIds,
+  project,
+  roadmapItems,
+  setDecisionForm,
+  setDecisionModalOpen,
+  setRoadmapForm,
+  setRoadmapModalOpen,
+  tasks,
+  progress,
+}) {
+  const seedRoadmap = (project.milestones || [])
+    .filter((milestone) => !hiddenRoadmapIds.has(milestone.id))
+    .map((milestone) => ({
+      id: milestone.id,
+      projectId: project.id,
+      title: milestone.title,
+      timeframe: `Week ${milestone.week}`,
+      status: milestone.status || "planned",
+      summary: milestone.deliverables?.join(" · ") || "",
+      source: "seed",
+    }));
+  const roadmap = [...seedRoadmap, ...roadmapItems];
+  const seedDecisions = data.logs
+    .filter((log) => log.projectId === project.id && log.type === "decision" && !hiddenDecisionIds.has(log.id))
+    .map((log) => ({
+      id: log.id,
+      projectId: project.id,
+      title: log.title,
+      status: "accepted",
+      context: "",
+      decision: log.summary,
+      impact: "",
+      decidedAt: log.date,
+      authorName: memberName(data, log.authorId),
+      source: "seed",
+    }));
+  const decisions = [...decisionRecords, ...seedDecisions];
+
+  function editRoadmap(item) {
+    setRoadmapForm({
+      id: item.id,
+      projectId: project.id,
+      title: item.title,
+      timeframe: item.timeframe || "",
+      status: item.status || "planned",
+      summary: item.summary || "",
+      startDate: item.startDate ? String(item.startDate).slice(0, 10) : "",
+      endDate: item.endDate ? String(item.endDate).slice(0, 10) : "",
+    });
+    setRoadmapModalOpen(true);
+  }
+
+  function editDecision(item) {
+    setDecisionForm({
+      id: item.id,
+      projectId: project.id,
+      title: item.title,
+      status: item.status || "proposed",
+      context: item.context || "",
+      decision: item.decision || "",
+      impact: item.impact || "",
+      decidedAt: item.decidedAt ? String(item.decidedAt).slice(0, 10) : "",
+    });
+    setDecisionModalOpen(true);
+  }
+
   return (
     <div className="workspace-flow">
       <section className="workspace-summary">
@@ -581,16 +845,36 @@ function OverviewPanel({ data, project, tasks, archive, archiveItems, progress }
             <span className="eyebrow">Roadmap</span>
             <h2>프로젝트 흐름</h2>
           </div>
+          {canEdit && (
+            <button className="action-button compact" type="button" onClick={() => {
+              setRoadmapForm(emptyRoadmapItem(project.id));
+              setRoadmapModalOpen(true);
+            }}>
+              <Plus aria-hidden="true" />
+              항목 추가
+            </button>
+          )}
         </div>
         <div className="milestone-list">
-          {milestones.map((milestone) => (
-            <article key={milestone.id}>
-              <span>Week {milestone.week}</span>
-              <strong>{milestone.title}</strong>
-              <p>{milestone.deliverables?.join(" · ")}</p>
+          {roadmap.map((item) => (
+            <article key={`${item.source}-${item.id}`} className={`roadmap-card ${item.status}`}>
+              <div className="card-kicker">
+                <span>{item.timeframe || "No timeframe"}</span>
+                <span>{getStatusLabel(item.status)}</span>
+              </div>
+              <strong>{item.title}</strong>
+              {item.summary && <p>{item.summary}</p>}
+              <div className="workspace-row-actions inline-left">
+                {canEdit && item.source !== "seed" && <button type="button" onClick={() => editRoadmap(item)}>수정</button>}
+                {((canEdit && item.source !== "seed") || (canAdmin && item.source === "seed")) && (
+                  <button type="button" onClick={() => deleteRoadmapItem(item)}>
+                    {item.source === "seed" ? "Seed 숨김" : "삭제"}
+                  </button>
+                )}
+              </div>
             </article>
           ))}
-          {milestones.length === 0 && <p className="workspace-empty">보드에서 백로그를 만들며 로드맵을 구체화하세요.</p>}
+          {roadmap.length === 0 && <p className="workspace-empty">프로젝트 흐름을 기간, 상태, 산출물 기준으로 추가하세요.</p>}
         </div>
       </section>
 
@@ -600,17 +884,145 @@ function OverviewPanel({ data, project, tasks, archive, archiveItems, progress }
             <span className="eyebrow">Decisions</span>
             <h2>의사결정 로그</h2>
           </div>
+          {canEdit && (
+            <button className="action-button compact" type="button" onClick={() => {
+              setDecisionForm(emptyDecisionRecord(project.id));
+              setDecisionModalOpen(true);
+            }}>
+              <Plus aria-hidden="true" />
+              결정 기록
+            </button>
+          )}
         </div>
         <div className="workspace-list">
-          {decisions.map((log) => (
-            <article key={log.id}>
-              <strong>{log.title}</strong>
-              <span>{formatDate(log.date)} · {memberName(data, log.authorId)}</span>
-              <p>{log.summary}</p>
+          {decisions.map((item) => (
+            <article key={`${item.source}-${item.id}`} className="decision-card">
+              <div className="card-kicker">
+                <span>{getStatusLabel(item.status)}</span>
+                <span>{formatDate(item.decidedAt || item.updatedAt || item.createdAt)}</span>
+              </div>
+              <strong>{item.title}</strong>
+              {item.context && <p>{item.context}</p>}
+              <p>{item.decision}</p>
+              {item.impact && <small>{item.impact}</small>}
+              <div className="workspace-row-actions inline-left">
+                {canEdit && item.source !== "seed" && <button type="button" onClick={() => editDecision(item)}>수정</button>}
+                {((canEdit && item.source !== "seed") || (canAdmin && item.source === "seed")) && (
+                  <button type="button" onClick={() => deleteDecisionRecord(item)}>
+                    {item.source === "seed" ? "Seed 숨김" : "삭제"}
+                  </button>
+                )}
+              </div>
             </article>
           ))}
-          {decisions.length === 0 && <p className="workspace-empty">Developer가 결정 사항을 기록으로 남길 수 있습니다.</p>}
+          {decisions.length === 0 && <p className="workspace-empty">배경, 결정 내용, 영향을 남겨 나중에 맥락을 잃지 않게 하세요.</p>}
         </div>
+      </section>
+    </div>
+  );
+}
+
+function RoadmapModal({ form, projectId, saveRoadmapItem, setForm, setOpen }) {
+  return (
+    <div className="modal-backdrop" role="presentation">
+      <section className="modal-panel" role="dialog" aria-modal="true" aria-label="로드맵 항목 편집">
+        <header className="modal-header">
+          <div>
+            <span className="eyebrow">Roadmap</span>
+            <h2>{form.id ? "로드맵 항목 수정" : "로드맵 항목 추가"}</h2>
+          </div>
+          <button className="icon-button" type="button" onClick={() => setOpen(false)} aria-label="닫기">
+            <X aria-hidden="true" />
+          </button>
+        </header>
+        <form className="workspace-form" onSubmit={saveRoadmapItem}>
+          <label>
+            <span>제목</span>
+            <input value={form.title} onChange={(event) => setForm((item) => ({ ...item, title: event.target.value, projectId }))} required />
+          </label>
+          <div className="modal-grid">
+            <label>
+              <span>기간 표시</span>
+              <input value={form.timeframe} onChange={(event) => setForm((item) => ({ ...item, timeframe: event.target.value, projectId }))} placeholder="Week 3-4, 7월 1주" />
+            </label>
+            <label>
+              <span>상태</span>
+              <select value={form.status} onChange={(event) => setForm((item) => ({ ...item, status: event.target.value, projectId }))}>
+                {roadmapStatuses.map((status) => <option key={status.value} value={status.value}>{status.label}</option>)}
+              </select>
+            </label>
+          </div>
+          <div className="modal-grid">
+            <label>
+              <span>시작일</span>
+              <input type="date" value={form.startDate || ""} onChange={(event) => setForm((item) => ({ ...item, startDate: event.target.value, projectId }))} />
+            </label>
+            <label>
+              <span>종료일</span>
+              <input type="date" value={form.endDate || ""} onChange={(event) => setForm((item) => ({ ...item, endDate: event.target.value, projectId }))} />
+            </label>
+          </div>
+          <label>
+            <span>산출물과 범위</span>
+            <textarea value={form.summary} onChange={(event) => setForm((item) => ({ ...item, summary: event.target.value, projectId }))} />
+          </label>
+          <div className="modal-actions">
+            <button className="subtle-button" type="button" onClick={() => setOpen(false)}>취소</button>
+            <button className="action-button compact" type="submit">저장</button>
+          </div>
+        </form>
+      </section>
+    </div>
+  );
+}
+
+function DecisionModal({ form, projectId, saveDecisionRecord, setForm, setOpen }) {
+  return (
+    <div className="modal-backdrop" role="presentation">
+      <section className="modal-panel" role="dialog" aria-modal="true" aria-label="의사결정 기록 편집">
+        <header className="modal-header">
+          <div>
+            <span className="eyebrow">Decision</span>
+            <h2>{form.id ? "의사결정 수정" : "의사결정 기록"}</h2>
+          </div>
+          <button className="icon-button" type="button" onClick={() => setOpen(false)} aria-label="닫기">
+            <X aria-hidden="true" />
+          </button>
+        </header>
+        <form className="workspace-form" onSubmit={saveDecisionRecord}>
+          <label>
+            <span>제목</span>
+            <input value={form.title} onChange={(event) => setForm((item) => ({ ...item, title: event.target.value, projectId }))} required />
+          </label>
+          <div className="modal-grid">
+            <label>
+              <span>상태</span>
+              <select value={form.status} onChange={(event) => setForm((item) => ({ ...item, status: event.target.value, projectId }))}>
+                {decisionStatuses.map((status) => <option key={status.value} value={status.value}>{status.label}</option>)}
+              </select>
+            </label>
+            <label>
+              <span>결정일</span>
+              <input type="date" value={form.decidedAt || ""} onChange={(event) => setForm((item) => ({ ...item, decidedAt: event.target.value, projectId }))} />
+            </label>
+          </div>
+          <label>
+            <span>배경</span>
+            <textarea value={form.context} onChange={(event) => setForm((item) => ({ ...item, context: event.target.value, projectId }))} />
+          </label>
+          <label>
+            <span>결정 내용</span>
+            <textarea value={form.decision} onChange={(event) => setForm((item) => ({ ...item, decision: event.target.value, projectId }))} required />
+          </label>
+          <label>
+            <span>영향과 후속 조치</span>
+            <textarea value={form.impact} onChange={(event) => setForm((item) => ({ ...item, impact: event.target.value, projectId }))} />
+          </label>
+          <div className="modal-actions">
+            <button className="subtle-button" type="button" onClick={() => setOpen(false)}>취소</button>
+            <button className="action-button compact" type="submit">저장</button>
+          </div>
+        </form>
       </section>
     </div>
   );

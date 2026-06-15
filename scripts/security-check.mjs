@@ -35,11 +35,13 @@ for (const file of sourceFiles) {
 for (const file of [
   "src/app/api/comments/route.js",
   "src/app/api/drafts/route.js",
+  "src/app/api/decision-records/route.js",
   "src/app/api/review-queue/route.js",
   "src/app/api/backlog-items/route.js",
   "src/app/api/archive-items/route.js",
   "src/app/api/content-overrides/route.js",
   "src/app/api/projects/route.js",
+  "src/app/api/roadmap-items/route.js",
   "src/app/api/task-updates/route.js",
 ]) {
   const body = read(file);

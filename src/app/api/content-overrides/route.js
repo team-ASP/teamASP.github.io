@@ -5,7 +5,7 @@ import { hideContentTarget, isDatabaseConfigured, listContentOverrides, writeAud
 import { projectExists } from "@/lib/projects";
 import { checkRateLimit, getRateLimitKey } from "@/lib/rate-limit";
 
-const validTargetTypes = new Set(["task", "review", "archive-checklist"]);
+const validTargetTypes = new Set(["task", "review", "archive-checklist", "roadmap", "decision"]);
 
 export const dynamic = "force-dynamic";
 
@@ -79,6 +79,16 @@ async function isValidOverrideTarget(payload) {
     if (!archive || !String(payload.targetId).startsWith(prefix)) return false;
     const label = String(payload.targetId).slice(prefix.length);
     return archive.required.includes(label);
+  }
+
+  if (payload.targetType === "roadmap") {
+    const project = aspData.projects.find((item) => item.id === payload.projectId);
+    return Boolean(project?.milestones?.some((item) => item.id === payload.targetId));
+  }
+
+  if (payload.targetType === "decision") {
+    const log = aspData.logs.find((item) => item.id === payload.targetId);
+    return Boolean(log && log.projectId === payload.projectId && log.type === "decision");
   }
 
   return assertKnownTarget(payload.targetType, payload.targetId);

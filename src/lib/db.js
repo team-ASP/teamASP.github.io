@@ -143,6 +143,46 @@ export async function ensureSchema() {
   await sql`create index if not exists backlog_items_project_idx on backlog_items (project_id, status, updated_at desc)`;
 
   await sql`
+    create table if not exists roadmap_items (
+      id text primary key,
+      project_id text not null,
+      title text not null,
+      timeframe text not null default '',
+      status text not null default 'planned',
+      summary text not null default '',
+      owner_login text not null,
+      author_login text not null,
+      author_name text not null,
+      start_date date,
+      end_date date,
+      created_at timestamptz not null default now(),
+      updated_at timestamptz not null default now(),
+      deleted_at timestamptz
+    )
+  `;
+  await sql`create index if not exists roadmap_items_project_idx on roadmap_items (project_id, status, updated_at desc)`;
+
+  await sql`
+    create table if not exists decision_records (
+      id text primary key,
+      project_id text not null,
+      title text not null,
+      status text not null default 'proposed',
+      context text not null default '',
+      decision text not null default '',
+      impact text not null default '',
+      owner_login text not null,
+      author_login text not null,
+      author_name text not null,
+      decided_at date,
+      created_at timestamptz not null default now(),
+      updated_at timestamptz not null default now(),
+      deleted_at timestamptz
+    )
+  `;
+  await sql`create index if not exists decision_records_project_idx on decision_records (project_id, status, updated_at desc)`;
+
+  await sql`
     create table if not exists archive_items (
       id text primary key,
       project_id text not null,
@@ -359,6 +399,44 @@ export function toPublicBacklogItem(row) {
     authorLogin: row.author_login,
     authorName: row.author_name,
     due: row.due_date,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
+export function toPublicRoadmapItem(row) {
+  return {
+    id: row.id,
+    projectId: row.project_id,
+    title: row.title,
+    timeframe: row.timeframe,
+    status: row.status,
+    summary: row.summary,
+    ownerLogin: row.owner_login,
+    authorLogin: row.author_login,
+    authorName: row.author_name,
+    startDate: row.start_date,
+    endDate: row.end_date,
+    source: "database",
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
+export function toPublicDecisionRecord(row) {
+  return {
+    id: row.id,
+    projectId: row.project_id,
+    title: row.title,
+    status: row.status,
+    context: row.context,
+    decision: row.decision,
+    impact: row.impact,
+    ownerLogin: row.owner_login,
+    authorLogin: row.author_login,
+    authorName: row.author_name,
+    decidedAt: row.decided_at,
+    source: "database",
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };

@@ -1202,6 +1202,11 @@ a {
   gap: 0.5rem;
 }
 
+.workspace-row-actions.inline-left {
+  justify-content: flex-start;
+  margin-top: 0.7rem;
+}
+
 .workspace-header-actions a,
 .workspace-row-actions button,
 .subtle-button,
@@ -1364,6 +1369,40 @@ a {
   margin: 0.45rem 0 0;
   color: var(--muted);
   line-height: 1.55;
+}
+
+.decision-card small {
+  display: block;
+  margin-top: 0.45rem;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.card-kicker {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.45rem;
+  margin-bottom: 0.35rem;
+}
+
+.card-kicker span {
+  margin-top: 0;
+}
+
+.roadmap-card.blocked {
+  border-color: #efc9cc;
+  background: #fff7f7;
+}
+
+.roadmap-card.in-progress {
+  border-color: #bddaea;
+  background: #f1f8fc;
+}
+
+.roadmap-card.done {
+  border-color: #b9dcc9;
+  background: #f1faf4;
 }
 
 .workspace-list a {
