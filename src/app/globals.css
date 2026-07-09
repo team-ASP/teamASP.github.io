@@ -1663,6 +1663,93 @@ a {
   line-height: 1.45;
 }
 
+.markdown-text {
+  margin-top: 0.55rem;
+  color: var(--text);
+  font-size: 0.94rem;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.markdown-text.compact {
+  color: var(--muted);
+  font-size: 0.86rem;
+  line-height: 1.5;
+}
+
+.markdown-text > :first-child {
+  margin-top: 0;
+}
+
+.markdown-text > :last-child {
+  margin-bottom: 0;
+}
+
+.markdown-text p,
+.markdown-text ul,
+.markdown-text ol,
+.markdown-text blockquote,
+.markdown-text pre {
+  margin: 0.45rem 0 0;
+}
+
+.markdown-text h4,
+.markdown-text h5,
+.markdown-text h6,
+.markdown-heading {
+  margin: 0.65rem 0 0;
+  color: var(--text);
+  font-size: 0.95rem;
+  line-height: 1.35;
+}
+
+.markdown-text ul,
+.markdown-text ol {
+  padding-left: 1.1rem;
+}
+
+.markdown-text li + li {
+  margin-top: 0.2rem;
+}
+
+.markdown-text a {
+  color: var(--brand-strong);
+  font-weight: 800;
+  text-decoration: underline;
+  text-underline-offset: 0.16em;
+}
+
+.markdown-text code {
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #f5f7f9;
+  padding: 0.08rem 0.28rem;
+  color: var(--text);
+  font-size: 0.86em;
+}
+
+.markdown-text pre {
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #111827;
+  padding: 0.75rem;
+  color: #f8fafc;
+}
+
+.markdown-text pre code {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  color: inherit;
+}
+
+.markdown-text blockquote {
+  border-left: 3px solid var(--brand);
+  padding-left: 0.65rem;
+  color: var(--muted);
+}
+
 .process-edit {
   display: grid;
   gap: 0.45rem;
@@ -1808,6 +1895,26 @@ a {
 
 .modal-panel .workspace-form textarea {
   min-height: 7rem;
+}
+
+.markdown-preview {
+  display: grid;
+  gap: 0.35rem;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #f8fafb;
+  padding: 0.75rem;
+}
+
+.markdown-preview > span {
+  color: var(--brand-strong);
+  font-size: 0.76rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.markdown-preview .markdown-text {
+  margin-top: 0;
 }
 
 .modal-header,

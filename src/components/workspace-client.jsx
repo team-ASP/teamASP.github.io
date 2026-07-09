@@ -109,6 +109,173 @@ function formatDate(date) {
   return new Intl.DateTimeFormat("ko-KR", { month: "short", day: "numeric" }).format(value);
 }
 
+function safeMarkdownHref(rawHref) {
+  const href = String(rawHref || "").trim();
+  if (!href) return "";
+  if (href.startsWith("/") || href.startsWith("#")) return href;
+
+  try {
+    const url = new URL(href);
+    if (["http:", "https:", "mailto:"].includes(url.protocol)) return url.href;
+  } catch {
+    return "";
+  }
+
+  return "";
+}
+
+function renderInlineMarkdown(value, keyPrefix) {
+  const text = String(value || "");
+  const pattern = /(`[^`]+`|\*\*[^*]+?\*\*|\*[^*]+?\*|\[[^\]]+?\]\([^)]+?\))/g;
+  const nodes = [];
+  let lastIndex = 0;
+  let match;
+
+  while ((match = pattern.exec(text)) !== null) {
+    if (match.index > lastIndex) nodes.push(text.slice(lastIndex, match.index));
+    const token = match[0];
+    const key = `${keyPrefix}-${match.index}`;
+
+    if (token.startsWith("`") && token.endsWith("`")) {
+      nodes.push(<code key={key}>{token.slice(1, -1)}</code>);
+    } else if (token.startsWith("**") && token.endsWith("**")) {
+      nodes.push(<strong key={key}>{renderInlineMarkdown(token.slice(2, -2), `${key}-strong`)}</strong>);
+    } else if (token.startsWith("*") && token.endsWith("*")) {
+      nodes.push(<em key={key}>{renderInlineMarkdown(token.slice(1, -1), `${key}-em`)}</em>);
+    } else {
+      const linkMatch = token.match(/^\[([^\]]+?)\]\(([^)]+?)\)$/);
+      const href = safeMarkdownHref(linkMatch?.[2]);
+      nodes.push(
+        href ? (
+          <a key={key} href={href} target={href.startsWith("http") ? "_blank" : undefined} rel={href.startsWith("http") ? "noreferrer" : undefined}>
+            {renderInlineMarkdown(linkMatch[1], `${key}-link`)}
+          </a>
+        ) : (
+          linkMatch?.[1] || token
+        ),
+      );
+    }
+
+    lastIndex = pattern.lastIndex;
+  }
+
+  if (lastIndex < text.length) nodes.push(text.slice(lastIndex));
+  return nodes;
+}
+
+function isMarkdownBlockStart(line) {
+  return /^(```|#{1,3}\s+|[-*]\s+|\d+\.\s+|>\s+)/.test(line.trim());
+}
+
+function MarkdownText({ value, compact = false }) {
+  const normalized = String(value || "").replace(/\r\n/g, "\n").trim();
+  if (!normalized) return null;
+
+  const lines = normalized.split("\n");
+  const blocks = [];
+  let index = 0;
+
+  while (index < lines.length) {
+    const line = lines[index];
+    const trimmed = line.trim();
+    const key = `md-${blocks.length}`;
+
+    if (!trimmed) {
+      index += 1;
+      continue;
+    }
+
+    if (trimmed.startsWith("```")) {
+      const codeLines = [];
+      index += 1;
+      while (index < lines.length && !lines[index].trim().startsWith("```")) {
+        codeLines.push(lines[index]);
+        index += 1;
+      }
+      if (index < lines.length) index += 1;
+      blocks.push(
+        <pre key={key}>
+          <code>{codeLines.join("\n")}</code>
+        </pre>,
+      );
+      continue;
+    }
+
+    const heading = trimmed.match(/^(#{1,3})\s+(.+)$/);
+    if (heading) {
+      const Tag = compact ? "p" : `h${Math.min(heading[1].length + 3, 6)}`;
+      blocks.push(
+        <Tag key={key} className={compact ? "markdown-heading" : undefined}>
+          {renderInlineMarkdown(heading[2], key)}
+        </Tag>,
+      );
+      index += 1;
+      continue;
+    }
+
+    const unordered = trimmed.match(/^[-*]\s+(.+)$/);
+    if (unordered) {
+      const items = [];
+      while (index < lines.length) {
+        const item = lines[index].trim().match(/^[-*]\s+(.+)$/);
+        if (!item) break;
+        items.push(item[1]);
+        index += 1;
+      }
+      blocks.push(
+        <ul key={key}>
+          {items.map((item, itemIndex) => (
+            <li key={`${key}-${itemIndex}`}>{renderInlineMarkdown(item, `${key}-${itemIndex}`)}</li>
+          ))}
+        </ul>,
+      );
+      continue;
+    }
+
+    const ordered = trimmed.match(/^\d+\.\s+(.+)$/);
+    if (ordered) {
+      const items = [];
+      while (index < lines.length) {
+        const item = lines[index].trim().match(/^\d+\.\s+(.+)$/);
+        if (!item) break;
+        items.push(item[1]);
+        index += 1;
+      }
+      blocks.push(
+        <ol key={key}>
+          {items.map((item, itemIndex) => (
+            <li key={`${key}-${itemIndex}`}>{renderInlineMarkdown(item, `${key}-${itemIndex}`)}</li>
+          ))}
+        </ol>,
+      );
+      continue;
+    }
+
+    const quote = trimmed.match(/^>\s+(.+)$/);
+    if (quote) {
+      const quotes = [];
+      while (index < lines.length) {
+        const item = lines[index].trim().match(/^>\s+(.+)$/);
+        if (!item) break;
+        quotes.push(item[1]);
+        index += 1;
+      }
+      blocks.push(<blockquote key={key}>{renderInlineMarkdown(quotes.join(" "), key)}</blockquote>);
+      continue;
+    }
+
+    const paragraph = [trimmed];
+    index += 1;
+    while (index < lines.length && lines[index].trim() && !isMarkdownBlockStart(lines[index])) {
+      paragraph.push(lines[index].trim());
+      index += 1;
+    }
+    blocks.push(<p key={key}>{renderInlineMarkdown(paragraph.join(" "), key)}</p>);
+  }
+
+  return <div className={`markdown-text${compact ? " compact" : ""}`}>{blocks}</div>;
+}
+
 function getStatusLabel(status) {
   return statusLabels[status] || status;
 }
@@ -217,22 +384,9 @@ export function WorkspaceClient({ data }) {
   const [itemModal, setItemModal] = useState(null);
   const [contentOverrides, setContentOverrides] = useState([]);
   const [message, setMessage] = useState("");
-  const [formProjectId, setFormProjectId] = useState(project.id);
 
   const requestOptions = useMemo(() => ({ cache: "no-store", credentials: "same-origin" }), []);
   const sessionAuthenticated = session?.authenticated;
-
-  if (formProjectId !== project.id) {
-    setFormProjectId(project.id);
-    setDraftForm(emptyDraft(project.id));
-    setBacklogForm(emptyBacklogItem(project.id));
-    setRoadmapForm(emptyRoadmapItem(project.id));
-    setDecisionForm(emptyDecisionRecord(project.id));
-    setArchiveForm(emptyArchiveItem(project.id));
-    setRoadmapModalOpen(false);
-    setDecisionModalOpen(false);
-    setItemModal(null);
-  }
 
   useEffect(() => {
     let alive = true;
@@ -266,14 +420,14 @@ export function WorkspaceClient({ data }) {
         roadmapResponse,
         decisionResponse,
       ] = await Promise.all([
-        fetch(`/api/backlog-items?projectId=${project.id}`, requestOptions),
+        fetch(`/api/backlog-items?projectId=${encodeURIComponent(project.id)}`, requestOptions),
         fetch("/api/task-updates", requestOptions),
         sessionAuthenticated ? fetch("/api/drafts", requestOptions) : Promise.resolve(null),
         fetch("/api/review-queue", requestOptions),
-        fetch(`/api/archive-items?projectId=${project.id}`, requestOptions),
-        fetch(`/api/content-overrides?projectId=${project.id}`, requestOptions),
-        fetch(`/api/roadmap-items?projectId=${project.id}`, requestOptions),
-        fetch(`/api/decision-records?projectId=${project.id}`, requestOptions),
+        fetch(`/api/archive-items?projectId=${encodeURIComponent(project.id)}`, requestOptions),
+        fetch(`/api/content-overrides?projectId=${encodeURIComponent(project.id)}`, requestOptions),
+        fetch(`/api/roadmap-items?projectId=${encodeURIComponent(project.id)}`, requestOptions),
+        fetch(`/api/decision-records?projectId=${encodeURIComponent(project.id)}`, requestOptions),
       ]);
       const [backlogPayload, taskPayload, draftPayload, reviewData, archivePayload, overridesPayload, roadmapPayload, decisionPayload] = await Promise.all([
         backlogResponse.json(),
@@ -351,7 +505,7 @@ export function WorkspaceClient({ data }) {
             source: "seed",
             type: "task",
             priority: "medium",
-            description: "",
+            description: task.description || "",
             status: latest?.status || task.status,
             latestUpdate: latest,
           };
@@ -372,10 +526,21 @@ export function WorkspaceClient({ data }) {
   const canReview = reviewPayload.permissions?.canReview;
   const canAdmin = session?.editableScopes?.includes("admin");
 
+  function resetProjectForms(nextProjectId) {
+    setDraftForm(emptyDraft(nextProjectId));
+    setBacklogForm(emptyBacklogItem(nextProjectId));
+    setRoadmapForm(emptyRoadmapItem(nextProjectId));
+    setDecisionForm(emptyDecisionRecord(nextProjectId));
+    setArchiveForm(emptyArchiveItem(nextProjectId));
+    setRoadmapModalOpen(false);
+    setDecisionModalOpen(false);
+    setItemModal(null);
+  }
+
   async function createBacklogItem(event) {
     event.preventDefault();
     setMessage("");
-    const response = await mutate("/api/backlog-items", "POST", backlogForm, session);
+    const response = await mutate("/api/backlog-items", "POST", { ...backlogForm, projectId: project.id }, session);
     if (!response.ok) return setMessage(response.error || "백로그 항목 생성에 실패했습니다.");
     setBacklogItems((items) => [response.item, ...items]);
     setTaskStatuses((items) => ({ ...items, [response.item.id]: response.item.status }));
@@ -388,14 +553,15 @@ export function WorkspaceClient({ data }) {
     setMessage("");
     const isTemplateEdit = roadmapForm.source === "seed";
     const isEdit = Boolean(roadmapForm.id) && !isTemplateEdit;
+    const roadmapPayload = { ...roadmapForm, projectId: project.id };
     const response = isTemplateEdit
       ? await mutate(
           "/api/static-content/promote",
           "POST",
-          { projectId: project.id, targetType: "roadmap", targetId: roadmapForm.templateId || roadmapForm.id, item: roadmapForm },
+          { projectId: project.id, targetType: "roadmap", targetId: roadmapForm.templateId || roadmapForm.id, item: roadmapPayload },
           session,
         )
-      : await mutate("/api/roadmap-items", isEdit ? "PATCH" : "POST", roadmapForm, session);
+      : await mutate("/api/roadmap-items", isEdit ? "PATCH" : "POST", roadmapPayload, session);
     if (!response.ok) return setMessage(response.error || "로드맵 항목 저장에 실패했습니다.");
     setRoadmapItems((items) => [response.item, ...items.filter((item) => item.id !== response.item.id)]);
     if (response.override) {
@@ -436,14 +602,15 @@ export function WorkspaceClient({ data }) {
     setMessage("");
     const isTemplateEdit = decisionForm.source === "seed";
     const isEdit = Boolean(decisionForm.id) && !isTemplateEdit;
+    const decisionPayload = { ...decisionForm, projectId: project.id };
     const response = isTemplateEdit
       ? await mutate(
           "/api/static-content/promote",
           "POST",
-          { projectId: project.id, targetType: "decision", targetId: decisionForm.templateId || decisionForm.id, item: decisionForm },
+          { projectId: project.id, targetType: "decision", targetId: decisionForm.templateId || decisionForm.id, item: decisionPayload },
           session,
         )
-      : await mutate("/api/decision-records", isEdit ? "PATCH" : "POST", decisionForm, session);
+      : await mutate("/api/decision-records", isEdit ? "PATCH" : "POST", decisionPayload, session);
     if (!response.ok) return setMessage(response.error || "의사결정 저장에 실패했습니다.");
     setDecisionRecords((items) => [response.item, ...items.filter((item) => item.id !== response.item.id)]);
     if (response.override) {
@@ -531,7 +698,7 @@ export function WorkspaceClient({ data }) {
     event.preventDefault();
     setMessage("");
     const isEdit = Boolean(draftForm.id);
-    const response = await mutate("/api/drafts", isEdit ? "PATCH" : "POST", draftForm, session);
+    const response = await mutate("/api/drafts", isEdit ? "PATCH" : "POST", { ...draftForm, targetId: project.id }, session);
     if (!response.ok) return setMessage(response.error || "Draft 저장에 실패했습니다.");
     setDrafts((items) => [response.item, ...items.filter((item) => item.id !== response.item.id)]);
     setDraftForm(response.item);
@@ -594,7 +761,7 @@ export function WorkspaceClient({ data }) {
     event.preventDefault();
     setMessage("");
     const isEdit = Boolean(archiveForm.id);
-    const response = await mutate("/api/archive-items", isEdit ? "PATCH" : "POST", archiveForm, session);
+    const response = await mutate("/api/archive-items", isEdit ? "PATCH" : "POST", { ...archiveForm, projectId: project.id }, session);
     if (!response.ok) return setMessage(response.error || "아카이브 항목 저장에 실패했습니다.");
     setArchiveItems((items) => [response.item, ...items.filter((item) => item.id !== response.item.id)]);
     setArchiveForm(emptyArchiveItem(project.id));
@@ -620,7 +787,7 @@ export function WorkspaceClient({ data }) {
         <div className="workspace-project-switcher">
           <span className="eyebrow">Project</span>
           {projects.map((item) => (
-            <Link key={item.id} className={item.id === project.id ? "active" : ""} href={`/workspace?project=${item.id}`}>
+            <Link key={item.id} className={item.id === project.id ? "active" : ""} href={`/workspace?project=${item.id}`} onClick={() => resetProjectForms(item.id)}>
               {item.title}
             </Link>
           ))}
@@ -686,6 +853,7 @@ export function WorkspaceClient({ data }) {
             data={data}
             tasks={tasks}
             canEdit={canEdit}
+            projectId={project.id}
             backlogForm={backlogForm}
             taskStatuses={taskStatuses}
             createBacklogItem={createBacklogItem}
@@ -780,7 +948,7 @@ async function mutate(url, method, body, session) {
     body: JSON.stringify(body),
   });
   const payload = await response.json().catch(() => ({}));
-  return { ok: response.ok, ...payload };
+  return { ok: response.ok, status: response.status, ...payload };
 }
 
 function OverviewPanel({
@@ -1107,7 +1275,9 @@ function DecisionModal({ form, projectId, saveDecisionRecord, setForm, setOpen }
   );
 }
 
-function BoardPanel({ data, tasks, canEdit, backlogForm, taskStatuses, createBacklogItem, setBacklogForm, setItemModal, setTaskStatuses }) {
+function BoardPanel({ data, tasks, canEdit, projectId, backlogForm, taskStatuses, createBacklogItem, setBacklogForm, setItemModal, setTaskStatuses }) {
+  const updateBacklogForm = (patch) => setBacklogForm((item) => ({ ...item, projectId, ...patch }));
+
   return (
     <div className="workspace-board-layout">
       <section className="workspace-section backlog-create-panel">
@@ -1122,22 +1292,22 @@ function BoardPanel({ data, tasks, canEdit, backlogForm, taskStatuses, createBac
           <form className="backlog-create-form" onSubmit={createBacklogItem}>
             <input
               value={backlogForm.title}
-              onChange={(event) => setBacklogForm((item) => ({ ...item, title: event.target.value }))}
+              onChange={(event) => updateBacklogForm({ title: event.target.value })}
               placeholder="작업 제목"
               required
             />
             <div className="form-row">
-              <select value={backlogForm.type} onChange={(event) => setBacklogForm((item) => ({ ...item, type: event.target.value }))}>
+              <select value={backlogForm.type} onChange={(event) => updateBacklogForm({ type: event.target.value })}>
                 {itemTypes.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
               </select>
-              <select value={backlogForm.priority} onChange={(event) => setBacklogForm((item) => ({ ...item, priority: event.target.value }))}>
+              <select value={backlogForm.priority} onChange={(event) => updateBacklogForm({ priority: event.target.value })}>
                 {priorities.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
               </select>
-              <input type="date" value={backlogForm.due} onChange={(event) => setBacklogForm((item) => ({ ...item, due: event.target.value }))} />
+              <input type="date" value={backlogForm.due} onChange={(event) => updateBacklogForm({ due: event.target.value })} />
             </div>
             <textarea
               value={backlogForm.description}
-              onChange={(event) => setBacklogForm((item) => ({ ...item, description: event.target.value }))}
+              onChange={(event) => updateBacklogForm({ description: event.target.value })}
               placeholder="완료 조건, 참고 링크, 논의 맥락"
             />
             <button className="action-button compact" type="submit">
@@ -1176,7 +1346,7 @@ function BoardPanel({ data, tasks, canEdit, backlogForm, taskStatuses, createBac
                       </div>
                       <strong>{task.title}</strong>
                       <p>{task.source === "backlog" ? task.ownerLogin : memberName(data, task.ownerId)} · {formatDate(task.due)}</p>
-                      {task.description && <small>{task.description}</small>}
+                      {task.description && <MarkdownText value={task.description} compact />}
                       {task.latestUpdate?.note && <small>{task.latestUpdate.note}</small>}
                       <div className="process-edit inline">
                         {canEdit && (
@@ -1226,6 +1396,12 @@ function BoardItemModal({ data, item, canDelete, deleteTask, saveBoardModal, set
                 <span>상세 내용</span>
                 <textarea value={item.description || ""} onChange={(event) => setItemModal((current) => ({ ...current, description: event.target.value }))} />
               </label>
+              {item.description && (
+                <div className="markdown-preview">
+                  <span>Markdown preview</span>
+                  <MarkdownText value={item.description} />
+                </div>
+              )}
               <div className="modal-grid">
                 <label>
                   <span>종류</span>
@@ -1242,7 +1418,15 @@ function BoardItemModal({ data, item, canDelete, deleteTask, saveBoardModal, set
               </div>
             </>
           ) : (
-            <p className="muted">초기 설계 태스크는 제목과 설명을 코드 데이터로 관리합니다. 여기서는 진행 상태와 변경 메모만 저장합니다.</p>
+            <>
+              {item.description && (
+                <div className="markdown-preview">
+                  <span>상세 설명</span>
+                  <MarkdownText value={item.description} />
+                </div>
+              )}
+              <p className="muted">초기 설계 태스크는 제목과 설명을 코드 데이터로 관리합니다. 여기서는 진행 상태와 변경 메모만 저장합니다.</p>
+            </>
           )}
           <div className="modal-grid">
             <label>

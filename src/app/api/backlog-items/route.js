@@ -13,7 +13,7 @@ export const dynamic = "force-dynamic";
 
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
-  const projectId = searchParams.get("projectId");
+  const projectId = normalizeProjectId(searchParams.get("projectId"));
   if (!projectId || !(await projectExists(projectId))) return jsonError("invalid_project", 400);
   if (!isDatabaseConfigured()) return jsonResponse({ configured: false, items: [] });
 
@@ -31,6 +31,7 @@ export async function GET(request) {
 
 export async function POST(request) {
   const session = getSessionFromRequest(request);
+  if (!session.authenticated) return jsonError("auth_required", 401);
   if (!can(session.role, "draft")) return jsonError("forbidden", 403);
   if (!verifyCsrf(request)) return jsonError("csrf_failed", 403);
 
@@ -43,7 +44,8 @@ export async function POST(request) {
   const payload = await readJson(request);
   const missing = requireFields(payload, ["projectId", "title"]);
   if (missing.length) return jsonError("missing_fields", 400, { missing });
-  if (!(await projectExists(payload.projectId))) return jsonError("invalid_project", 400);
+  const projectId = normalizeProjectId(payload.projectId);
+  if (!projectId || !(await projectExists(projectId))) return jsonError("invalid_project", 400);
 
   const normalized = normalizeBacklogPayload(payload);
   if (normalized.error) return jsonError(normalized.error, 400, normalized.extra || {});
@@ -54,7 +56,7 @@ export async function POST(request) {
     insert into backlog_items (id, project_id, title, description, type, status, priority, owner_login, author_login, author_name, due_date)
     values (
       ${randomUUID()},
-      ${payload.projectId},
+      ${projectId},
       ${normalized.title},
       ${normalized.description},
       ${normalized.type},
@@ -81,6 +83,7 @@ export async function POST(request) {
 
 export async function PATCH(request) {
   const session = getSessionFromRequest(request);
+  if (!session.authenticated) return jsonError("auth_required", 401);
   if (!can(session.role, "draft")) return jsonError("forbidden", 403);
   if (!verifyCsrf(request)) return jsonError("csrf_failed", 403);
 
@@ -138,6 +141,7 @@ export async function PATCH(request) {
 
 export async function DELETE(request) {
   const session = getSessionFromRequest(request);
+  if (!session.authenticated) return jsonError("auth_required", 401);
   if (!can(session.role, "draft")) return jsonError("forbidden", 403);
   if (!verifyCsrf(request)) return jsonError("csrf_failed", 403);
 
@@ -170,6 +174,10 @@ export async function DELETE(request) {
   });
 
   return jsonResponse({ item: toPublicBacklogItem(item) });
+}
+
+function normalizeProjectId(value) {
+  return typeof value === "string" ? value.trim() : "";
 }
 
 function normalizeBacklogPayload(payload, { allowEmptyDescription = true } = {}) {
