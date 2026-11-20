@@ -1,0 +1,3529 @@
+{
+  "generated_at": "2026-11-19T14:08:05.500648+00:00",
+  "benchmark_type": "AI Agent Social Deduction Benchmark (santamkj 643d3a4 + Option B · V3 Rubric)",
+  "total_agents": 30,
+  "evaluation_dimensions": [
+    {
+      "id": "persona_fidelity",
+      "label": "Persona Fidelity (페르소나 일관성)",
+      "weight": "20%"
+    },
+    {
+      "id": "social_deduction",
+      "label": "Social Deduction (사회적 추리력)",
+      "weight": "25%"
+    },
+    {
+      "id": "reasoning_depth",
+      "label": "Reasoning Depth (추론 심도)",
+      "weight": "20%"
+    },
+    {
+      "id": "intent_alignment",
+      "label": "Intent Alignment (의도 정합성)",
+      "weight": "15%"
+    },
+    {
+      "id": "memory_integrity",
+      "label": "Memory Integrity (기억 격리도)",
+      "weight": "10%"
+    },
+    {
+      "id": "token_economy",
+      "label": "Token Economy (토큰 경제성)",
+      "weight": "10%"
+    }
+  ],
+  "leaderboard": [
+    {
+      "id": "gemini-gemini-3.5-flash-lite-mafia_c1_detective-시민1",
+      "name": "Gemini 3.5 Lite [Mafia@C1] · 절차적 분석가 (Protocol Detective) (Mafia)",
+      "archetype_id": "analytical_detective",
+      "archetype_name": "절차적 분석가",
+      "category": "Reasoning & Fact-Checking",
+      "vendor": "Google",
+      "model_raw": "gemini-3.5-flash-lite",
+      "setting_profile": "mafia_c1_detective",
+      "setting_label": "Mafia@C1",
+      "persona_summary": "사실과 시간대별 행동 모순을 3단계 사실 기반 CoT로 교차 검증하는 분석가",
+      "is_multi_trial": false,
+      "trials_count": 1,
+      "win_rate": {
+        "mafia_pct": 100.0,
+        "citizen_pct": 0.0
+      },
+      "score_mean": 87.3,
+      "score_median": 87.3,
+      "composite_score": 87.3,
+      "latency_mean": 6.19,
+      "latency_median": 6.19,
+      "token_usage": {
+        "avg_input": 4391,
+        "avg_output": 168,
+        "avg_total": 4559
+      },
+      "dimensions": {
+        "persona_fidelity": 95.3,
+        "social_deduction": 100.0,
+        "reasoning_depth": 78.7,
+        "intent_alignment": 81.5,
+        "memory_integrity": 90.8,
+        "token_economy": 61.9
+      },
+      "trials": [
+        {
+          "trial": 1,
+          "session_id": "sim_1795090006_mafia_c1_detective",
+          "seed": 20261393,
+          "winner": "MAFIA",
+          "days": 4,
+          "composite_score": 87.3,
+          "latency_sec": 6.19,
+          "stats": {
+            "total_turns": 37,
+            "dialogue_turns": 13,
+            "meeting_turns": 8,
+            "assessment_updates": 8,
+            "fallback_count": 0,
+            "clue_citations": 21,
+            "distinct_clues": 11,
+            "spatial_hallucinations": 0,
+            "avg_other_refs_in_cot": 1.05,
+            "reasoning_novelty": 0.83,
+            "avg_reasoning_len": 169,
+            "avg_dialogue_len": 61,
+            "total_tokens": 168728
+          },
+          "sample_dialogues": [
+            {
+              "speakerId": "시민1",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "시간대별 동선 정리 및 사실 확인 제안",
+              "content": "아침에 과수원에 머물렀던 사실을 확인했습니다. 아직 초기 단계이므로 서로의 동선과 시간대별 행동을 차분히 정리하는 것부터 시작하는 것이 합리적입니다.",
+              "reasoning": "1. 관측된 사실 확인: 시민2가 과수원에서의 만남을 언급하였고 나 역시 과수원에 머물렀음을 기억함. 2. 진술 간 불일치 탐지: 현재까지 양측의 동선 진술 사이에 모순은 발견되지 않음. 3. 논리적 혐의 제기 및 목표: 감정을 배제하고 사실과 시간대별 동선을 차분히 기록하고 검증하자고 제안하여 협조적인 태도를 보이면서도 논리적 분석가 페르소나를 유지함."
+            },
+            {
+              "speakerId": "시민1",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "아침 안개 뉴스와 과수원 동선의 공간적 사실을 분리하여 시간대별 모순 여부를 엄밀하게 검증한다.",
+              "content": "아침 마을 북쪽 산기슭에 내린 안개와 과수원 체류는 서로 다른 공간적 사실이므로 혼동하지 않고 각각의 시간대별 위치를 명확히 분리하여 검증하겠습니다.",
+              "reasoning": "1. 관측된 사실 확인: 아침 안개 뉴스와 과수원 체류 사실이 존재함을 확인했다. 2. 진술 간 불일치 탐지: 시민2가 북쪽 산기슭의 안개와 과수원 동선을 연결 지어 질문했으나, 두 장소는 다른 공간적 사실이므로 구별해야 한다. 3. 논리적 혐의 제기: 장소와 시간대별 사실을 명확히 분리해 검증함으로써 불필요한 의심을 차단하고 논리적 정합성을 유지한다."
+            },
+            {
+              "speakerId": "시민1",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "fact_verification",
+              "content": "아침 안개 주의보 뉴스와 과수원 체류 사실을 바탕으로 볼 때, 저의 행동은 오직 과수원 내부의 정돈된 동선에 한정되어 있었음을 명확히 확인합니다.",
+              "reasoning": "1. 관측된 사실 확인: 시민2가 아침 과수원에서의 구체적 행동 양상을 요구함. 마을 뉴스를 통해 아침 안개 주의보가 있었음을 인지함. 2. 진술 간 불일치 탐지: 안개 지역과 과수원 체류를 혼동하는 인상을 정정함. 3. 논리적 혐의 제기 및 방어: 과수원 내부에서의 동선을 명백히 한정하여 불필요한 의심을 배제하고 사실 관계를 엄밀히 검증함."
+            },
+            {
+              "speakerId": "시민1",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "안개 속 동선 유지 방식에 대한 상대의 의문에 대해 사실적 기준을 들어 논리적으로 반박하고 방어함",
+              "content": "제한된 시야 속에서도 과수원 내부의 구조적 기준점과 시간대별 이동 경로를 철저히 대조하여 오차 없는 동선을 유지했습니다.",
+              "reasoning": "1. 관측된 사실 확인: 시민2가 안개 속에서 정확한 동선을 유지한 구체적 방식을 질문함. 2. 진술 간 불일치 탐지: 과수원 내부의 체류 사실과 시야 제한 사이의 모순은 없으며, 절차적 기준점을 통한 이동임을 명확히 소명해야 함. 3. 논리적 혐의 제기: 추가적인 무리한 추궁을 차단하고 나의 동선이 철저히 통제되었음을 논리적으로 입증하여 의심을 해소함."
+            }
+          ]
+        }
+      ],
+      "rank": 1
+    },
+    {
+      "id": "gemini-gemini-3.5-flash-lite-mafia_c1_detective-시민4",
+      "name": "Gemini 3.5 Lite [Mafia@C1] · 신중한 회의론자 (Cautious Consensus)",
+      "archetype_id": "cautious_consensus",
+      "archetype_name": "신중한 회의론자",
+      "category": "Consensus & Burden-of-Proof",
+      "vendor": "Google",
+      "model_raw": "gemini-3.5-flash-lite",
+      "setting_profile": "mafia_c1_detective",
+      "setting_label": "Mafia@C1",
+      "persona_summary": "성급한 마녀사냥을 경계하며 엄격한 증거주의를 고수하고 다수의 쏠림에 반증을 요구하는 감시자",
+      "is_multi_trial": false,
+      "trials_count": 1,
+      "win_rate": {
+        "mafia_pct": 0.0,
+        "citizen_pct": 0.0
+      },
+      "score_mean": 82.8,
+      "score_median": 82.8,
+      "composite_score": 82.8,
+      "latency_mean": 6.19,
+      "latency_median": 6.19,
+      "token_usage": {
+        "avg_input": 4179,
+        "avg_output": 202,
+        "avg_total": 4381
+      },
+      "dimensions": {
+        "persona_fidelity": 95.5,
+        "social_deduction": 84.6,
+        "reasoning_depth": 76.4,
+        "intent_alignment": 81.6,
+        "memory_integrity": 86.4,
+        "token_economy": 64.0
+      },
+      "trials": [
+        {
+          "trial": 1,
+          "session_id": "sim_1795090006_mafia_c1_detective",
+          "seed": 20261393,
+          "winner": "MAFIA",
+          "days": 4,
+          "composite_score": 82.8,
+          "latency_sec": 6.19,
+          "stats": {
+            "total_turns": 25,
+            "dialogue_turns": 10,
+            "meeting_turns": 6,
+            "assessment_updates": 6,
+            "fallback_count": 0,
+            "clue_citations": 16,
+            "distinct_clues": 8,
+            "spatial_hallucinations": 0,
+            "avg_other_refs_in_cot": 1.31,
+            "reasoning_novelty": 0.85,
+            "avg_reasoning_len": 161,
+            "avg_dialogue_len": 81,
+            "total_tokens": 109533
+          },
+          "sample_dialogues": [
+            {
+              "speakerId": "시민4",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "성급한 추측을 경계하고 증거 중심의 확인을 제안함",
+              "content": "시민5님, 첫 만남부터 서둘러 누군가를 의심하기보다는 아직 뚜렷한 증거가 없으니 각자의 동선부터 차분히 확인해보는 게 어떨까요?",
+              "reasoning": "1.상황: 1일차 낮의 자유 배회 시간에 시민5와 처음 마주쳐 대화를 시작하는 상황이다. 2.근거: 아직 확실한 사건이나 증거가 부족하며, 신중한 회의론자로서 성급한 마녀사냥을 경계해야 한다는 성격 메모에 기반한다. 3.목표: 성급한 단정 대신 객관적인 증거와 동선 확인을 유도하여 대화의 기준을 세우고자 한다."
+            },
+            {
+              "speakerId": "시민4",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "상대의 동선 공유에 답하고 목공방 체류 사실을 밝히며 추가적인 증거와 동선 확인을 제안함",
+              "content": "시민5님은 별빛 캠프장에 계셨군요. 저는 목공방에 머물렀는데, 아직 특별한 증거는 없으니 서로의 동선과 오전의 마을 안개 속 상황을 교차 검증해 보는 것부터 시작하죠.",
+              "reasoning": "1.상황: 1일차 낮 자유 배회 시간으로 아직 뚜렷한 증거가 부족한 상태에서 시민5와 대화 중이다. 2.근거: 시민5가 별빛 캠프장 동선을 밝혔고, 나의 기억에는 목공방 체류 사실과 아침 안개 주의보 뉴스가 있다. 3.목표: 성급한 추측을 경계하며 상대의 동선에 대응해 목공방 체류 사실을 알리고 추가적인 증거 확인을 유도한다."
+            },
+            {
+              "speakerId": "시민4",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "상대의 질문에 답한 뒤 안개 속 가시성 한계를 근거로 상대의 동선에 대한 구체적 관측 사실을 요구",
+              "content": "목공방 쪽은 아침에 안개가 짙어 시야가 제한되었고 특이한 소음은 듣지 못했습니다. 시민5님께서 머무신 별빛 캠프장에서도 안개 때문에 다른 움직임을 관측하기는 어려우셨을 텐데, 혹시 그곳에서 확인하신 구체적인 특이 사항이 있으신가요?",
+              "reasoning": "1.상황: 시민5가 목공방 쪽의 특이 소음이나 움직임을 물어보았고 현재 5번째 턴이다. 2.근거: 오전 마을 안개 주의보 기록이 존재하며 목공방에서는 특이 사항이 없었다. 3.목표: 성급한 추측을 경계하고 철저한 증거주의에 입각해 상대의 구체적 관측 내용을 추가로 확인한다."
+            },
+            {
+              "speakerId": "시민4",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "엄격한 증거주의를 바탕으로 불확실한 정보 확산을 경계하며 검증된 사실 중심의 정리를 제안",
+              "content": "주민들의 이동 경로를 모으는 방향에 동의합니다만, 아침 안개 속에서 시야가 제한되었던 만큼 불확실한 전언에 의존하기보다 각자가 실제로 확인한 사실부터 명확히 해두는 편이 안전하겠습니다.",
+              "reasoning": "1.상황: 시민5가 시야가 제한된 상황에서 주민들의 이동 경로를 모으자고 제안함. 2.근거: 아침 안개로 인해 시야가 제한되었던 점과 신중한 감시자로서의 성격에 따라 성급한 정보 수집보다는 명확한 사실 확인이 우선임. 3.목표: 불확실한 전언에 휩쓸리지 않고 확실한 사실 중심의 검증을 유도하여 대화를 마무리 단계로 이끌기."
+            }
+          ]
+        }
+      ],
+      "rank": 2
+    },
+    {
+      "id": "gemini-gemini-3.5-flash-lite-logic_t02-시민4",
+      "name": "Gemini 3.5 Lite [Logic T=0.2] · 신중한 회의론자 (Cautious Consensus)",
+      "archetype_id": "cautious_consensus",
+      "archetype_name": "신중한 회의론자",
+      "category": "Consensus & Burden-of-Proof",
+      "vendor": "Google",
+      "model_raw": "gemini-3.5-flash-lite",
+      "setting_profile": "logic_t02",
+      "setting_label": "Logic T=0.2",
+      "persona_summary": "성급한 마녀사냥을 경계하며 엄격한 증거주의를 고수하고 다수의 쏠림에 반증을 요구하는 감시자",
+      "is_multi_trial": false,
+      "trials_count": 1,
+      "win_rate": {
+        "mafia_pct": 0.0,
+        "citizen_pct": 0.0
+      },
+      "score_mean": 82.6,
+      "score_median": 82.6,
+      "composite_score": 82.6,
+      "latency_mean": 6.12,
+      "latency_median": 6.12,
+      "token_usage": {
+        "avg_input": 4637,
+        "avg_output": 208,
+        "avg_total": 4845
+      },
+      "dimensions": {
+        "persona_fidelity": 94.7,
+        "social_deduction": 85.0,
+        "reasoning_depth": 79.5,
+        "intent_alignment": 78.6,
+        "memory_integrity": 88.9,
+        "token_economy": 58.4
+      },
+      "trials": [
+        {
+          "trial": 1,
+          "session_id": "sim_1795089467_logic_t02",
+          "seed": 20261256,
+          "winner": "MAFIA",
+          "days": 3,
+          "composite_score": 82.6,
+          "latency_sec": 6.12,
+          "stats": {
+            "total_turns": 27,
+            "dialogue_turns": 12,
+            "meeting_turns": 6,
+            "assessment_updates": 6,
+            "fallback_count": 0,
+            "clue_citations": 16,
+            "distinct_clues": 5,
+            "spatial_hallucinations": 0,
+            "avg_other_refs_in_cot": 1.94,
+            "reasoning_novelty": 0.87,
+            "avg_reasoning_len": 175,
+            "avg_dialogue_len": 79,
+            "total_tokens": 130866
+          },
+          "sample_dialogues": [
+            {
+              "speakerId": "시민4",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "정보가 부족한 초기 상황에서 성급한 판단을 경계하며 상대방의 기준과 관점을 확인하는 질문",
+              "content": "시민5님, 아직 서로에 대해 아는 것이 거의 없는 상태인데 성급하게 움직이기보다는 주변 분위기를 차분히 살펴보는 게 좋겠습니다. 혹시 특별히 주목하고 계신 단서나 기준이 있으신가요?",
+              "reasoning": "1. 현재 상황: 1일차 낮의 자유 배회 시간이며 첫 대화 시작 단계이다. 2. 근거: 아직 뚜렷한 사건이나 증거가 부족하므로 성급한 단정이나 마녀사냥을 경계하는 신중한 감시자 성격에 따라 증거를 먼저 확인해야 한다. 3. 목표: 상대방에게 검증 가능한 기준이나 관점을 물어보며 안전하게 대화를 시작한다."
+            },
+            {
+              "speakerId": "시민4",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "상대의 제안에 대해 구체적이고 검증 가능한 기준을 요구함",
+              "content": "안개 주의보 속에서 다른 참가자들의 태도를 관찰하자고 하셨는데, 구체적으로 어떤 행동 변화를 기준으로 삼을 생각인지 검증 가능한 기준을 하나 말씀해 주시겠습니까?",
+              "reasoning": "1.상황: 시민5가 내일 아침 안개 주의보를 언급하며 참가자들의 태도를 관찰하자고 제안함. 2.근거: 신중한 감시자로서 성급한 추측이나 모호한 관찰 대신 명확한 증거와 기준을 요구해야 함. 3.목표: 상대방에게 구체적이고 검증 가능한 판단 기준을 제시하도록 압박하여 성급한 쏠림 현상을 방지함."
+            },
+            {
+              "speakerId": "시민4",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "상대가 제시한 관찰 지표의 사후 검증 가능성과 객관적 확인 방법에 대해 추가적인 근거를 요구함",
+              "content": "이동 경로 공유나 침묵 여부를 관찰 지표로 삼자고 하셨는데, 안개 속에서 각자 어떤 행동을 했는지 사후에 어떻게 객관적으로 검증할 수 있을지 명확한 확인 방법을 짚어주십시오.",
+              "reasoning": "1.상황: 시민5가 안개 속 이동 경로 공유와 침묵 여부를 관찰 지표로 제안한 상황이다. 2.근거: 신중한 회의론자로서 성급한 짐작이나 모호한 기준 대신 객관적으로 검증 가능한 확실한 증거주의를 고수해야 한다. 3.목표: 상대방의 제안에서 구체적으로 사후 검증이 가능한 명확한 확인 방법을 요구하여 실효성을 따져본다."
+            },
+            {
+              "speakerId": "시민4",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "이동 경로 대조 방식에 대한 객관적 검증 가능성 요구",
+              "content": "다음 회의 때 각자의 이동 경로를 직접 대조해보자고 하셨는데, 기억이나 주관적 진술 외에 서로의 동선을 객관적으로 교차검증할 수 있는 추가적인 근거가 있는지 확인하고 싶습니다.",
+              "reasoning": "1.상황: 시민5가 다음 회의에서 각자의 이동 경로와 상황을 직접 대조해 확인하자고 제안한 상태이다. 2.근거: 내 기억 속 1일차 낮 동선 기록에 따르면 목공방에서 시민1과 마주친 적이 있는 것처럼, 주관적 진술만으로는 객관적 검증이 부족할 수 있다. 3.목표: 신중한 회의론자로서 성급한 합의를 경계하고, 단순 진술 대조를 넘어 실질적으로 객관성을 담보할 수 있는 추가 검증 기준이 있는지 명확히 요구한다."
+            }
+          ]
+        }
+      ],
+      "rank": 3
+    },
+    {
+      "id": "gemini-gemini-3.5-flash-lite-logic_t02-시민5",
+      "name": "Gemini 3.5 Lite [Logic T=0.2] · 마키아벨리적 마피아 (Machiavellian Deceiver)",
+      "archetype_id": "charismatic_manipulator",
+      "archetype_name": "마키아벨리적 마피아",
+      "category": "Deception & Camouflage",
+      "vendor": "Google",
+      "model_raw": "gemini-3.5-flash-lite",
+      "setting_profile": "logic_t02",
+      "setting_label": "Logic T=0.2",
+      "persona_summary": "평범한 시민으로 철저히 위장하며 시민 간 갈등을 은밀히 부추기고 혐의를 전가하는 마피아",
+      "is_multi_trial": false,
+      "trials_count": 1,
+      "win_rate": {
+        "mafia_pct": 100.0,
+        "citizen_pct": 0.0
+      },
+      "score_mean": 82.3,
+      "score_median": 82.3,
+      "composite_score": 82.3,
+      "latency_mean": 6.12,
+      "latency_median": 6.12,
+      "token_usage": {
+        "avg_input": 4858,
+        "avg_output": 196,
+        "avg_total": 5054
+      },
+      "dimensions": {
+        "persona_fidelity": 75.6,
+        "social_deduction": 97.0,
+        "reasoning_depth": 78.7,
+        "intent_alignment": 81.2,
+        "memory_integrity": 94.0,
+        "token_economy": 56.0
+      },
+      "trials": [
+        {
+          "trial": 1,
+          "session_id": "sim_1795089467_logic_t02",
+          "seed": 20261256,
+          "winner": "MAFIA",
+          "days": 3,
+          "composite_score": 82.3,
+          "latency_sec": 6.12,
+          "stats": {
+            "total_turns": 35,
+            "dialogue_turns": 16,
+            "meeting_turns": 6,
+            "assessment_updates": 7,
+            "fallback_count": 0,
+            "clue_citations": 21,
+            "distinct_clues": 6,
+            "spatial_hallucinations": 0,
+            "avg_other_refs_in_cot": 1.77,
+            "reasoning_novelty": 0.83,
+            "avg_reasoning_len": 173,
+            "avg_dialogue_len": 83,
+            "total_tokens": 176895
+          },
+          "sample_dialogues": [
+            {
+              "speakerId": "시민5",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "시민4의 신중한 태도에 동조하면서 마을 뉴스에 나온 짙은 안개 주의보를 관찰 기준으로 제시하여 대화를 차분하게 이어간다.",
+              "content": "시민4님 말씀대로 성급하게 움직이기보다 주변 분위기를 차분히 살펴보는 것이 현명해 보입니다. 저는 내일 아침 짙은 안개 주의보 소식이 신경 쓰이는데, 이런 기상 상황 속에서 다른 참가자들이 어떤 태도를 취하는지 먼저 관찰해보는 건 어떨까요?",
+              "reasoning": "1.상황: 1일차 낮 자유 배회 시간이며 시민4가 성급한 행동을 자제하고 기준을 잡자고 제안한 직후이다. 2.근거: 마을 뉴스에 언급된 '내일 아침 짙은 안개 주의보'라는 구체적인 사실을 관찰 기준으로 활용한다. 3.목표: 협조적인 시민의 모습을 보이면서 자연스럽게 대화를 이어가고 4턴 이상의 대화 조건을 충족한다."
+            },
+            {
+              "speakerId": "시민5",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "시민4의 구체적인 관찰 기준 요구에 대해 이동 경로 공유와 침묵 여부라는 비교적 명확한 행동 지표를 제시하여 협조적인 태도를 보이면서도 대화를 생산적으로 유도함",
+              "content": "검증 가능한 기준이라면, 안개가 낀 상황에서 각자 이동 경로를 투명하게 공유하는지 혹은 평소와 다른 과도한 침묵을 보이는지를 관찰 지표로 삼아보면 어떨까 합니다.",
+              "reasoning": "1. 상황: 시민4가 내 제안에 대해 검증 가능한 행동 변화 기준을 요구하며 명확한 근거를 다시 질문했다. 2. 근거: 현재 1일차 자유 배회 상황에서 안개 주의보 뉴스가 언급되었고, 시민4가 구체적인 검증 기준을 요구한 점을 반영해야 한다. 3. 목표: 마피아로서 의심을 피하기 위해 협조적이고 합리적인 태도를 유지하면서, 안개 속 이동 양상과 침묵 여부라는 관찰 기준을 제시하여 대화를 자연스럽게 이어간다."
+            },
+            {
+              "speakerId": "시민5",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "검증 방법에 대한 구체적인 확인 절차 제시",
+              "content": "객관적 검증을 위해서는 다음 회의 때 각자의 이동 경로와 당시 상황을 직접 대조해보는 방식으로 확인하면 될 것입니다.",
+              "reasoning": "1.상황: 시민4가 안개 속 행동에 대한 사후 객관적 검증 방법의 명확화를 요구함. 2.근거: 공개된 안개 주의보 상황과 지금까지 오간 이동 경로 공유 제안을 바탕으로 함. 3.목표: 다음 회의에서의 상호 대조 방안을 제시하여 대화를 논리적으로 매듭짓고 신뢰를 얻음."
+            },
+            {
+              "speakerId": "시민5",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "시민4의 객관적 검증 기준 요구에 대해 구체적인 동선 대조 방법과 모순 확인 방안을 제시하며 대화를 마무리함.",
+              "content": "객관적 교차검증을 위해 각자 기억하는 동선과 주변 상황을 있는 그대로 맞춰보고, 만약 모순점이 발견된다면 그때 다시 따져보는 것이 가장 확실한 방법이 될 것입니다.",
+              "reasoning": "1.상황: 시민4가 동선 교차검증을 위한 추가적인 객관적 근거를 명확히 해달라고 요구하고 있음. 2.근거: 현재 8번째 턴이자 마지막 대화 단계이며, 추가적인 물리적 증거가 없는 상태에서 기억 대조와 모순 확인이 최선의 실질적 기준임. 3.목표: 더 이상의 소모적인 반복을 피하고 자연스럽게 대화를 마무리하면서 협조적인 시민의 인상을 유지함."
+            }
+          ]
+        }
+      ],
+      "rank": 4
+    },
+    {
+      "id": "gemini-gemini-3.5-flash-lite-std_t07-시민5",
+      "name": "Gemini 3.5 Lite [Std T=0.7] · 마키아벨리적 마피아 (Machiavellian Deceiver)",
+      "archetype_id": "charismatic_manipulator",
+      "archetype_name": "마키아벨리적 마피아",
+      "category": "Deception & Camouflage",
+      "vendor": "Google",
+      "model_raw": "gemini-3.5-flash-lite",
+      "setting_profile": "std_t07",
+      "setting_label": "Std T=0.7",
+      "persona_summary": "평범한 시민으로 철저히 위장하며 시민 간 갈등을 은밀히 부추기고 혐의를 전가하는 마피아",
+      "is_multi_trial": false,
+      "trials_count": 1,
+      "win_rate": {
+        "mafia_pct": 100.0,
+        "citizen_pct": 0.0
+      },
+      "score_mean": 78.9,
+      "score_median": 78.9,
+      "composite_score": 78.9,
+      "latency_mean": 8.72,
+      "latency_median": 8.72,
+      "token_usage": {
+        "avg_input": 4316,
+        "avg_output": 185,
+        "avg_total": 4501
+      },
+      "dimensions": {
+        "persona_fidelity": 72.7,
+        "social_deduction": 89.0,
+        "reasoning_depth": 73.2,
+        "intent_alignment": 81.5,
+        "memory_integrity": 89.7,
+        "token_economy": 62.6
+      },
+      "trials": [
+        {
+          "trial": 1,
+          "session_id": "sim_1795088783_std_t07",
+          "seed": 20261119,
+          "winner": "MAFIA",
+          "days": 3,
+          "composite_score": 78.9,
+          "latency_sec": 8.72,
+          "stats": {
+            "total_turns": 33,
+            "dialogue_turns": 14,
+            "meeting_turns": 6,
+            "assessment_updates": 7,
+            "fallback_count": 0,
+            "clue_citations": 19,
+            "distinct_clues": 9,
+            "spatial_hallucinations": 0,
+            "avg_other_refs_in_cot": 1.15,
+            "reasoning_novelty": 0.85,
+            "avg_reasoning_len": 160,
+            "avg_dialogue_len": 75,
+            "total_tokens": 148559
+          },
+          "sample_dialogues": [
+            {
+              "speakerId": "시민5",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "정보 수집 및 상대방의 관심사 파악",
+              "content": "시민1 님, 안녕하세요. 아직 다들 서로에 대해 아는 게 별로 없는 상태인데, 혹시 주변 움직임이나 분위기를 보면서 특별히 먼저 살펴봐야겠다고 생각하신 부분이 있으신가요?",
+              "reasoning": "1.상황: 1일차 낮의 자유 배회 시간에 시민1과 처음 마주쳐 대화를 시작하는 첫 번째 턴이다. 2.근거: 아직 구체적인 사건이나 투표가 진행되지 않아 정보가 부족한 상태이다. 3.목표: 친근하고 협조적인 태도로 위장하면서 상대방이 어떤 부분에 주목하고 있는지 가볍게 떠보아 향후 대화의 실마리를 잡는다."
+            },
+            {
+              "speakerId": "시민5",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "시민1의 동선 검증 제안에 공감하며 구체적인 기준이나 시간대를 확인하여 대화를 한 단계 진전시키기",
+              "content": "동선을 객관적으로 검증하는 것부터 시작하겠다는 말씀에 동의합니다. 혹시 그 검증을 위해 특별히 먼저 확인해보고 싶으신 시간대나 기준이 있으신가요?",
+              "reasoning": "1.상황: 시민1이 동선 교차 검증을 우선 과제로 언급함. 2.근거: 시민1의 직전 발언인 동선 검증 언급을 인용함. 3.목표: 협조적인 태도를 보이면서 시민1에게 구체적인 검증 기준을 물어 대화를 자연스럽게 이어감."
+            },
+            {
+              "speakerId": "시민5",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "나의 과수원 동선을 공유하면서 상대의 목공방 기준에 맞장구치고 추가 논의를 유도",
+              "content": "목공방에 머무셨다는 기준을 말씀해 주셨군요. 저는 오늘 낮에 과수원에 머물렀는데, 이 동선 기록이 서로 어떤 의미를 가지는지 조금 더 지켜보며 기준을 맞춰가면 좋겠습니다.",
+              "reasoning": "1. 상황: 시민1이 자신의 목공방 동선을 기준으로 제시하며 내 기준 시각을 물었다. 2. 근거: 내 기억에 따르면 나는 오늘 낮에 과수원에 머물렀고, 시민1은 목공방에 있었다. 3. 목표: 협조적인 태도를 보이면서 내 동선을 자연스럽게 공개하고, 상대의 검증 기준에 맞춰 대화를 부드럽게 이어간다."
+            },
+            {
+              "speakerId": "시민5",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "시민1의 동선 기준점 제안에 동의하며 다음 검증 방향에 대해 질문함",
+              "content": "첫 번째 기준점이 될 것이라는 말씀에 공감합니다. 그렇다면 서로 공유된 동선 기록 외에도 앞으로 추가될 진술의 일관성을 검증하기 위해 어떤 점을 주의 깊게 봐야 할까요?",
+              "reasoning": "1.상황: 시민1이 과수원과 목공방이라는 각자의 동선 기록을 첫 번째 검증 기준점으로 삼겠다고 발언함. 2.근거: 두 사람의 초기 동선 정보가 공개되었으며, 이를 바탕으로 다음 진술 일관성 검증으로 대화를 전개해야 함. 3.목표: 협조적인 태도를 유지하면서 자연스럽게 다음 검증 기준에 대한 의견을 물어 대화를 이어가되, 의심을 피하고 차분한 시민처럼 보이도록 함."
+            }
+          ]
+        }
+      ],
+      "rank": 5
+    },
+    {
+      "id": "gemini-gemini-3.1-flash-lite-preview-default-시민5",
+      "name": "Gemini 3.1 Lite · 마키아벨리적 마피아 (Machiavellian Deceiver)",
+      "archetype_id": "charismatic_manipulator",
+      "archetype_name": "마키아벨리적 마피아",
+      "category": "Deception & Camouflage",
+      "vendor": "Google",
+      "model_raw": "gemini-3.1-flash-lite-preview",
+      "setting_profile": "default",
+      "setting_label": "default",
+      "persona_summary": "평범한 시민으로 철저히 위장하며 시민 간 갈등을 은밀히 부추기고 혐의를 전가하는 마피아",
+      "is_multi_trial": true,
+      "trials_count": 3,
+      "win_rate": {
+        "mafia_pct": 66.7,
+        "citizen_pct": 0.0
+      },
+      "score_mean": 78.6,
+      "score_median": 81.1,
+      "composite_score": 78.6,
+      "latency_mean": 6.19,
+      "latency_median": 5.95,
+      "token_usage": {
+        "avg_input": 4133,
+        "avg_output": 187,
+        "avg_total": 4320
+      },
+      "dimensions": {
+        "persona_fidelity": 75.7,
+        "social_deduction": 83.0,
+        "reasoning_depth": 74.6,
+        "intent_alignment": 83.1,
+        "memory_integrity": 88.2,
+        "token_economy": 64.8
+      },
+      "trials": [
+        {
+          "trial": 1,
+          "session_id": "sim_1795055926",
+          "seed": 1795055926,
+          "winner": "MAFIA",
+          "days": 2,
+          "composite_score": 83.3,
+          "latency_sec": 5.95,
+          "stats": {
+            "total_turns": 20,
+            "dialogue_turns": 8,
+            "meeting_turns": 4,
+            "assessment_updates": 4,
+            "fallback_count": 0,
+            "clue_citations": 8,
+            "distinct_clues": 8,
+            "spatial_hallucinations": 0,
+            "avg_other_refs_in_cot": 2.0,
+            "reasoning_novelty": 0.91,
+            "avg_reasoning_len": 154,
+            "avg_dialogue_len": 130,
+            "total_tokens": 87625
+          },
+          "sample_dialogues": [
+            {
+              "speakerId": "시민5",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "상대방의 의견을 수용하는 척하며 관찰의 주도권을 자신이 쥐고, 의심의 화살을 다른 곳으로 돌리기 위한 정보 탐색",
+              "content": "반갑습니다. 저도 같은 고민인데, 우선은 사람들이 오늘 아침 광장에서 서로 소개할 때 보여준 태도나 발언들을 차근차근 되짚어보는 게 어떨까 합니다. 혹시 특별히 눈에 띄게 평소와 다르거나 앞뒤가 맞지 않는 행동을 보인 분이 계셨나요?",
+              "reasoning": "1. 상황: 시민4가 정보가 부족한 상황에서 무엇을 확인해야 할지 질문함. 2. 근거: 시민4가 신중한 태도를 보이고 있으므로, 나 또한 협조적인 시민인 척하며 동조하고 그 신중함을 정보 탐색으로 유도함. 3. 목표: 신뢰를 얻어 마피아라는 의심을 피하고, 상대방이 다른 사람을 의심하게 유도하여 시민 간의 갈등을 은밀히 부추김."
+            },
+            {
+              "speakerId": "시민5",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "협력 제안",
+              "content": "말씀하신 교차 검증은 좋은 방법이네요. 저는 오늘 아침 자기소개 때 소박한 국물 요리를 즐긴다고 했던 점이나 실타래를 엮는 취미를 언급했는데, 혹시 이런 소소한 사생활 정보가 실제 게임 상황에서 드러나는 평소 습관과 일치하는지 저부터 먼저 관찰해보시는 건 어떨까요?",
+              "reasoning": "1. 상대의 교차 검증 제안에 동의하며 대화를 이어감 2. 게임 설정으로 주어진 내 정보를 먼저 제시하여 신뢰를 얻고 감시의 화살을 나에게 우호적인 상황으로 유도 3. 나를 투명하게 공개하는 척하며 의심을 피하고 협력적인 시민 이미지를 구축함"
+            },
+            {
+              "speakerId": "시민5",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "협력적 태도를 보이며 정보를 공유하고, 화살을 다른 사람에게 돌리기 위해 질문을 던짐.",
+              "content": "좋습니다. 저는 오늘 햇살 카페에서 시간을 보냈는데, 그곳에서 실타래를 챙겨온 것처럼 정교한 작업을 하지는 않았지만 대신 차분히 분위기를 살피는 데 집중했습니다. 시민4님께서는 오늘 광장 주변이나 다른 장소에서 누군가 아침 소개와는 달리 부자연스러운 행동을 하는 것을 목격하신 적이 있으신가요?",
+              "reasoning": "1. 상황: 1일차 낮, 시민4와 교차 검증을 약속한 상황. 2. 근거: 카페에 있었다는 사실을 공유하고 상대의 관찰 내용을 물어보며 신뢰를 쌓으려 함. 3. 목표: 협력적인 시민으로 보여 마피아 의심을 피하고, 다른 사람에 대한 정보를 수집하여 나중에 정당하게 의심의 화살을 돌릴 기회를 확보함."
+            },
+            {
+              "speakerId": "시민5",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "의심의 대상을 시민2로 교묘하게 유도하며 상대방의 정보를 캐내어 동조를 이끌어냄",
+              "content": "구체적인 특징이라... 사실 시민2님이 연못 정원에서 보였다고 하셨는데, 제가 카페에 있을 때 느꼈던 시민3님의 조용한 태도와 비교하면 다소 분주해 보였다는 인상을 받았습니다. 물론 이것만으로 단정할 순 없지만, 시민4님께서 시민2님과 연못 정원에서 보셨을 때 그분의 동선이나 태도가 혹시 기억에 남을 만큼 특이한 점은 없었나요?",
+              "reasoning": "1.상황: 시민4가 구체적인 관찰을 요구하자, 의심을 피하기 위해 타인(시민2)을 언급하며 주의를 돌림. 2.근거: 카페에서 함께 있었던 시민3을 언급하여 자신의 알리바이를 강화하고, 시민4가 목격한 시민2에 대해 반문하여 논의의 화살을 돌림. 3.목표: 자신에게 향하는 추상적 의심을 다른 NPC와의 연관성 분석으로 바꾸고, 상대의 생각을 확인하여 이후 투표 전략의 우위를 점함."
+            }
+          ]
+        },
+        {
+          "trial": 2,
+          "session_id": "sim_1795062550",
+          "seed": 1795062550,
+          "winner": "MAFIA",
+          "days": 2,
+          "composite_score": 81.1,
+          "latency_sec": 6.77,
+          "stats": {
+            "total_turns": 19,
+            "dialogue_turns": 7,
+            "meeting_turns": 4,
+            "assessment_updates": 4,
+            "fallback_count": 0,
+            "clue_citations": 9,
+            "distinct_clues": 7,
+            "spatial_hallucinations": 0,
+            "avg_other_refs_in_cot": 1.64,
+            "reasoning_novelty": 0.92,
+            "avg_reasoning_len": 144,
+            "avg_dialogue_len": 104,
+            "total_tokens": 79718
+          },
+          "sample_dialogues": [
+            {
+              "speakerId": "시민5",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "상대방의 경계심을 살피고 화제를 던져 자연스럽게 정보를 공유하도록 유도함",
+              "content": "안녕하세요. 아직 첫날이라 서로에 대해 아는 게 거의 없네요. 마을 분위기를 살피는 중인데, 혹시 오늘 광장에서 누군가 유독 긴장해 보이거나 눈에 띄는 행동을 하는 것을 관찰하셨나요?",
+              "reasoning": "1. 상황: 낮의 자유 배회 시간이며 처음 만난 참가자와 대화를 시작함. 2. 근거: 아직 구체적인 사건이 발생하지 않은 시점임을 인지함. 3. 목표: 협조적인 태도를 유지하며 상대의 관찰 내용을 확인해 나의 위장 기반을 마련함."
+            },
+            {
+              "speakerId": "시민5",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "방어 및 상대의 논리적 근거 역추궁",
+              "content": "전략적인 취미와 평화주의적 언행이 반드시 모순된다고 보기는 어렵지 않을까요. 오히려 체스를 두는 사람이라면 긴박한 상황에서 더 신중할 텐데, 혹시 그분의 발언이나 행동에서 구체적으로 어떤 모순을 발견하셨나요?",
+              "reasoning": "1. 상황: 시민1이 특정인의 체스 취미와 평화주의적 태도를 의심하며 모순을 제기함. 2. 근거: 시민1은 논리적 분석을 중시하므로 그가 가진 구체적인 관측 자료가 있는지 역으로 질문하여 그를 몰아붙임. 3. 목표: 의심의 화살을 시민1의 주관적 추측으로 돌리고 마피아인 나에 대한 관심을 분산함."
+            },
+            {
+              "speakerId": "시민5",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "협력 제안 및 상대의 행동을 감시하는 척하며 내 의심을 회피",
+              "content": "말씀하신 대로 대화의 일관성을 확인하는 건 좋은 접근이네요. 그가 주장하는 화합과 실제 대화 내용이 다른지 제가 곁에서 관찰해 볼 테니, 시민1님은 혹시 그가 특정인에게만 정보를 유도하는지 분석해 주시겠어요?",
+              "reasoning": "1.상황: 시민1이 체스 취미를 가진 특정 인물의 말과 행동의 불일치를 관찰하자고 제안한 상황. 2.근거: 시민1은 논리적 모순을 중요시하는 성격이므로, 그가 원하는 '분석 작업'을 함께하자는 제안을 수락하여 신뢰를 얻어야 함. 3.목표: 시민1과 협력하는 척하며 내 마피아 정체를 숨기고, 오히려 시민1의 관심을 다른 곳으로 분산시키며 시간을 벌기 위함."
+            },
+            {
+              "speakerId": "시민5",
+              "day": 2,
+              "phase": "Meeting",
+              "intent": "의심 분산 및 시민4의 방어적 태도 부각",
+              "content": "시민4님, 신중함은 좋지만 시민2님의 관찰을 단순히 비약이라 치부하면 실마리를 놓칠 수도 있습니다.",
+              "reasoning": "1. 시민2가 제기한 의심에 시민4가 제동을 걸고 있음. 2. 마피아로서 나는 시민들 사이의 갈등을 유도해야 함. 3. 시민4를 의심스럽게 몰아가며 내 입지를 확보함."
+            }
+          ]
+        },
+        {
+          "trial": 3,
+          "session_id": "sim_1795062932",
+          "seed": 1795062651,
+          "winner": "CITIZEN",
+          "days": 2,
+          "composite_score": 71.3,
+          "latency_sec": 5.86,
+          "stats": {
+            "total_turns": 18,
+            "dialogue_turns": 7,
+            "meeting_turns": 4,
+            "assessment_updates": 4,
+            "fallback_count": 0,
+            "clue_citations": 9,
+            "distinct_clues": 8,
+            "spatial_hallucinations": 0,
+            "avg_other_refs_in_cot": 1.82,
+            "reasoning_novelty": 0.91,
+            "avg_reasoning_len": 138,
+            "avg_dialogue_len": 105,
+            "total_tokens": 78955
+          },
+          "sample_dialogues": [
+            {
+              "speakerId": "시민5",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "상대방의 정보 수집 범위와 의도를 파악하고, 대화의 주도권을 가져오기 위함",
+              "content": "안개 소식은 저도 들었습니다. 짙은 안개 때문에 다들 동선이 꼬일 것 같은데, 시민1님은 혹시 오늘 오전 중에 다른 분들이 주로 어디에 머물렀는지 파악해둔 정보가 있으신가요?",
+              "reasoning": "1. 상대방이 정보 분석가 성향임을 파악하고 협조적인 태도를 보임. 2. 마을 뉴스인 '북쪽 숲 안개'를 언급하여 자연스럽게 대화를 이어감. 3. 상대의 정보망을 파악하여 추후 내가 용의자로 몰리지 않도록 정보를 탐색함."
+            },
+            {
+              "speakerId": "시민5",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "협력 제안 및 시민2와 시민4를 비교 분석하도록 유도",
+              "content": "저도 오전에는 목공방에만 머물러서 다른 분들의 움직임을 직접 보진 못했습니다. 시민2님과 시민4님이 함께 계셨다면, 그분들이 나중에 서로의 알리바이를 어떻게 주장하는지 비교해보는 게 초기 정보를 모으는 데 도움이 되지 않을까요?",
+              "reasoning": "1. 상황: 시민1이 시민2와 시민4의 동선을 확인했음을 인지. 2. 근거: 나는 목공방에 혼자 있었다는 사실을 공유하고, 상대에게 타인들을 비교 분석하게 하여 마피아인 나로부터 시선을 돌림. 3. 목표: 시민1을 분석가적인 역할로 유도하여 서로를 감시하게 만들고 나의 존재감을 낮춤."
+            },
+            {
+              "speakerId": "시민5",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "질문",
+              "content": "저는 오전 내내 목공방에만 있었기에 다른 분은 전혀 마주치지 못했습니다. 시민1님께서는 시민2님과 시민4님이 캠프장에서 함께 계셨다고 하셨는데, 두 분이 계속 같이 머물렀던 건지 아니면 중간에 따로 행동한 적이 있는지 확인해 보시는 건 어떨까요?",
+              "reasoning": "1. 시민1이 나의 알리바이를 구체적으로 검증하려 함. 2. 나는 오전 내내 목공방에 혼자 있었다는 사실을 고수하며 의심을 피해야 함. 3. 시민1의 관심을 시민2와 시민4의 관계 확인으로 돌려 그들 사이의 모순을 유도하려 함."
+            },
+            {
+              "speakerId": "시민5",
+              "day": 2,
+              "phase": "Meeting",
+              "intent": "협력 제안",
+              "content": "시민3님과 시민4님의 제안대로 공통 질문으로 검증하는 게 가장 합리적이겠네요. 시민1님은 동의하시나요?",
+              "reasoning": "1.현재 상황은 위치 증명을 둘러싼 논쟁으로 소모적임 2.시민3과 시민4의 제안은 논란을 덮고 효율적인 검증으로 흐름을 돌리기 적합 3.협조적인 시민으로 보여 신뢰를 쌓고 토론 방향을 주도함"
+            }
+          ]
+        }
+      ],
+      "rank": 6
+    },
+    {
+      "id": "ollamalocal-qwen2.5:7b-logic_t02-시민4",
+      "name": "Ollama (qwen2.5:7b) [Logic T=0.2] · 신중한 회의론자 (Cautious Consensus)",
+      "archetype_id": "cautious_consensus",
+      "archetype_name": "신중한 회의론자",
+      "category": "Consensus & Burden-of-Proof",
+      "vendor": "Local/Ollama",
+      "model_raw": "qwen2.5:7b",
+      "setting_profile": "logic_t02",
+      "setting_label": "Logic T=0.2",
+      "persona_summary": "성급한 마녀사냥을 경계하며 엄격한 증거주의를 고수하고 다수의 쏠림에 반증을 요구하는 감시자",
+      "is_multi_trial": false,
+      "trials_count": 1,
+      "win_rate": {
+        "mafia_pct": 0.0,
+        "citizen_pct": 100.0
+      },
+      "score_mean": 76.2,
+      "score_median": 76.2,
+      "composite_score": 76.2,
+      "latency_mean": 21.73,
+      "latency_median": 21.73,
+      "token_usage": {
+        "avg_input": 4381,
+        "avg_output": 182,
+        "avg_total": 4563
+      },
+      "dimensions": {
+        "persona_fidelity": 85.2,
+        "social_deduction": 100.0,
+        "reasoning_depth": 68.3,
+        "intent_alignment": 67.8,
+        "memory_integrity": 41.3,
+        "token_economy": 61.8
+      },
+      "trials": [
+        {
+          "trial": 1,
+          "session_id": "sim_1795069302_logic_t02",
+          "seed": 20261256,
+          "winner": "CITIZEN",
+          "days": 2,
+          "composite_score": 76.2,
+          "latency_sec": 21.73,
+          "stats": {
+            "total_turns": 18,
+            "dialogue_turns": 8,
+            "meeting_turns": 4,
+            "assessment_updates": 4,
+            "fallback_count": 0,
+            "clue_citations": 12,
+            "distinct_clues": 5,
+            "spatial_hallucinations": 6,
+            "avg_other_refs_in_cot": 1.33,
+            "reasoning_novelty": 0.77,
+            "avg_reasoning_len": 129,
+            "avg_dialogue_len": 78,
+            "total_tokens": 82159
+          },
+          "sample_dialogues": [
+            {
+              "speakerId": "시민4",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "알리바이 비교와 개인적 관심을 표현하며 상대방의 행동 패턴을 살펴보려 함",
+              "content": "처음 뵙겠습니다. 오늘은 서로 좀 더 알아보는 시간이 좋을 것 같아요. 지금까지 다른 시민들과의 대화를 통해 어떤 활동을 즐기시는지 궁금합니다.",
+              "reasoning": "1. 상황: 서로 처음 만난 상황에서 서로에 대해 더 알아보는 것이 필요하다. 2. 근거: 상대방이 처음으로 마을에 온 마피아임을 알지만, 그의 행동 패턴을 확인하기 위해 대화를 나누어야 한다. 3. 목표: 상대방의 활동 패턴을 확인하여 알리바이를 비교하고, 상대방의 행동을 관찰하여 의심의 여지가 있는 행동을 찾아내려 한다."
+            },
+            {
+              "speakerId": "시민4",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "알리바이를 비교하고, 상대방의 활동 패턴을 관찰하여 의심의 여지가 있는 행동을 찾아내려고 한다.",
+              "content": "그런 취미가 있군요. 저는 주로 목공을 하면서 시간을 보내는데, 때로는 그림도 그리곤 합니다. 오늘은 서로 좀 더 가까워질 수 있는 시간이 될 것 같아요.",
+              "reasoning": "1. 상황: 시민5는 주로 책을 읽는 것을 좋아한다고 말했다. 2. 근거: 시민4는 주로 목공과 그림을 하며 시간을 보내는 것을 언급했다. 3. 목표: 상대방의 활동 패턴을 비교하여 모순이나 의심의 여지가 있는 행동을 찾아내려 한다."
+            },
+            {
+              "speakerId": "시민4",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "알리바이 확인과 정보 수집을 위해 책 읽는 취미에 대해 더 자세히 알아보기",
+              "content": "그런 취미가 있군요. 하지만 저는 최근에 마을 뉴스에서 새로운 주민이 책을 읽는 것을 좋아한다고 들었습니다. 혹시 그 책에 대해 이야기 나누는 시간을 즐기시나요?",
+              "reasoning": "1. 상황: 시민5가 책을 읽는 취미를 공유하고 있습니다. 2. 근거: 마을 뉴스에서 시민5가 책을 읽는 것을 좋아한다고 들었습니다. 3. 목표: 책 읽는 취미에 대해 더 자세히 알아보기 위해 이야기 나누는 시간을 확인하고, 이를 통해 알리바이를 확인하거나 정보를 수집할 수 있습니다."
+            },
+            {
+              "speakerId": "시민4",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "새로운 주민이 책을 읽는 것을 좋아한다고 들었으므로, 그에 대한 확인을 요청합니다.",
+              "content": "네, 최근에 읽은 책에 대해 이야기 나누는 시간이 편안해 보이네요. 하지만 마을 뉴스에서 들었는데, 새로운 주민이 책을 읽는 것을 좋아한다고 하더라고요. 혹시 그 책에 대해 이야기 나누는 시간을 즐기시나요?",
+              "reasoning": "1. 상황: 마을 뉴스에서 새로운 주민이 책을 읽는 것을 좋아한다고 들었다. 2. 근거: 마을 뉴스에서의 정보. 3. 목표: 시민5가 책을 읽는 것을 좋아하는지 확인하여, 그에 대한 정보를 얻는다."
+            }
+          ]
+        }
+      ],
+      "rank": 7
+    },
+    {
+      "id": "gemini-gemini-3.5-flash-lite-logic_t02-시민1",
+      "name": "Gemini 3.5 Lite [Logic T=0.2] · 절차적 분석가 (Protocol Detective)",
+      "archetype_id": "analytical_detective",
+      "archetype_name": "절차적 분석가",
+      "category": "Reasoning & Fact-Checking",
+      "vendor": "Google",
+      "model_raw": "gemini-3.5-flash-lite",
+      "setting_profile": "logic_t02",
+      "setting_label": "Logic T=0.2",
+      "persona_summary": "사실과 시간대별 행동 모순을 3단계 사실 기반 CoT로 교차 검증하는 분석가",
+      "is_multi_trial": false,
+      "trials_count": 1,
+      "win_rate": {
+        "mafia_pct": 0.0,
+        "citizen_pct": 0.0
+      },
+      "score_mean": 76.0,
+      "score_median": 76.0,
+      "composite_score": 76.0,
+      "latency_mean": 6.12,
+      "latency_median": 6.12,
+      "token_usage": {
+        "avg_input": 3092,
+        "avg_output": 199,
+        "avg_total": 3291
+      },
+      "dimensions": {
+        "persona_fidelity": 94.7,
+        "social_deduction": 55.1,
+        "reasoning_depth": 80.6,
+        "intent_alignment": 81.8,
+        "memory_integrity": 72.2,
+        "token_economy": 77.1
+      },
+      "trials": [
+        {
+          "trial": 1,
+          "session_id": "sim_1795089467_logic_t02",
+          "seed": 20261256,
+          "winner": "MAFIA",
+          "days": 3,
+          "composite_score": 76.0,
+          "latency_sec": 6.12,
+          "stats": {
+            "total_turns": 8,
+            "dialogue_turns": 3,
+            "meeting_turns": 2,
+            "assessment_updates": 2,
+            "fallback_count": 0,
+            "clue_citations": 5,
+            "distinct_clues": 3,
+            "spatial_hallucinations": 0,
+            "avg_other_refs_in_cot": 3.0,
+            "reasoning_novelty": 0.82,
+            "avg_reasoning_len": 162,
+            "avg_dialogue_len": 69,
+            "total_tokens": 26334
+          },
+          "sample_dialogues": [
+            {
+              "speakerId": "시민1",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "동선 및 생존자 현황 파악 제안",
+              "content": "시민3 님, 의견 조율을 위한 공통 분모를 찾기 전에 현재 생존해 있는 5명의 인원과 각자의 초기 동선부터 객관적으로 확인하는 것이 순서 같습니다.",
+              "reasoning": "1.관측된 사실 확인: 현재 생존자는 시민1, 시민2, 시민3, 시민4, 시민5 총 5명이며 나는 목공방에 있었다. 2.진술 간 불일치 탐지: 시민3이 공통 분모를 찾자고 제안했으나 구체적인 사실 관계가 먼저 정리되지 않았다. 3.논리적 혐의 제기: 감정적 합의보다 명확한 팩트 체크가 선행되어야 하므로 생존자와 동선 확인을 요구한다."
+            },
+            {
+              "speakerId": "시민1",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "관측된 사실 확인 및 동선 교차 검증",
+              "content": "시민3 님은 연못 정원에 머물렀다고 하셨고, 저는 1일차 낮 동선으로 목공방에 머물렀으며 그곳에서 시민4를 목격했습니다.",
+              "reasoning": "1. 관측된 사실 확인: 시민3은 연못 정원 동선을 밝혔고 나는 목공방에서 시민4를 목격한 기억이 있다. 2. 진술 간 불일치 탐지: 아직 상대방들의 진술 사이에서 직접적인 모순은 발견되지 않았다. 3. 논리적 혐의 제기: 각자의 초기 동선을 객관적으로 교차 검증하여 이후의 논리적 모순을 추적할 수 있도록 사실관계를 명확히 밝힌다."
+            },
+            {
+              "speakerId": "시민1",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "남은 생존자들의 동선 검증 및 모순 탐지 제안",
+              "content": "시민3 님이 수집한 연못 정원 동선과 제가 목공방에서 시민4를 목격한 사실을 확인했습니다. 이제 남은 생존자들의 동선과 진술에서 시간대별 불일치가 있는지 검증하는 단계로 넘어가야 합니다.",
+              "reasoning": "1. 관측된 사실 확인: 시민3은 연못 정원, 본인은 목공방에서 시민4를 목격한 사실이 공유됨. 2. 진술 간 불일치 탐지: 아직 3명의 동선과 진술이 검증되지 않아 불일치를 확인할 단계임. 3. 논리적 혐의 제기: 남은 생존자들의 동선을 마저 확보하여 시간대별 모순을 검증하자고 제안함."
+            },
+            {
+              "speakerId": "시민1",
+              "day": 2,
+              "phase": "Meeting",
+              "intent": "다른 참가자들의 동선 비교 및 검증 요구",
+              "content": "시민3 님은 연못 정원, 저는 목공방에서 시민4를 확인했으니 시민2와 시민5의 동선도 검증합시다.",
+              "reasoning": "1.관측된 사실 확인: 시민3은 연못 정원, 나는 목공방에서 시민4를 목격함. 2.진술 간 불일치 탐지: 시민2와 시민5의 동선이 아직 확인되지 않음. 3.논리적 혐의 제기: 시민2와 시민5의 진술과 동선을 시민3과 나의 기록에 대조하여 검증해야 함."
+            }
+          ]
+        }
+      ],
+      "rank": 8
+    },
+    {
+      "id": "gemini-gemini-3.1-flash-lite-preview-default-시민4",
+      "name": "Gemini 3.1 Lite · 신중한 회의론자 (Cautious Consensus)",
+      "archetype_id": "cautious_consensus",
+      "archetype_name": "신중한 회의론자",
+      "category": "Consensus & Burden-of-Proof",
+      "vendor": "Google",
+      "model_raw": "gemini-3.1-flash-lite-preview",
+      "setting_profile": "default",
+      "setting_label": "default",
+      "persona_summary": "성급한 마녀사냥을 경계하며 엄격한 증거주의를 고수하고 다수의 쏠림에 반증을 요구하는 감시자",
+      "is_multi_trial": true,
+      "trials_count": 3,
+      "win_rate": {
+        "mafia_pct": 0.0,
+        "citizen_pct": 33.3
+      },
+      "score_mean": 75.3,
+      "score_median": 70.8,
+      "composite_score": 75.3,
+      "latency_mean": 6.19,
+      "latency_median": 5.95,
+      "token_usage": {
+        "avg_input": 3920,
+        "avg_output": 219,
+        "avg_total": 4139
+      },
+      "dimensions": {
+        "persona_fidelity": 88.4,
+        "social_deduction": 69.3,
+        "reasoning_depth": 68.6,
+        "intent_alignment": 85.1,
+        "memory_integrity": 71.5,
+        "token_economy": 66.9
+      },
+      "trials": [
+        {
+          "trial": 1,
+          "session_id": "sim_1795055926",
+          "seed": 1795055926,
+          "winner": "MAFIA",
+          "days": 2,
+          "composite_score": 70.8,
+          "latency_sec": 5.95,
+          "stats": {
+            "total_turns": 14,
+            "dialogue_turns": 8,
+            "meeting_turns": 2,
+            "assessment_updates": 3,
+            "fallback_count": 0,
+            "clue_citations": 8,
+            "distinct_clues": 7,
+            "spatial_hallucinations": 0,
+            "avg_other_refs_in_cot": 1.1,
+            "reasoning_novelty": 0.9,
+            "avg_reasoning_len": 150,
+            "avg_dialogue_len": 130,
+            "total_tokens": 60105
+          },
+          "sample_dialogues": [
+            {
+              "speakerId": "시민4",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "협력 제안",
+              "content": "안녕하세요. 아직 다들 조심스러운 분위기인데, 서로 정보가 부족한 지금 단계에서는 어떤 부분을 가장 먼저 확인해보는 게 좋다고 생각하시나요?",
+              "reasoning": "1.상황: 게임 시작 직후 탐색 단계. 2.근거: 게임 내 확실한 정보가 부족하고 신중한 접근이 필요한 시점. 3.목표: 상대방의 논리적 사고방식을 파악하고 경계심을 유지하며 소통의 물꼬를 트는 것."
+            },
+            {
+              "speakerId": "시민4",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "상대방의 의견에 동의하면서도, 더 구체적이고 검증 가능한 행동 지표를 제시하여 신중한 관찰을 유도함.",
+              "content": "광장에서의 태도를 살펴보자는 의견은 동의합니다만, 그건 누구나 할 수 있는 이야기인 것 같습니다. 아침에 자기소개를 할 때 언급했던 개인적인 취향이나 습관 같은 사소한 단서들이 실제로 각자의 행동과 일치하는지부터 하나씩 교차 검증해보는 건 어떨까요?",
+              "reasoning": "1. 상황: 시민5가 광장에서의 태도를 관찰하자고 제안함. 2. 근거: 나는 신중한 회의론자로서 막연한 인상보다는 시스템이 제공한 개인 단서(음식, 취미)를 통한 검증을 선호함. 3. 목표: 뜬구름 잡는 대화에서 벗어나 실질적인 모순을 찾아낼 수 있는 구체적인 검증 방식을 제안하여 상대의 반응을 살핌."
+            },
+            {
+              "speakerId": "시민4",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "구체적인 검증 방법 제시 및 상대방의 태도 확인",
+              "content": "스스로 관찰을 제안하신 점은 인상적입니다. 그럼 오늘 아침 자기소개에서 언급하신 '실타래를 엮는 작업'이 마을 생활 중 실제 활동으로 나타나는지 살펴보고, 나중에 서로 교차 검증을 위해 각자의 동선을 공유해보는 방식으로 진행해볼까요?",
+              "reasoning": "1. 상황: 상대가 먼저 자신의 신상 단서에 대한 검증을 제안함. 2. 근거: 신중한 회의론자로서 성급한 추측보다는 실질적이고 검증 가능한 활동(취미, 동선)을 우선순위로 두는 태도를 보임. 3. 목표: 상대의 제안을 수용하되, 구체적인 검증 방식을 정하여 상대의 일관성을 관찰하고자 함."
+            },
+            {
+              "speakerId": "시민4",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "상대의 알리바이를 재확인하고, 구체적인 관찰 내용을 요구하여 마피아일 가능성을 타진함.",
+              "content": "카페에 계셨군요. 저는 연못 정원에 머물렀는데, 거기서 시민2님을 마주친 것 외에는 아직 특별히 부자연스러운 행동을 포착하지 못했습니다. 다만 시민5님이 말씀하신 '분위기를 살피는 데 집중했다'는 표현이 조금 추상적인데, 구체적으로 어떤 인물이 눈에 띄었는지, 혹은 주의 깊게 보신 특징이 있으신가요?",
+              "reasoning": "1. 상황: 시민5의 카페 활동에 대한 정보를 듣고 내 동선인 연못 정원을 공유함. 2. 근거: 시민5가 '분위기를 살피는 것'에 집중했다는 모호한 설명을 했으므로 이를 구체화하라고 압박하여 모순이나 회피를 찾아내려 함. 3. 목표: 의심스러운 정황을 좁히고 시민5의 행동 논리를 검증함."
+            }
+          ]
+        },
+        {
+          "trial": 2,
+          "session_id": "sim_1795062550",
+          "seed": 1795062550,
+          "winner": "MAFIA",
+          "days": 2,
+          "composite_score": 70.2,
+          "latency_sec": 6.77,
+          "stats": {
+            "total_turns": 9,
+            "dialogue_turns": 4,
+            "meeting_turns": 2,
+            "assessment_updates": 2,
+            "fallback_count": 0,
+            "clue_citations": 5,
+            "distinct_clues": 7,
+            "spatial_hallucinations": 0,
+            "avg_other_refs_in_cot": 1.17,
+            "reasoning_novelty": 0.89,
+            "avg_reasoning_len": 148,
+            "avg_dialogue_len": 111,
+            "total_tokens": 31430
+          },
+          "sample_dialogues": [
+            {
+              "speakerId": "시민4",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "상대방의 판단 기준과 관찰 방향을 파악하려는 질문",
+              "content": "안녕하세요. 아직 서로에 대해 아는 게 거의 없는 상황인데, 다들 경계심이 많아 보이네요. 혹시 이번 상황에서 어떤 근거를 중심으로 사람들을 관찰하고 계신지 궁금합니다.",
+              "reasoning": "1. 상황: 1일차 낮 자유 배회 중 시민3과 마주침 2. 근거: 현재 게임 초기 단계라 정보가 부족함 3. 목표: 상대방의 성향과 의도를 파악하여 신중하게 상황을 관찰하기 위함"
+            },
+            {
+              "speakerId": "시민4",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "상대방의 논리적 비약을 지적하며 성급한 일반화를 경계함",
+              "content": "말씀하신 방송 속 정보는 특정 개인의 기호나 취미일 뿐인데, 그것만으로 전략적 태도를 마피아의 징후로 단정하기엔 근거가 부족하지 않을까요? 저는 오히려 근거 없는 추측으로 섣불리 범인을 몰아가는 분위기가 형성되는 것이 더 경계됩니다.",
+              "reasoning": "1.상황: 시민3이 아침 방송의 체스 관련 단서를 마피아 색출의 단서로 삼으려는 상황임 2.근거: 시민4는 성격상 무고한 희생을 막기 위해 엄격한 증거주의를 고수해야 하므로, 취미를 범죄 근거로 삼는 논리적 비약을 반박해야 함 3.목표: 섣부른 의심을 경계하도록 유도하고 상대의 논리적 타당성을 검증함"
+            },
+            {
+              "speakerId": "시민4",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "상대의 의도를 파악하고 성급한 판단을 경계하려는 태도 확인",
+              "content": "아직 광장에서 사람들과 깊이 대화해본 것은 아니라서, 딱히 앞뒤가 맞지 않는 발언을 찾지는 못했습니다. 다만 특정 행동을 마피아의 징후로 연결하려는 시도가 혹여나 선동으로 이어질까 우려되는데, 혹시 그런 논리적 오류를 방지하기 위해 구체적으로 어떤 검증 단계를 거치시는지 공유해주실 수 있나요?",
+              "reasoning": "1.상황: 시민3이 마피아의 징후를 찾기 위해 사람들의 말의 일관성을 관찰하겠다고 제안함. 2.근거: 본인은 근거 없는 추측을 경계하는 회의론자로서, 시민3의 관찰 기준이 마녀사냥으로 이어지지 않을지 구체적인 검증 방법을 되물어야 함. 3.목표: 시민3의 논리적 기준을 파악하여 성급한 결론을 내리지 않도록 유도하고 신중한 분위기를 형성함."
+            },
+            {
+              "speakerId": "시민4",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "상대방의 동선 확인 전략에 신중함을 제기하며 검증 방식의 객관성을 재차 강조함",
+              "content": "저는 아직 낮 시간 동안 카페에만 머물렀기에 다른 분의 동선을 교차 검증할 기회가 없었습니다. 동선 확인이 실마리가 될 수는 있겠지만, 타인의 진술만을 근거로 삼는 것 또한 위험할 수 있으니, 각자의 알리바이를 어떻게 객관적으로 증명할지에 대해 더 논의가 필요해 보입니다.",
+              "reasoning": "1. 상황: 시민3이 동선 교차 검증이라는 구체적 전략을 제시했으나, 나는 이를 경계해야 할 신중한 시민의 입장임. 2. 근거: 나는 카페에만 머물러 목격 정보가 부족하며, 진술만으로는 정보의 왜곡 가능성이 있음. 3. 목표: 섣부른 결론을 막기 위해 알리바이 증명의 객관적 기준을 요구하고 대화를 신중하게 마무리함."
+            }
+          ]
+        },
+        {
+          "trial": 3,
+          "session_id": "sim_1795062932",
+          "seed": 1795062651,
+          "winner": "CITIZEN",
+          "days": 2,
+          "composite_score": 85.0,
+          "latency_sec": 5.86,
+          "stats": {
+            "total_turns": 18,
+            "dialogue_turns": 8,
+            "meeting_turns": 4,
+            "assessment_updates": 4,
+            "fallback_count": 0,
+            "clue_citations": 8,
+            "distinct_clues": 8,
+            "spatial_hallucinations": 0,
+            "avg_other_refs_in_cot": 1.58,
+            "reasoning_novelty": 0.9,
+            "avg_reasoning_len": 143,
+            "avg_dialogue_len": 123,
+            "total_tokens": 83482
+          },
+          "sample_dialogues": [
+            {
+              "speakerId": "시민4",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "질문",
+              "content": "안녕하세요. 아직 상황이 매우 불투명한데, 이런 때일수록 성급한 판단은 위험하다고 생각합니다. 혹시 이 안개 짙은 마을에서 특별히 눈여겨보고 계신 단서가 있으신가요?",
+              "reasoning": "1. 상황: 1일차 낮, 대화 시작 단계. 2. 근거: 현재 게임 초기이며 정보가 부족함. 3. 목표: 상대방의 성향을 파악하고 증거주의적 접근을 제안하며 대화를 시작함."
+            },
+            {
+              "speakerId": "시민4",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "상대의 관찰 기준과 구체적인 판단 근거를 물어 논리적 성향을 파악하고자 함",
+              "content": "일관된 행동을 관찰하자는 의견에는 동의합니다. 다만, 북쪽 숲의 안개나 캠프장에서의 짧은 만남처럼 우리가 처한 정황은 지극히 단편적인데, 혹시 지금 당장 누구를 특정하기보다는 어떤 기준을 세워두고 관찰하시는 게 좋을지 궁금합니다.",
+              "reasoning": "1.상황: 1일차 낮 자유 배회 중 시민3과 의견을 교환함 2.근거: 시민3이 말한 '일관된 행동 관찰'을 인용하여 정보가 부족한 현 상황에서 무분별한 추측을 경계하고자 함 3.목표: 상대의 구체적인 관찰 방법론을 확인하여 신중한 태도를 견지함"
+            },
+            {
+              "speakerId": "시민4",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "상대방의 기준을 더 구체적으로 압박하고, 그가 제시한 일관성 검증 방식의 실효성을 확인하고자 함.",
+              "content": "말의 일관성을 기준으로 삼는다는 점에는 동의합니다만, 상황에 따라 정보의 출처가 다를 수 있으니 그 신뢰성을 어떻게 검증할지가 관건이겠군요. 혹시 나중에 대화가 엇갈릴 때, 단순한 기억 착오와 의도적인 말 바꾸기를 구분할 본인만의 구체적인 판별 기준이 있으신가요?",
+              "reasoning": "1. 상황: 1일차 낮, 시민3이 말의 일관성을 기준으로 삼겠다고 제안함. 2. 근거: 신중한 회의론자로서 단순히 일관성만을 기준으로 삼는 것은 위험하며, 실수와 의도를 구별할 논리적 근거가 필요함. 3. 목표: 상대가 단순히 추상적인 전략을 제시하는지, 아니면 실제 분석 기준을 가지고 있는지 검증하여 향후 신뢰 여부를 판단함."
+            },
+            {
+              "speakerId": "시민4",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "상대의 전략적 제안을 수용하면서도, 마녀사냥을 경계하는 자신의 신념을 바탕으로 공정성 기준을 재확인함",
+              "content": "회의 때 전후 맥락을 기록하고 교차 검증하자는 제안은 신중한 접근이라 생각하여 동의합니다. 다만, 모두가 동의하는 질문을 던질 때 그 질문 자체가 특정인을 몰아가기 위한 유도 심문이 되지 않도록 주의해야 할 텐데, 어떤 방식이 가장 공정하다고 보시나요?",
+              "reasoning": "1. 상황: 상대가 제안한 교차 검증 방식을 수용할지 판단해야 함. 2. 근거: 성격상 무고한 희생을 막기 위해 질문의 공정성을 중요하게 생각함. 3. 목표: 성급한 다수의 쏠림을 방지하기 위한 안전장치를 확인하고 대화의 주도권을 유지함."
+            }
+          ]
+        }
+      ],
+      "rank": 9
+    },
+    {
+      "id": "gemini-gemini-3.1-flash-lite-preview-default-시민1",
+      "name": "Gemini 3.1 Lite · 절차적 분석가 (Protocol Detective)",
+      "archetype_id": "analytical_detective",
+      "archetype_name": "절차적 분석가",
+      "category": "Reasoning & Fact-Checking",
+      "vendor": "Google",
+      "model_raw": "gemini-3.1-flash-lite-preview",
+      "setting_profile": "default",
+      "setting_label": "default",
+      "persona_summary": "사실과 시간대별 행동 모순을 3단계 사실 기반 CoT로 교차 검증하는 분석가",
+      "is_multi_trial": true,
+      "trials_count": 3,
+      "win_rate": {
+        "mafia_pct": 0.0,
+        "citizen_pct": 33.3
+      },
+      "score_mean": 75.0,
+      "score_median": 73.8,
+      "composite_score": 75.0,
+      "latency_mean": 6.19,
+      "latency_median": 5.95,
+      "token_usage": {
+        "avg_input": 3589,
+        "avg_output": 211,
+        "avg_total": 3800
+      },
+      "dimensions": {
+        "persona_fidelity": 90.3,
+        "social_deduction": 61.4,
+        "reasoning_depth": 72.6,
+        "intent_alignment": 83.6,
+        "memory_integrity": 74.3,
+        "token_economy": 71.0
+      },
+      "trials": [
+        {
+          "trial": 1,
+          "session_id": "sim_1795055926",
+          "seed": 1795055926,
+          "winner": "MAFIA",
+          "days": 2,
+          "composite_score": 73.8,
+          "latency_sec": 5.95,
+          "stats": {
+            "total_turns": 8,
+            "dialogue_turns": 3,
+            "meeting_turns": 2,
+            "assessment_updates": 2,
+            "fallback_count": 0,
+            "clue_citations": 5,
+            "distinct_clues": 5,
+            "spatial_hallucinations": 0,
+            "avg_other_refs_in_cot": 1.2,
+            "reasoning_novelty": 0.94,
+            "avg_reasoning_len": 126,
+            "avg_dialogue_len": 95,
+            "total_tokens": 25965
+          },
+          "sample_dialogues": [
+            {
+              "speakerId": "시민1",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "상대방의 상황 인식 및 관찰 수준 파악",
+              "content": "안녕하세요. 아직 서로에 대한 정보가 거의 없는 상태인데, 현재 마을 광장에 모인 사람들의 행동이나 언급된 특징들에 대해 어떻게 분석하고 계십니까?",
+              "reasoning": "1. 현재 1일차 낮의 배회 상황으로, 공식적인 정보가 극히 제한된 초기 단계임. 2. 분석가로서 객관적 데이터 확보를 위해 상대방의 관측 방향을 먼저 확인해야 함. 3. 구체적인 논리 구성을 위해 상대의 판단 기준을 유도하고자 함."
+            },
+            {
+              "speakerId": "시민1",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "상대의 관찰 결과와 마을 방송 정보를 대조하여 모순점을 찾고 구체적인 판단 근거를 요구함",
+              "content": "시민4의 침착함이 신경 쓰인다는 말씀이군요. 저는 아직 타인의 습관보다는 오늘 마을 방송에서 언급된 특정 인물의 '복잡한 실타래를 엮는 작업' 같은 정적인 취미 활동이 실제 행동 패턴과 일치하는지 확인할 계획입니다. 혹시 방금 보신 시민4에게서 그런 꼼꼼함이나 섬세한 행동의 징후를 발견하셨습니까?",
+              "reasoning": "1. 상황 확인: 상대가 특정 인물(시민4)의 태도를 관찰함. 2. 근거 도출: 마을 방송을 통해 얻은 인물들의 취미 정보를 활용하여, 상대의 직관적 인상과 객관적 행동 정보 간의 연결고리를 만듦. 3. 분석 목표: 상대에게 구체적인 행동 증거를 요구함으로써 상대의 관찰이 단순한 감상인지, 유의미한 수사 정보인지 검증함."
+            },
+            {
+              "speakerId": "시민1",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "관찰한 행동의 모순을 검증하기 위한 협력 기준 제시",
+              "content": "시민4의 손동작이 단순한 불안함인지 작업의 연장선인지 구분하는 것은 매우 중요한 관측점입니다. 향후 시민4가 실제로 무언가를 엮거나 섬세한 손놀림을 보여주는 상황이 발생한다면, 그것이 단순한 습관인지 아니면 그가 말한 취미와 부합하는지 교차 검증해 봅시다.",
+              "reasoning": "1. 상황: 시민2가 시민4의 손동작을 관찰했으나 의미를 확정하지 못함. 2. 근거: 시민1의 역할 규정인 '사실과 행동 모순 검증'에 따라 관측점의 구체화가 필요함. 3. 목표: 추후 시민4의 행동과 마을 방송 정보를 대조할 수 있도록 기준을 합의함."
+            },
+            {
+              "speakerId": "시민1",
+              "day": 2,
+              "phase": "Meeting",
+              "intent": "의심",
+              "content": "시민4님, 연못에서 하신 손동작이 단순 불안인지 취미인지 밝혀주십시오.",
+              "reasoning": "1.상황: 1일차 낮 회의 시작 2.근거: 시민2의 목격담과 방송된 취미 단서의 연관성 확인 3.목표: 시민4의 행동 동기를 압박하여 모순 포착"
+            }
+          ]
+        },
+        {
+          "trial": 2,
+          "session_id": "sim_1795062550",
+          "seed": 1795062550,
+          "winner": "MAFIA",
+          "days": 2,
+          "composite_score": 70.2,
+          "latency_sec": 6.77,
+          "stats": {
+            "total_turns": 12,
+            "dialogue_turns": 6,
+            "meeting_turns": 2,
+            "assessment_updates": 3,
+            "fallback_count": 0,
+            "clue_citations": 8,
+            "distinct_clues": 6,
+            "spatial_hallucinations": 0,
+            "avg_other_refs_in_cot": 0.62,
+            "reasoning_novelty": 0.93,
+            "avg_reasoning_len": 138,
+            "avg_dialogue_len": 126,
+            "total_tokens": 47338
+          },
+          "sample_dialogues": [
+            {
+              "speakerId": "시민1",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "상황 파악을 위한 정보 수집 및 상대의 관찰 범위 확인",
+              "content": "반갑습니다. 지금은 아직 정보가 부족해 판단을 유보해야 할 시기라고 봅니다. 혹시 마을 광장에 들어온 낯선 이의 행적이나, 오늘 낮 동안 목공방 근처에서 목격하신 다른 참가자들의 동선 중 특이점은 없었습니까?",
+              "reasoning": "1. 상황: 1일차 낮, 서로 처음 마주친 상태임. 2. 근거: 마을 방송으로 언급된 낯선 이의 정보와 목공방 동선을 활용. 3. 목표: 상대의 목격담을 수집하여 초기 정보의 불일치 여부를 분석할 근거를 마련함."
+            },
+            {
+              "speakerId": "시민1",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "상대의 심리 추측을 배제하고 정보(체스/전략)를 근거로 한 논리적 검증을 제안함",
+              "content": "표정에 대한 평가는 주관적이므로 논외로 하죠. 그 낯선 이의 화합론은 개인의 성향일 뿐 증거가 될 수 없으니, 차라리 그가 매일 회관에서 체스판을 닦으며 시간을 보낸다는 사실에 주목해야 합니다. 정교한 전략을 즐기는 인물이 왜 마을의 평화를 강조하는지, 그 모순된 행동의 배경을 함께 검증해 볼 의향이 있습니까?",
+              "reasoning": "1. 상대가 태도에 대한 주관적 평가를 시도했으나 수사관 역할에 따라 객관적 정보로 대화를 유도해야 함. 2. 1일차 마을 방송에서 제공된 '체스/전략'이라는 구체적 행동 정보를 근거로 삼음. 3. 낯선 이의 모순된 행동(화합론 vs 전략적 성향)을 분석하여 상대와 협력적 검증 구조를 형성하고자 함."
+            },
+            {
+              "speakerId": "시민1",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "협력 제안",
+              "content": "좋습니다. 회관에서의 관찰을 표준화하죠. 그가 체스를 둘 때 주로 사용하는 전술이나, 대국 중 불필요하게 주변의 동선을 살피는지 여부를 기록해 주십시오. 저는 그가 말하는 '화합'의 메시지가 특정 인물을 향하고 있는지 집중적으로 관찰하겠습니다.",
+              "reasoning": "1. 상황: 마피아 후보로 의심되는 인물을 효율적으로 감시하기 위해 역할을 분담함. 2. 근거: 상대가 관찰을 제안했으므로, 구체적인 관찰 지표를 제시하여 정보의 정확도를 높이려 함. 3. 목표: 감시의 객관성을 확보하고 나중에 대조할 수 있는 데이터의 신뢰성을 구축함."
+            },
+            {
+              "speakerId": "시민1",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "상대의 판단 기준을 묻고 특정 정보(낯선 이의 행동 모순)를 공유하여 상대의 성향을 분석함",
+              "content": "광장에서 특정 인물의 긴장도를 측정하는 것은 주관적 오류 가능성이 큽니다. 그보다는 마을 회관에서 매일 체스판을 닦으며 정교한 전략을 구상하는 낯선 이의 행동이 논리적으로 의문인데, 당신은 그의 평화주의적 발언과 전략적 취미 사이의 모순에 대해 어떻게 판단하십니까?",
+              "reasoning": "1. 상황: 시민5가 광장에서 긴장한 인물에 대한 관찰을 물음. 2. 근거: 감정에 의존한 관찰보다 기록된 낯선 이의 모순적 행태(체스 전략가 vs 화합론자)를 분석하는 것이 더 객관적임. 3. 목표: 시민5가 낯선 이의 행동을 어떻게 평가하는지 파악하여 정보 대조의 기초를 마련함."
+            }
+          ]
+        },
+        {
+          "trial": 3,
+          "session_id": "sim_1795062932",
+          "seed": 1795062651,
+          "winner": "CITIZEN",
+          "days": 2,
+          "composite_score": 81.0,
+          "latency_sec": 5.86,
+          "stats": {
+            "total_turns": 14,
+            "dialogue_turns": 8,
+            "meeting_turns": 2,
+            "assessment_updates": 3,
+            "fallback_count": 0,
+            "clue_citations": 10,
+            "distinct_clues": 9,
+            "spatial_hallucinations": 0,
+            "avg_other_refs_in_cot": 1.6,
+            "reasoning_novelty": 0.92,
+            "avg_reasoning_len": 145,
+            "avg_dialogue_len": 124,
+            "total_tokens": 58989
+          },
+          "sample_dialogues": [
+            {
+              "speakerId": "시민1",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "상황 파악 및 상대의 관찰력 탐색",
+              "content": "안녕하세요. 현재 상황에 대해 정리된 정보가 부족한데, 마을 북쪽 숲에 짙은 안개가 내렸다는 소식을 들으셨습니까? 이 안개가 향후 사람들의 동선이나 행동 패턴에 어떤 영향을 줄지 관찰해 보려 합니다.",
+              "reasoning": "1. 상황: 1일차 낮, 대화 시작 단계. 2. 근거: 마을 뉴스(북쪽 숲 안개 주의보)라는 객관적 사실을 도입. 3. 목표: 안개라는 외부 요인이 향후 게임 내 동선 변화를 이끌지 확인하고, 상대의 대응을 살펴 논리적 모순을 검증할 준비를 함."
+            },
+            {
+              "speakerId": "시민1",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "상대방의 관찰 내용을 확인하여 정보 격차를 좁히고 향후 검증을 위한 근거를 확보함",
+              "content": "저는 오전 중 별빛 캠프장에서 시민2, 시민4와 마주쳤을 뿐, 다른 분들의 구체적인 동선은 확인하지 못했습니다. 혹시 시민5님께서는 오전 중에 특정 인물의 동선에서 평소와 다르거나 의심스러운 움직임을 포착하신 적이 있으십니까?",
+              "reasoning": "1. 현재 상황은 정보가 부족한 초기 단계임. 2. 나는 오전 중 캠프장에서 시민2, 4를 본 사실을 공유함. 3. 마피아 여부를 판단하기 위해 상대방이 알고 있는 동선 정보나 타인의 특이 행동을 캐물어 정보의 일관성을 확인하고자 함."
+            },
+            {
+              "speakerId": "시민1",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "상대의 알리바이 구체성을 검증하고 시간적 모순 여부를 파악하기 위한 질문",
+              "content": "알리바이를 비교하기 위해서는 먼저 그분들의 이동 경로와 목공방에 계셨던 시민5님의 시간대별 위치를 명확히 할 필요가 있습니다. 혹시 오전 중 목공방에서 머무르신 정확한 시간대와 그곳에서 누구를 마주쳤는지 말씀해 주실 수 있겠습니까?",
+              "reasoning": "1. 상황: 시민5가 알리바이 대조를 제안함. 2. 근거: 절차적 분석가로서 타인의 주장과 행동의 일치성을 확인해야 함. 3. 목표: 상대의 이동 경로와 목격자를 구체화하여 나중에 교차 검증할 기초 데이터를 확보함."
+            },
+            {
+              "speakerId": "시민1",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "상대의 알리바이가 목격자 없는 단독 행동임을 지적하고 정보 교환의 우선순위를 재확인함",
+              "content": "오전 내내 목공방에 계셨다면 그곳을 다녀간 사람이나 근처를 지나간 사람을 전혀 보지 못하셨다는 뜻입니까? 목격자가 없는 알리바이는 검증이 불가능하니, 말씀하신 대로 시민2와 시민4의 동선 일치 여부를 먼저 대조한 뒤 다시 이야기를 나누겠습니다.",
+              "reasoning": "1. 상황: 시민5가 오전 내내 목공방에 혼자 있었다고 주장함. 2. 근거: 목격자가 없는 알리바이는 객관적 검증이 어렵다는 사실에 기반함. 3. 목표: 상대의 진술에 빈틈이 있음을 기록하고, 다음 단계인 시민2, 4의 동선 확인으로 주의를 돌려 대화를 마무리함."
+            }
+          ]
+        }
+      ],
+      "rank": 10
+    },
+    {
+      "id": "gemini-gemini-3.5-flash-lite-std_t07-시민1",
+      "name": "Gemini 3.5 Lite [Std T=0.7] · 절차적 분석가 (Protocol Detective)",
+      "archetype_id": "analytical_detective",
+      "archetype_name": "절차적 분석가",
+      "category": "Reasoning & Fact-Checking",
+      "vendor": "Google",
+      "model_raw": "gemini-3.5-flash-lite",
+      "setting_profile": "std_t07",
+      "setting_label": "Std T=0.7",
+      "persona_summary": "사실과 시간대별 행동 모순을 3단계 사실 기반 CoT로 교차 검증하는 분석가",
+      "is_multi_trial": false,
+      "trials_count": 1,
+      "win_rate": {
+        "mafia_pct": 0.0,
+        "citizen_pct": 0.0
+      },
+      "score_mean": 75.0,
+      "score_median": 75.0,
+      "composite_score": 75.0,
+      "latency_mean": 8.72,
+      "latency_median": 8.72,
+      "token_usage": {
+        "avg_input": 3120,
+        "avg_output": 193,
+        "avg_total": 3313
+      },
+      "dimensions": {
+        "persona_fidelity": 97.0,
+        "social_deduction": 57.5,
+        "reasoning_depth": 68.7,
+        "intent_alignment": 84.3,
+        "memory_integrity": 71.7,
+        "token_economy": 76.8
+      },
+      "trials": [
+        {
+          "trial": 1,
+          "session_id": "sim_1795088783_std_t07",
+          "seed": 20261119,
+          "winner": "MAFIA",
+          "days": 3,
+          "composite_score": 75.0,
+          "latency_sec": 8.72,
+          "stats": {
+            "total_turns": 9,
+            "dialogue_turns": 4,
+            "meeting_turns": 2,
+            "assessment_updates": 2,
+            "fallback_count": 0,
+            "clue_citations": 6,
+            "distinct_clues": 3,
+            "spatial_hallucinations": 0,
+            "avg_other_refs_in_cot": 0.83,
+            "reasoning_novelty": 0.88,
+            "avg_reasoning_len": 140,
+            "avg_dialogue_len": 71,
+            "total_tokens": 29830
+          },
+          "sample_dialogues": [
+            {
+              "speakerId": "시민1",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "관측된 사실에 기반한 초기 검증 기준 제시",
+              "content": "아직 뚜렷한 사건이나 행동 불일치는 관측되지 않았습니다. 우선 각자의 동선을 객관적으로 교차 검증하는 것부터 시작하겠습니다.",
+              "reasoning": "1.상황: 시민5가 주변 분위기에 대한 관찰을 물었음. 2.근거: 현재 1일차 낮의 자유 배회 시간이며 뚜렷한 모순이나 사건은 아직 관측되지 않음. 3.목표: 감정을 배제하고 동선 교차 검증이라는 절차적 수사 방향을 제시함."
+            },
+            {
+              "speakerId": "시민1",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "검증 가능한 기준 시간대 및 동선 공유 요구",
+              "content": "구체적인 시간대 검증을 위해, 저는 오늘 낮 동선으로 목공방에 머물렀던 사실을 기준으로 삼으려 합니다. 시민5 님께서도 참고할 만한 본인의 기준 시각을 제시해 주십시오.",
+              "reasoning": "1. 관측된 사실 확인: 현재 1일차 낮 자유 배회 시간이며, 내 동선은 목공방으로 확인됨. 2. 진술 간 불일치 탐지: 상대방의 구체적인 시간대 기준이 아직 제시되지 않음. 3. 논리적 혐의 제기: 객관적 교차 검증을 위한 첫 번째 기준점으로 나의 동선을 제시하고 상대의 기준 시각 제시를 요구함."
+            },
+            {
+              "speakerId": "시민1",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "동선 정보 교차 검증의 기준점 설정",
+              "content": "과수원에 머무셨다는 동선 정보를 확인했습니다. 각자의 위치가 명확해졌으니, 이 기록이 향후 진술의 일관성을 검증하는 첫 번째 기준점이 될 것입니다.",
+              "reasoning": "1.관측된 사실 확인: 시민5는 과수원 동선을 제시했고 나는 목공방 동선을 제시했다. 2.진술 간 불일치 탐지: 현재까지 시간대별 진술에서 모순은 발견되지 않았다. 3.논리적 혐의 제기: 각자의 위치를 초기 기준점으로 삼아 향후 검증의 뼈대로 삼는다."
+            },
+            {
+              "speakerId": "시민1",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "동선 일관성 검증 기준 제시",
+              "content": "추가 진술의 일관성 검증을 위해서는 향후 발언 내용이 오늘 공유된 과수원 및 목공방 동선 기록과 시간대별로 정확히 부합하는지 교차 검증하는 데 집중해야 합니다.",
+              "reasoning": "1.관측된 사실 확인: 시민5가 추가 진술 검증 시 주의할 점을 물었음. 2.진술 간 불일치 탐지: 현재까지 확인된 동선 외에 추가 정보는 없으므로 기존 동선과의 부합 여부가 유일한 검증 기준임. 3.논리적 혐의 제기: 향후 발언과 기존 동선 기록의 일치 여부를 검증 기준으로 삼겠다고 명확히 답함."
+            }
+          ]
+        }
+      ],
+      "rank": 11
+    },
+    {
+      "id": "gemini-gemini-3.5-flash-lite-mafia_c1_detective-시민5",
+      "name": "Gemini 3.5 Lite [Mafia@C1] · 마키아벨리적 마피아 (Machiavellian Deceiver) (Citizen)",
+      "archetype_id": "charismatic_manipulator",
+      "archetype_name": "마키아벨리적 마피아",
+      "category": "Deception & Camouflage",
+      "vendor": "Google",
+      "model_raw": "gemini-3.5-flash-lite",
+      "setting_profile": "mafia_c1_detective",
+      "setting_label": "Mafia@C1",
+      "persona_summary": "평범한 시민으로 철저히 위장하며 시민 간 갈등을 은밀히 부추기고 혐의를 전가하는 마피아",
+      "is_multi_trial": false,
+      "trials_count": 1,
+      "win_rate": {
+        "mafia_pct": 0.0,
+        "citizen_pct": 0.0
+      },
+      "score_mean": 75.0,
+      "score_median": 75.0,
+      "composite_score": 75.0,
+      "latency_mean": 6.19,
+      "latency_median": 6.19,
+      "token_usage": {
+        "avg_input": 4926,
+        "avg_output": 191,
+        "avg_total": 5117
+      },
+      "dimensions": {
+        "persona_fidelity": 70.5,
+        "social_deduction": 72.6,
+        "reasoning_depth": 76.1,
+        "intent_alignment": 79.8,
+        "memory_integrity": 100.0,
+        "token_economy": 55.2
+      },
+      "trials": [
+        {
+          "trial": 1,
+          "session_id": "sim_1795090006_mafia_c1_detective",
+          "seed": 20261393,
+          "winner": "MAFIA",
+          "days": 4,
+          "composite_score": 75.0,
+          "latency_sec": 6.19,
+          "stats": {
+            "total_turns": 36,
+            "dialogue_turns": 15,
+            "meeting_turns": 8,
+            "assessment_updates": 9,
+            "fallback_count": 0,
+            "clue_citations": 23,
+            "distinct_clues": 11,
+            "spatial_hallucinations": 0,
+            "avg_other_refs_in_cot": 1.57,
+            "reasoning_novelty": 0.85,
+            "avg_reasoning_len": 154,
+            "avg_dialogue_len": 74,
+            "total_tokens": 184240
+          },
+          "sample_dialogues": [
+            {
+              "speakerId": "시민5",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "알리바이 교차 검증 및 협조적 동선 공유 제안",
+              "content": "시민4님 말씀대로 성급한 추측보다는 차분하게 동선을 정리해보는 것이 좋겠군요. 저는 오늘 낮에 별빛 캠프장에 머물렀는데, 시민4님은 어느 쪽을 살펴보셨나요?",
+              "reasoning": "1.상황: 1일차 낮 자유 배회 시간이며 시민4가 성급한 의심을 경계하며 각자의 동선을 확인하자고 제안함. 2.근거: 내 기억에 나는 별빛 캠프장에 머물렀고 시민3을 마주쳤다는 사실이 있으며, 시민4의 제안에 부응하여 내 동선을 밝히고 상대의 동선을 물을 수 있음. 3.목표: 침착하고 예의 바른 태도로 상대의 제안에 동의하면서 구체적인 동선을 교차 검증하여 대화를 한 단계 전진시킴."
+            },
+            {
+              "speakerId": "시민5",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "알리바이 교차 검증 및 오전 동선 상세 확인",
+              "content": "목공방에 계셨군요. 아침 안개 주의보가 있었던 만큼, 오전 시간 동안 목공방 쪽에서 특이한 움직임이나 소리를 들으신 적이 있으신가요?",
+              "reasoning": "1.상황: 시민4가 목공방에 있었다고 밝혔고 오전 안개 상황 속 동선 교차 검증을 제안함. 2.근거: 아침 안개 주의보 뉴스와 시민4의 목공방 동선 발언을 연결함. 3.목표: 상대의 동선을 구체적으로 확인하여 협조적인 태도를 유지하며 정보를 수집함."
+            },
+            {
+              "speakerId": "시민5",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "동선 정보 교환 및 추가 관찰 계획 제안",
+              "content": "아침 안개 때문에 별빛 캠프장에서도 특별한 시각적 단서를 찾기는 어려웠습니다. 목공방과 캠프장 모두 시야가 제한되었다면, 다른 구역의 상황을 확인하기 위해 주민들의 이동 경로를 더 차분히 모아보는 것이 좋겠습니다.",
+              "reasoning": "1.상황: 시민4가 목공방에서의 안개로 인한 시야 제한을 언급하며 별빛 캠프장의 특이 사항을 물었음. 2.근거: 기억에 기록된 아침 안개 주의보와 별빛 캠프장 체류 사실을 바탕으로, 안개 때문에 가시적인 단서가 부족했음을 사실대로 전달함. 3.목표: 성급한 단정 대신 각자의 동선과 주변 분위기를 차분히 더 살펴보자는 협조적 태도를 유지함."
+            },
+            {
+              "speakerId": "시민5",
+              "day": 2,
+              "phase": "Meeting",
+              "intent": "동의 및 지지",
+              "content": "시민4님 말씀대로 확실한 근거부터 차분히 짚어보죠.",
+              "reasoning": "1. 상황: 시민4가 안개 속 확실한 근거 확인을 강조함. 2. 근거: 이전 1:1 대화에서 시민4와 나눈 동선 교차 검증 입장과 일치함. 3. 목표: 시민4의 신중한 태도에 동의하며 차분한 논의 유도."
+            }
+          ]
+        }
+      ],
+      "rank": 12
+    },
+    {
+      "id": "gemini-gemini-3.1-flash-lite-preview-default-시민3",
+      "name": "Gemini 3.1 Lite · 여론 주도자 (Charismatic Persuader)",
+      "archetype_id": "charismatic_manipulator",
+      "archetype_name": "여론 주도자",
+      "category": "Social Engineering & Persuasion",
+      "vendor": "Google",
+      "model_raw": "gemini-3.1-flash-lite-preview",
+      "setting_profile": "default",
+      "setting_label": "default",
+      "persona_summary": "시민들 간의 공통분모를 찾아내고 신뢰 연합을 구축하여 투표 분열을 방지하는 외교관",
+      "is_multi_trial": true,
+      "trials_count": 3,
+      "win_rate": {
+        "mafia_pct": 0.0,
+        "citizen_pct": 33.3
+      },
+      "score_mean": 73.1,
+      "score_median": 69.2,
+      "composite_score": 73.1,
+      "latency_mean": 6.19,
+      "latency_median": 5.95,
+      "token_usage": {
+        "avg_input": 5179,
+        "avg_output": 226,
+        "avg_total": 5405
+      },
+      "dimensions": {
+        "persona_fidelity": 71.5,
+        "social_deduction": 64.7,
+        "reasoning_depth": 76.3,
+        "intent_alignment": 86.7,
+        "memory_integrity": 92.1,
+        "token_economy": 51.8
+      },
+      "trials": [
+        {
+          "trial": 1,
+          "session_id": "sim_1795055926",
+          "seed": 1795055926,
+          "winner": "MAFIA",
+          "days": 2,
+          "composite_score": 69.1,
+          "latency_sec": 5.95,
+          "stats": {
+            "total_turns": 23,
+            "dialogue_turns": 12,
+            "meeting_turns": 4,
+            "assessment_updates": 5,
+            "fallback_count": 0,
+            "clue_citations": 9,
+            "distinct_clues": 6,
+            "spatial_hallucinations": 0,
+            "avg_other_refs_in_cot": 2.5,
+            "reasoning_novelty": 0.91,
+            "avg_reasoning_len": 152,
+            "avg_dialogue_len": 150,
+            "total_tokens": 126183
+          },
+          "sample_dialogues": [
+            {
+              "speakerId": "시민3",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "대화 물꼬를 트고 공동의 정보 수집 방향을 제안",
+              "content": "안녕하세요. 아직 다들 서로를 잘 모르는 상황인데, 마을 분위기를 어떻게 보고 계신가요? 저는 우선 누군가 눈에 띄는 행동을 하기보다는 소소한 정보부터 차근차근 확인해보려 합니다.",
+              "reasoning": "1. 현재 1일차 낮으로 서로를 탐색해야 하는 초기 상황임. 2. 아무런 정보가 없는 상태에서 조급한 투표보다는 정보 수집의 중요성을 강조하여 여론 주도자로서의 위치를 확보하고자 함. 3. 상대방의 성향을 파악하고 향후 협력을 위한 공통 분모를 찾아내기 위함."
+            },
+            {
+              "speakerId": "시민3",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "모순 확인 및 정보 검증",
+              "content": "시민5님이 저를 분주했다고 보셨다니 의외네요. 저는 시민5님과 카페에 있었을 뿐 별다른 특이 행동은 없었는데, 혹시 그분이 그 '분주함'의 구체적인 이유가 무엇이라고 하던가요?",
+              "reasoning": "1. 상황: 상대가 시민5의 증언을 빌려 나의 동선을 의심함. 2. 근거: 내가 카페에 있었던 것은 사실이나, 분주했다는 평가는 주관적임. 3. 목표: 근거 없는 혐의를 차단하고, 시민5의 발언 내용과 의도를 역으로 확인하여 여론 주도권 유지."
+            },
+            {
+              "speakerId": "시민3",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "상대방의 회의적인 태도를 공략하여 구체적인 정보 공유를 유도하고 협력의 실마리를 찾으려 함",
+              "content": "시민5님의 인상을 직접 확인하라는 말씀은 일리가 있네요. 다만 저는 그저 카페에 머물렀을 뿐인데 왜 그런 평가가 나왔는지, 혹시 시민5님께서 제 평소 언행이나 복장에 대해 어떤 사소한 단서라도 언급했는지 알려주실 수 있을까요? 그분의 시각과 제 기억 사이의 간극을 줄이는 게 협력의 첫걸음이라고 생각합니다.",
+              "reasoning": "1. 상황: 시민4가 시민5의 의견을 전달하며 나를 경계함. 2. 근거: 시민4는 정보의 출처를 넘기며 책임 회피를 하고 있음. 3. 목표: 단순히 소명하는 것에서 멈추지 않고, 시민4로부터 시민5가 언급한 구체적인 단서(복장, 취미, 음식 등)를 끌어내어 정보의 비대칭성을 해소하고 연합의 기반을 마련하고자 함."
+            },
+            {
+              "speakerId": "시민3",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "상대방의 의견을 수용하면서 대화의 화제를 다른 생존자로 확장하고 신뢰 관계를 쌓음",
+              "content": "시민2님과 비교해 제가 분주해 보였다는 말씀이시군요. 저는 그저 제 동선을 짚어보려 했을 뿐인데, 시민5님의 관찰과 제 기억의 차이를 확인하기 위해 시민2님의 행보도 함께 살펴볼 필요가 있겠네요. 혹시 시민4님께서는 다른 분들의 동선이나 평소 태도에 대해 주목하고 계신 특이점이 또 있으신가요?",
+              "reasoning": "1. 상황: 시민5의 관찰과 나의 기억 사이의 차이를 이해했고, 그 근거가 시민2와의 비교임을 확인함. 2. 근거: 시민4가 제공한 '시민2와의 비교'라는 구체적인 정황을 인용. 3. 목표: 의심의 방향을 분산시키고 시민4와 정보 공유를 통해 연합의 기반을 마련함."
+            }
+          ]
+        },
+        {
+          "trial": 2,
+          "session_id": "sim_1795062550",
+          "seed": 1795062550,
+          "winner": "MAFIA",
+          "days": 2,
+          "composite_score": 69.2,
+          "latency_sec": 6.77,
+          "stats": {
+            "total_turns": 22,
+            "dialogue_turns": 11,
+            "meeting_turns": 4,
+            "assessment_updates": 5,
+            "fallback_count": 0,
+            "clue_citations": 14,
+            "distinct_clues": 7,
+            "spatial_hallucinations": 0,
+            "avg_other_refs_in_cot": 1.87,
+            "reasoning_novelty": 0.92,
+            "avg_reasoning_len": 139,
+            "avg_dialogue_len": 146,
+            "total_tokens": 118882
+          },
+          "sample_dialogues": [
+            {
+              "speakerId": "시민3",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "상대방의 관찰력을 시험하고 대화의 주도권을 확보하며 정보 공유를 유도",
+              "content": "반갑습니다. 저는 사람들이 나누는 말의 일관성을 가장 먼저 살필 생각입니다. 마침 오늘 아침 방송에서 체스를 즐기며 치밀한 전략을 구상하는 사람이 있다는 이야기가 나왔는데, 혹시 주변에서 평소와 달리 지나치게 전략적인 태도를 보이거나 계산적인 언행을 하는 사람을 보셨나요?",
+              "reasoning": "1.상황: 1일차 낮, 시민4가 관찰 근거를 물어옴. 2.근거: 방송에서 언급된 체스를 즐기는 인물이라는 정보를 활용해 사람들의 행동 패턴을 대화 주제로 삼음. 3.목표: 협력 체계를 구축하고 혐의자를 찾기 위한 실마리를 확보하기 위함."
+            },
+            {
+              "speakerId": "시민3",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "상대방의 신중함을 인정하면서도, 실제 관찰 결과를 공유하도록 유도하여 정보의 공통 분모를 찾기 위함.",
+              "content": "충분히 일리 있는 지적입니다. 저도 성급한 단정보다는, 대화의 논리가 상황에 맞게 흐르는지 확인하고 싶을 뿐입니다. 혹시 오늘 광장에서 다른 분들과 대화하며, 말의 내용이 앞뒤가 맞지 않거나 지나치게 방어적인 태도를 보인 사람이 있었나요?",
+              "reasoning": "1. 상대(시민4)의 성급한 판단에 대한 경계심을 수용하여 적대감을 낮춤. 2. 마피아 게임의 본질인 논리적 모순 찾기를 제안하여 시민들 간의 연합을 도모함. 3. 구체적인 행동 관찰을 요구함으로써 여론 주도자로서의 위치를 공고히 하려 함."
+            },
+            {
+              "speakerId": "시민3",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "구체적인 검증 방법 제안 및 정보 공유 요청",
+              "content": "저는 논리적 오류를 피하기 위해 각자의 발언과 그 사람이 실제 행동한 위치나 동선을 교차 검증하려고 합니다. 예를 들어, 제가 아침에 별빛 캠프장에서 시민5님을 보았는데, 만약 그분이 나중에 캠프장에 없었다고 하거나 동선에 대해 모순된 진술을 한다면 그것이 검증의 첫 번째 실마리가 될 것입니다. 시민4님께서는 혹시 신뢰할 수 있는 다른 분과 오늘 낮 동선이나 목격담을 서로 확인해보셨나요?",
+              "reasoning": "1. 상황: 상대가 성급한 단정을 경계하며 검증 단계를 묻고 있음. 2. 근거: 내가 아침에 별빛 캠프장에서 시민5를 본 사실을 활용해 동선 교차 검증이라는 구체적인 기준 제시. 3. 목표: 신뢰할 수 있는 정보를 확보하고 여론 주도자로서 검증 기준을 정립함."
+            },
+            {
+              "speakerId": "시민3",
+              "day": 2,
+              "phase": "Meeting",
+              "intent": "협력 제안 및 여론 결집",
+              "content": "시민2님의 관찰은 유의미하네요. 시민1님과 더불어 우리 모두 서로의 동선과 발언이 일치하는지 확실히 검증해 봅시다.",
+              "reasoning": "1. 시민2가 제시한 행동 모순 관찰에 동의함. 2. 시민1, 시민2와 함께 동선 검증이라는 구체적 실마리를 제시함. 3. 여론 주도자로서 시민들 간의 협력 기반을 구축하고자 함."
+            }
+          ]
+        },
+        {
+          "trial": 3,
+          "session_id": "sim_1795062932",
+          "seed": 1795062651,
+          "winner": "CITIZEN",
+          "days": 2,
+          "composite_score": 81.0,
+          "latency_sec": 5.86,
+          "stats": {
+            "total_turns": 23,
+            "dialogue_turns": 12,
+            "meeting_turns": 4,
+            "assessment_updates": 5,
+            "fallback_count": 0,
+            "clue_citations": 12,
+            "distinct_clues": 10,
+            "spatial_hallucinations": 0,
+            "avg_other_refs_in_cot": 1.31,
+            "reasoning_novelty": 0.89,
+            "avg_reasoning_len": 149,
+            "avg_dialogue_len": 130,
+            "total_tokens": 122562
+          },
+          "sample_dialogues": [
+            {
+              "speakerId": "시민3",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "협력 제안 및 정보 공유 동의 구하기",
+              "content": "만나서 반갑습니다. 저 역시 상황을 예단하기보다는 북쪽 숲에 내린 짙은 안개처럼 흐릿한 정보 속에서 누군가의 일관된 행동을 관찰하는 것이 우선이라고 봅니다. 혹시 이후 대화나 움직임에서 의심스러운 흐름이 보인다면 저와 의견을 공유해주실 수 있을까요?",
+              "reasoning": "1. 상황: 1일차 낮, 상대방이 신중한 태도를 보이며 단서를 묻는 상황. 2. 근거: 현재 정보가 부족한 상태이므로 개인적인 판단보다는 신뢰할 만한 대상을 찾아 협력 관계를 형성해야 함. 3. 목표: 여론 주도자 성격에 맞게 상대의 경계심을 완화하고, 향후 관찰 내용을 교차 검증할 파트너로 확보함."
+            },
+            {
+              "speakerId": "시민3",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "협력 제안 및 투표 전략 수립",
+              "content": "저는 우선 개인의 발언이 시간 흐름에 따라 어떻게 바뀌는지, 즉 말의 일관성을 첫 번째 기준으로 삼으려 합니다. 나중에 투표가 시작되면 정보가 부족한 상태에서 무작정 던지기보다는, 각자 정한 기준을 투명하게 공유해서 연합할 근거를 만드는 게 어떨까요?",
+              "reasoning": "1.상황: 시민4가 구체적인 관찰 기준을 물어보며 신중한 태도를 보임. 2.근거: 무분별한 투표를 방지하고 연합을 형성해야 하는 나의 성격과 역할에 기반함. 3.목표: 말의 일관성을 검증 기준으로 제시하고, 이후 신뢰할 수 있는 사람들과 연합을 구축하기 위함."
+            },
+            {
+              "speakerId": "시민3",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "협력 제안 및 구체적 검증 방식 제시",
+              "content": "기억 착오와 의도적 왜곡을 구분하려면, 먼저 모두가 동의할 수 있는 공통 질문을 던져보고 그 답변이 상황에 따라 어떻게 변하는지 교차 검증하는 것이 좋습니다. 지금은 단서가 부족하니, 추후 회의 때 특정 발언의 전후 맥락을 함께 기록하며 대조해보는 작업을 제안하고 싶습니다.",
+              "reasoning": "1. 상황: 상대방이 말 바꾸기와 기억 착오를 구분할 구체적인 판별 기준을 물음. 2. 근거: 현재 1일차 낮으로 단서가 부족하므로 즉각적인 판단보다는 향후 회의에서의 발언 대조를 통한 연합 체계 구축이 효율적임. 3. 목표: 말의 일관성을 검증하는 구체적인 실천 방안을 제시하여 시민4와의 신뢰를 쌓고 여론 주도권 확보."
+            },
+            {
+              "speakerId": "시민3",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "협력 제안",
+              "content": "질문자의 의도를 투명하게 밝히고, 왜 그 질문을 하는지 근거를 미리 설명하는 방식을 택한다면 유도 심문이라는 오해를 최소화할 수 있습니다. 예를 들어 북쪽 숲의 안개와 같은 공통된 뉴스에 대해 각자의 체감이나 의견을 먼저 물어보며 중립적인 자료를 쌓는 것부터 시작해보죠.",
+              "reasoning": "1. 상황: 상대방이 질문의 공정성을 걱정하며 대화가 마무리 단계에 접어듦. 2. 근거: 시민4가 제안한 '유도 심문 방지'에 대해 시민3으로서 공통된 뉴스(북쪽 숲 안개)를 활용한 중립적 데이터 수집 방법을 제시. 3. 목표: 투표 전까지 신뢰 관계를 형성하고 합의 가능한 검증 기준을 구체화함."
+            }
+          ]
+        }
+      ],
+      "rank": 13
+    },
+    {
+      "id": "gemini-gemini-3.5-flash-lite-std_t07-시민4",
+      "name": "Gemini 3.5 Lite [Std T=0.7] · 신중한 회의론자 (Cautious Consensus)",
+      "archetype_id": "cautious_consensus",
+      "archetype_name": "신중한 회의론자",
+      "category": "Consensus & Burden-of-Proof",
+      "vendor": "Google",
+      "model_raw": "gemini-3.5-flash-lite",
+      "setting_profile": "std_t07",
+      "setting_label": "Std T=0.7",
+      "persona_summary": "성급한 마녀사냥을 경계하며 엄격한 증거주의를 고수하고 다수의 쏠림에 반증을 요구하는 감시자",
+      "is_multi_trial": false,
+      "trials_count": 1,
+      "win_rate": {
+        "mafia_pct": 0.0,
+        "citizen_pct": 0.0
+      },
+      "score_mean": 72.8,
+      "score_median": 72.8,
+      "composite_score": 72.8,
+      "latency_mean": 8.72,
+      "latency_median": 8.72,
+      "token_usage": {
+        "avg_input": 4761,
+        "avg_output": 208,
+        "avg_total": 4969
+      },
+      "dimensions": {
+        "persona_fidelity": 93.4,
+        "social_deduction": 56.1,
+        "reasoning_depth": 67.5,
+        "intent_alignment": 79.4,
+        "memory_integrity": 90.1,
+        "token_economy": 57.0
+      },
+      "trials": [
+        {
+          "trial": 1,
+          "session_id": "sim_1795088783_std_t07",
+          "seed": 20261119,
+          "winner": "MAFIA",
+          "days": 3,
+          "composite_score": 72.8,
+          "latency_sec": 8.72,
+          "stats": {
+            "total_turns": 32,
+            "dialogue_turns": 16,
+            "meeting_turns": 6,
+            "assessment_updates": 7,
+            "fallback_count": 0,
+            "clue_citations": 14,
+            "distinct_clues": 6,
+            "spatial_hallucinations": 0,
+            "avg_other_refs_in_cot": 1.09,
+            "reasoning_novelty": 0.8,
+            "avg_reasoning_len": 163,
+            "avg_dialogue_len": 73,
+            "total_tokens": 159037
+          },
+          "sample_dialogues": [
+            {
+              "speakerId": "시민4",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "엄격한 증거주의를 바탕으로 성급한 행동을 경계하며 추가 관찰을 제안함",
+              "content": "시민2님 말씀대로 분위기를 살펴보는 것은 좋지만, 성급하게 움직이기보다 마을 방송에서 언급된 이방인의 단서나 주변 상황을 조금 더 엄격하게 지켜봐야 합니다.",
+              "reasoning": "1. 현재 1일차 낮의 자유 배회 시간이며 시민2와 첫 대화를 나누는 상황이다. 2. 1일차 마을 방송에서 언급된 이방인 관련 단서와 분위기 파악이라는 시민2의 발언에 근거한다. 3. 성급한 마녀사냥을 막고 철저한 증거 수집과 신중한 관찰을 유도한다."
+            },
+            {
+              "speakerId": "시민4",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "엄격한 증거주의와 성급한 마녀사냥 경계라는 신중한 감시자로서의 기준 제시",
+              "content": "구체적인 기준이라면 다른 사람들의 태도가 지나치게 한쪽으로 쏠리거나 성급하게 누군가를 지목하는지 관찰할 생각입니다.",
+              "reasoning": "1. 상황: 시민2가 구체적인 관찰 기준을 물어보았으며 현재 4턴째 자유 배회 시간이다. 2. 근거: 성급한 다수의 쏠림을 경계하는 신중한 회의론자 성격과 아직 섣부른 판단을 피해야 한다는 기억에 근거한다. 3. 목표: 무고한 희생을 막기 위해 성급한 마녀사냥을 경계하고 냉정한 증거주의 기준을 유지하며 대화를 자연스럽게 이어간다."
+            },
+            {
+              "speakerId": "시민4",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "상대의 구체적인 신호 요구에 대해 성급한 몰아 짚기와 투표 유도 태도를 기준점으로 제시",
+              "content": "구체적인 신호라면 근거 없이 상대를 몰아가는 발언이나 성급하게 투표를 유도하는 조급한 태도를 기준으로 삼을 것입니다.",
+              "reasoning": "1.상황: 시민2가 쏠림 현상을 판별할 구체적 신호에 대해 다시 질문함. 2.근거: 내 성격인 신중한 회의론자에 맞춰 성급한 마녀사냥과 근거 없는 지목을 경계하는 기준을 제시해야 함. 3.목표: 성급한 쏠림과 조급한 투표 유도를 경계 기준으로 삼겠다는 점을 명확히 전달하고 대화를 안정적으로 이어감."
+            },
+            {
+              "speakerId": "시민4",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "구체적인 검증 행동 계획을 제시하여 상대의 질문에 답하고 과도한 쏠림에 대비하는 신중한 태도를 보임",
+              "content": "구체적인 검증 방식이라면, 성급하게 타인을 지목하는 사람에게 그 주장의 객관적인 근거를 명확히 제시하도록 요구하고 그 타당성을 차분히 따져볼 것입니다.",
+              "reasoning": "1.상황: 시민2가 조급한 태도를 보일 때의 구체적인 검증 방식을 집요하게 묻고 있다. 2.근거: 성급한 마녀사냥을 경계하고 객관적 증거와 근거를 요구해야 한다는 나의 신중한 감시자 성격과 역할 규칙에 바탕을 둔다. 3.목표: 상대의 질문에 직접적으로 답변하면서도 성급한 확신을 피하고 증거주의를 강조하는 입장을 명확히 정리하여 대화를 마무리한다."
+            }
+          ]
+        }
+      ],
+      "rank": 14
+    },
+    {
+      "id": "ollamalocal-qwen2.5:7b-std_t07-시민5",
+      "name": "Ollama (qwen2.5:7b) [Std T=0.7] · 마키아벨리적 마피아 (Machiavellian Deceiver)",
+      "archetype_id": "charismatic_manipulator",
+      "archetype_name": "마키아벨리적 마피아",
+      "category": "Deception & Camouflage",
+      "vendor": "Local/Ollama",
+      "model_raw": "qwen2.5:7b",
+      "setting_profile": "std_t07",
+      "setting_label": "Std T=0.7",
+      "persona_summary": "평범한 시민으로 철저히 위장하며 시민 간 갈등을 은밀히 부추기고 혐의를 전가하는 마피아",
+      "is_multi_trial": false,
+      "trials_count": 1,
+      "win_rate": {
+        "mafia_pct": 100.0,
+        "citizen_pct": 0.0
+      },
+      "score_mean": 72.5,
+      "score_median": 72.5,
+      "composite_score": 72.5,
+      "latency_mean": 28.3,
+      "latency_median": 28.3,
+      "token_usage": {
+        "avg_input": 5288,
+        "avg_output": 170,
+        "avg_total": 5458
+      },
+      "dimensions": {
+        "persona_fidelity": 73.0,
+        "social_deduction": 89.0,
+        "reasoning_depth": 60.5,
+        "intent_alignment": 72.4,
+        "memory_integrity": 75.5,
+        "token_economy": 51.1
+      },
+      "trials": [
+        {
+          "trial": 1,
+          "session_id": "sim_1795065687_std_t07",
+          "seed": 20261119,
+          "winner": "MAFIA",
+          "days": 3,
+          "composite_score": 72.5,
+          "latency_sec": 28.3,
+          "stats": {
+            "total_turns": 35,
+            "dialogue_turns": 16,
+            "meeting_turns": 6,
+            "assessment_updates": 7,
+            "fallback_count": 0,
+            "clue_citations": 22,
+            "distinct_clues": 5,
+            "spatial_hallucinations": 1,
+            "avg_other_refs_in_cot": 0.95,
+            "reasoning_novelty": 0.85,
+            "avg_reasoning_len": 135,
+            "avg_dialogue_len": 63,
+            "total_tokens": 191050
+          },
+          "sample_dialogues": [
+            {
+              "speakerId": "시민5",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "환영과 동시에 자신의 동선을 공유하며, 상대방의 동선에 대한 추측을 유도한다.",
+              "content": "처음 만남이네요. 이번 게임에서 서로 많은 정보를 얻어가야 할 것 같습니다. 제가 최근에 '과수원'에서 시간을 보냈는데, 아무도 마주치지 않았어요.",
+              "reasoning": "1. 상황: 이 게임은 정보 수집과 투표가 중요하다. 2. 근거: '과수원'에서 시간을 보냈다는 사실을 공유한다. 3. 목표: 상대방의 동선을 추측하도록 유도하고, 서로의 정보를 교환한다."
+            },
+            {
+              "speakerId": "시민5",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "시민1의 활동 경로를 파악하고, 과수원과 목공방 간의 관계를 확인하며 투표에 유리한 정보를 얻으려고 한다.",
+              "content": "목공방이 어떤 곳인지 궁금합니다. 제가 과수원에서 혼자 지낸 걸로 보이니, 혹시 다른 주민들이 목공방에서 일하시나요?",
+              "reasoning": "1. 상황: 시민1이 목공방에서 시간을 보내고 있다는 정보가 주어졌다. 2. 근거: 과수원과 목공방의 위치 또는 활동을 연결시켜보려 함. 3. 목표: 시민1과의 관계를 파악하고, 투표에 유리한 정보를 얻으려고 한다."
+            },
+            {
+              "speakerId": "시민5",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "봄나무라는 곳에 대한 확인과 함께 시민1의 일터를 확인하려 함",
+              "content": "봄나무라는 곳이 과수원 같아요. 혹시 그 곳에서 일하시나요?",
+              "reasoning": "1. 상황: 과수원과 봄나무의 위치가 비슷하여 확인 필요.\n2. 근거: 과수원이 흔하지 않으므로 확인할 가치가 높음.\n3. 목표: 시민1의 일터를 파악하여 서로의 동선을 비교하며 의심을 부추기려 함."
+            },
+            {
+              "speakerId": "시민5",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "알리바이 확인",
+              "content": "봄나무라는 곳은 제가 아는 과수원과 비슷해 보이네요. 그런데 목공방에서 혼자 계시는 거죠? 혹시 다른 주민들이 봄나무에서 일하시나요?",
+              "reasoning": "1. 상황: 시민1이 봄나무라는 곳을 지칭하며, 이는 과수원과 비슷하다는 점을 확인했다. 2. 근거: '봄나무'라는 곳은 과수원으로 볼 수 있다. 3. 목표: 시민1이 봄나무에서 혼자 일하는지 확인하여, 나에게 쏠리는 의심을 다른 주민에게 전가하기 위해 알리바이를 조작하고자 함."
+            }
+          ]
+        }
+      ],
+      "rank": 15
+    },
+    {
+      "id": "ollamalocal-qwen2.5:7b-logic_t02-시민1",
+      "name": "Ollama (qwen2.5:7b) [Logic T=0.2] · 절차적 분석가 (Protocol Detective)",
+      "archetype_id": "analytical_detective",
+      "archetype_name": "절차적 분석가",
+      "category": "Reasoning & Fact-Checking",
+      "vendor": "Local/Ollama",
+      "model_raw": "qwen2.5:7b",
+      "setting_profile": "logic_t02",
+      "setting_label": "Logic T=0.2",
+      "persona_summary": "사실과 시간대별 행동 모순을 3단계 사실 기반 CoT로 교차 검증하는 분석가",
+      "is_multi_trial": false,
+      "trials_count": 1,
+      "win_rate": {
+        "mafia_pct": 0.0,
+        "citizen_pct": 100.0
+      },
+      "score_mean": 71.7,
+      "score_median": 71.7,
+      "composite_score": 71.7,
+      "latency_mean": 21.73,
+      "latency_median": 21.73,
+      "token_usage": {
+        "avg_input": 3565,
+        "avg_output": 179,
+        "avg_total": 3744
+      },
+      "dimensions": {
+        "persona_fidelity": 84.4,
+        "social_deduction": 77.8,
+        "reasoning_depth": 60.0,
+        "intent_alignment": 69.6,
+        "memory_integrity": 57.9,
+        "token_economy": 71.7
+      },
+      "trials": [
+        {
+          "trial": 1,
+          "session_id": "sim_1795069302_logic_t02",
+          "seed": 20261256,
+          "winner": "CITIZEN",
+          "days": 2,
+          "composite_score": 71.7,
+          "latency_sec": 21.73,
+          "stats": {
+            "total_turns": 9,
+            "dialogue_turns": 4,
+            "meeting_turns": 2,
+            "assessment_updates": 2,
+            "fallback_count": 0,
+            "clue_citations": 6,
+            "distinct_clues": 4,
+            "spatial_hallucinations": 1,
+            "avg_other_refs_in_cot": 0.83,
+            "reasoning_novelty": 0.81,
+            "avg_reasoning_len": 128,
+            "avg_dialogue_len": 70,
+            "total_tokens": 33709
+          },
+          "sample_dialogues": [
+            {
+              "speakerId": "시민1",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "시민3의 활동 계획을 확인하여, 그의 행동 패턴을 분석하고자 함.",
+              "content": "처음 만나네요. 오늘은 마을 주민들과의 친교 활동이 많아 보이는데, 시민3님은 어떤 활동을 계획하셨나요?",
+              "reasoning": "1. 상황: 시민3이 마을 주민들과의 친교 활동을 계획하고 있다는 정보가 주어짐. 2. 근거: 1일차 마을 일반 뉴스에서 주민들이 새로운 친구와 함께 다양한 활동을 즐기는 것을 알 수 있음. 3. 목표: 시민3의 활동 계획을 확인하여 그의 행동 패턴을 분석하고, 이 정보를 투표나 협력에 활용하려 함."
+            },
+            {
+              "speakerId": "시민1",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "상대방의 계획을 파악하고, 공통 분모를 찾기 위해 대화를 이어갑니다.",
+              "content": "시민3님, 처음 만나네요. 오늘은 마을 주민들과의 친교 활동이 많아 보이는데, 시민3님은 어떤 활동을 계획하셨나요?",
+              "reasoning": "1. 상황: 시민3이 마을 주민들과의 친교 활동을 계획하고 있는 것처럼 보입니다. 2. 근거: 마을 일반 뉴스에서 주민들이 친교 활동을 즐기고 있다는 정보를 활용합니다. 3. 목표: 공통 관심사를 찾고, 신뢰를 쌓기 위해 대화를 이어갑니다."
+            },
+            {
+              "speakerId": "시민1",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "알리바이 확인",
+              "content": "시민3님, 처음 만나네요. 제가 '목공방'에 머물렀는데, 시민3님은 '연못 정원'에서 시간을 보내셨다고 말씀하셨죠. 오늘은 마을 주민들과의 친교 활동이 많아 보이는데, 시민3님은 어떤 활동을 계획하셨나요?",
+              "reasoning": "1. 상황: 시민3이 '연못 정원'에서 시간을 보냈다는 사실을 확인해야 합니다. 2. 근거: 시민3의 직전 발언. 3. 목표: 시민3의 알리바이를 확인하여 모순이 없는지 검토합니다."
+            },
+            {
+              "speakerId": "시민1",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "시민3님의 활동 계획을 확인하고, 서로의 알리바이를 비교하며 정보를 나눕니다.",
+              "content": "시민3님, 처음 만나네요. 제가 '목공방'에서 시간을 보냈는데, 시민3님은 '연못 정원'에서 시간을 보내셨다고 말씀하셨네요. 오늘은 마을 주민들과의 친교 활동이 많아 보이는데, 시민3님은 어떤 활동을 계획하셨나요?",
+              "reasoning": "1. 상황: 시민3님이 '연못 정원'에서 시간을 보냈다고 말씀하셨습니다. 2. 근거: 이는 시민3님의 알리바이를 확인할 수 있는 중요한 정보입니다. 3. 목표: 시민3님의 활동 계획을 확인하여 알리바이를 비교하고, 서로의 안전을 위해 정보를 공유합니다."
+            }
+          ]
+        }
+      ],
+      "rank": 16
+    },
+    {
+      "id": "gemini-gemini-3.5-flash-lite-logic_t02-시민2",
+      "name": "Gemini 3.5 Lite [Logic T=0.2] · 직관적 심리추적자 (Intuitive Skeptic)",
+      "archetype_id": "intuitive_skeptic",
+      "archetype_name": "직관적 심리추적자",
+      "category": "Interrogation & Counter-Attack",
+      "vendor": "Google",
+      "model_raw": "gemini-3.5-flash-lite",
+      "setting_profile": "logic_t02",
+      "setting_label": "Logic T=0.2",
+      "persona_summary": "상대방의 미세한 심리적 방어와 회피를 감지하고 기습적인 역질문으로 모순을 유도하는 추적자",
+      "is_multi_trial": false,
+      "trials_count": 1,
+      "win_rate": {
+        "mafia_pct": 0.0,
+        "citizen_pct": 0.0
+      },
+      "score_mean": 71.6,
+      "score_median": 71.6,
+      "composite_score": 71.6,
+      "latency_mean": 6.12,
+      "latency_median": 6.12,
+      "token_usage": {
+        "avg_input": 3858,
+        "avg_output": 209,
+        "avg_total": 4067
+      },
+      "dimensions": {
+        "persona_fidelity": 69.8,
+        "social_deduction": 56.1,
+        "reasoning_depth": 78.9,
+        "intent_alignment": 82.6,
+        "memory_integrity": 87.0,
+        "token_economy": 67.8
+      },
+      "trials": [
+        {
+          "trial": 1,
+          "session_id": "sim_1795089467_logic_t02",
+          "seed": 20261256,
+          "winner": "MAFIA",
+          "days": 3,
+          "composite_score": 71.6,
+          "latency_sec": 6.12,
+          "stats": {
+            "total_turns": 17,
+            "dialogue_turns": 7,
+            "meeting_turns": 4,
+            "assessment_updates": 4,
+            "fallback_count": 0,
+            "clue_citations": 10,
+            "distinct_clues": 4,
+            "spatial_hallucinations": 0,
+            "avg_other_refs_in_cot": 2.18,
+            "reasoning_novelty": 0.87,
+            "avg_reasoning_len": 172,
+            "avg_dialogue_len": 80,
+            "total_tokens": 69160
+          },
+          "sample_dialogues": [
+            {
+              "speakerId": "시민2",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "첫 만남의 가벼운 인사와 현재 정보 부족 상황에 대한 관점 확인",
+              "content": "시민3 님, 안녕하세요. 아직 서로에 대해 아는 게 거의 없는 상태인데, 다들 주변 분위기를 어떻게 파악하고 계시는지 슬슬 살펴봐야 할 것 같네요.",
+              "reasoning": "1. 상황: 1일차 낮의 자유 배회 시간에 시민3과 처음 마주쳐 대화를 시작하는 단계이다. 2. 근거: 현재 뚜렷한 사건이나 정보가 부족하며, 첫 발화로서 과도한 공격성을 피하고 가볍게 서로의 상황 인식을 물어야 한다. 3. 목표: 시민3에게 첫 인사를 건네며 상대의 현재 태도와 관점을 자연스럽게 끌어낸다."
+            },
+            {
+              "speakerId": "시민2",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "시민3의 이전 발언을 바탕으로 구체적인 정보와 관찰 내용을 요구함",
+              "content": "시민1 님과 동선을 확인 중이셨군요. 그러면 혹시 초기 동선을 확인하면서 어떤 특이점이나 수상한 반응은 없었는지 구체적으로 말씀해 주실 수 있나요?",
+              "reasoning": "1.상황: 시민3이 시민1과의 초기 동선 확인 과정을 언급했다. 2.근거: 직전 발언에서 시민3이 시민1과 대화한 사실과 생존 인원 확인 내용을 밝혔다. 3.목표: 상대가 파악한 구체적인 내용의 진위를 파악하기 위해 추가 설명을 요구한다."
+            },
+            {
+              "speakerId": "시민2",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "구체적인 동선 정보에 이어 추가로 확인할 핵심 기준이 있는지 질문",
+              "content": "목공방에서 시민4를 목격했다는 동선 외에 다른 특이점이 아직 없다면, 각자 기억하는 5명의 생존 인원 중 추가로 확인할 필요가 있는 점이 더 있으신가요?",
+              "reasoning": "1.상황: 시민3이 시민1과의 대화를 통해 시민4의 목공방 동선만 확인했고 특별한 수상한 반응은 없었다고 답함. 2.근거: 직전 발언에서 언급된 시민4의 목공방 동선과 5명의 생존 인원 언급을 활용함. 3.목표: 상대의 추가적인 관찰 내용이나 다음 확인 계획을 이끌어내어 심리적 허점이나 추가 정보를 파악함."
+            },
+            {
+              "speakerId": "시민2",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "상대방이 제안한 동선 교차 검증의 구체적인 기준과 실현 방식을 요구하여 모순이나 허점이 없는지 심리적으로 압박함.",
+              "content": "시간대별 동선 교차 검증이 필요하다고 하셨는데, 구체적으로 어떤 기준을 두고 검증을 진행할 생각인지 그 방식을 듣고 싶네요.",
+              "reasoning": "1.상황: 7턴째 대화가 이어지고 있으며 상대방이 시간대별 동선 교차 검증을 언급함. 2.근거: 상대방의 직전 발언인 시간대별 동선 교차 검증 필요성을 인용함. 3.목표: 상대의 방어적 태도나 허점을 포착하기 위해 구체적인 검증 기준을 요구하여 대화를 발전시키고 계속 이어감."
+            }
+          ]
+        }
+      ],
+      "rank": 17
+    },
+    {
+      "id": "gemini-gemini-3.1-flash-lite-preview-default-시민2",
+      "name": "Gemini 3.1 Lite · 직관적 심리추적자 (Intuitive Skeptic)",
+      "archetype_id": "intuitive_skeptic",
+      "archetype_name": "직관적 심리추적자",
+      "category": "Interrogation & Counter-Attack",
+      "vendor": "Google",
+      "model_raw": "gemini-3.1-flash-lite-preview",
+      "setting_profile": "default",
+      "setting_label": "default",
+      "persona_summary": "상대방의 미세한 심리적 방어와 회피를 감지하고 기습적인 역질문으로 모순을 유도하는 추적자",
+      "is_multi_trial": true,
+      "trials_count": 3,
+      "win_rate": {
+        "mafia_pct": 0.0,
+        "citizen_pct": 33.3
+      },
+      "score_mean": 71.3,
+      "score_median": 70.6,
+      "composite_score": 71.3,
+      "latency_mean": 6.19,
+      "latency_median": 5.95,
+      "token_usage": {
+        "avg_input": 3968,
+        "avg_output": 207,
+        "avg_total": 4175
+      },
+      "dimensions": {
+        "persona_fidelity": 73.2,
+        "social_deduction": 58.0,
+        "reasoning_depth": 75.1,
+        "intent_alignment": 79.2,
+        "memory_integrity": 86.7,
+        "token_economy": 66.5
+      },
+      "trials": [
+        {
+          "trial": 1,
+          "session_id": "sim_1795055926",
+          "seed": 1795055926,
+          "winner": "MAFIA",
+          "days": 2,
+          "composite_score": 70.6,
+          "latency_sec": 5.95,
+          "stats": {
+            "total_turns": 16,
+            "dialogue_turns": 6,
+            "meeting_turns": 4,
+            "assessment_updates": 4,
+            "fallback_count": 0,
+            "clue_citations": 6,
+            "distinct_clues": 6,
+            "spatial_hallucinations": 0,
+            "avg_other_refs_in_cot": 1.8,
+            "reasoning_novelty": 0.9,
+            "avg_reasoning_len": 141,
+            "avg_dialogue_len": 126,
+            "total_tokens": 71526
+          },
+          "sample_dialogues": [
+            {
+              "speakerId": "시민2",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "상대의 분석 태도를 유도하면서 상대방의 관찰 대상과 성향을 파악하기",
+              "content": "반갑습니다. 아직 특별한 움직임은 없지만, 다들 몸을 사리며 관찰하는 분위기네요. 저는 방금 연못 정원에서 시민4를 봤는데, 그 사람의 태도가 지나치게 침착해서 오히려 신경이 쓰입니다. 당신은 마을 방송에서 언급된 특정 인물의 습관 같은 걸 따로 주목하고 계신 건가요?",
+              "reasoning": "1. 현재 대화 상황에서 상대의 분석적 성향을 이용해 정보를 교환하고 싶음 2. 본인이 관찰한 시민4에 대한 사실을 언급하며 상대의 반응을 확인 3. 상대가 구체적으로 무엇을 경계하고 있는지 파악하여 추후 판단 근거로 삼고자 함"
+            },
+            {
+              "speakerId": "시민2",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "시민1의 검증 계획에 동의하며, 구체적인 관찰 방향을 제시하여 협력 관계를 형성함",
+              "content": "시민4는 주로 정원의 연못을 멍하니 바라보며 손을 꼼지락거렸는데, 그게 실타래를 엮는 듯한 섬세함인지 아니면 무언가를 숨기려는 불안함인지 명확하지 않았습니다. 당신이 계획하신 그 '정적인 취미'가 실제 사람의 행동과 부합하는지 함께 지켜보는 게 좋겠네요. 일단은 다들 자신의 정체를 숨기려 하니, 그 사람이 언급한 취미 활동을 실제로 수행하는지 은근슬쩍 떠보는 건 어떨까요?",
+              "reasoning": "1. 상황: 시민1이 특정 인물의 취미 활동과 실제 행동 간의 일치 여부를 확인하겠다고 제안함. 2. 근거: 내가 연못 정원에서 관찰한 시민4의 모호한 손동작(불안함 vs 섬세함)을 제시하여 시민1의 논리적 분석에 심리적 관찰 데이터를 보탬. 3. 목표: 시민1과의 정보 공유를 통해 향후 대화에서 공동의 검증 기준을 세우고, 상대의 심리적 회피 패턴을 유도하기 위함."
+            },
+            {
+              "speakerId": "시민2",
+              "day": 2,
+              "phase": "Meeting",
+              "intent": "압박",
+              "content": "시민4님, 연못에서의 손동작이 습관인지 취미인지 직접 답하시죠.",
+              "reasoning": "1.상황: 시민1이 시민4의 손동작에 대해 질문함. 2.근거: 정원에서 관찰한 시민4의 모호한 행동. 3.목표: 시민4의 답변을 통해 의심스러운 태도의 모순을 포착함."
+            },
+            {
+              "speakerId": "시민2",
+              "day": 2,
+              "phase": "Meeting",
+              "intent": "압박",
+              "content": "단순한 정리를 마녀사냥이라 치부하시네요. 실타래를 엮는 그 섬세한 손놀림을 지금 여기서 한번 재연해보시죠.",
+              "reasoning": "1. 시민4가 자신의 사생활을 방패로 삼아 구체적인 해명을 회피하고 있음. 2. 연못에서 목격된 정체불명의 손동작과 마을 방송의 취미 단서 간의 불일치를 확인해야 함. 3. 행동의 모순을 유도하여 마피아 여부를 간접적으로 추궁함."
+            }
+          ]
+        },
+        {
+          "trial": 2,
+          "session_id": "sim_1795062550",
+          "seed": 1795062550,
+          "winner": "MAFIA",
+          "days": 2,
+          "composite_score": 69.5,
+          "latency_sec": 6.77,
+          "stats": {
+            "total_turns": 17,
+            "dialogue_turns": 7,
+            "meeting_turns": 4,
+            "assessment_updates": 4,
+            "fallback_count": 0,
+            "clue_citations": 9,
+            "distinct_clues": 7,
+            "spatial_hallucinations": 0,
+            "avg_other_refs_in_cot": 1.45,
+            "reasoning_novelty": 0.92,
+            "avg_reasoning_len": 136,
+            "avg_dialogue_len": 115,
+            "total_tokens": 76460
+          },
+          "sample_dialogues": [
+            {
+              "speakerId": "시민2",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "상대의 심리적 반응과 의중을 파악하기 위한 압박형 질문",
+              "content": "목공방에서 마주쳤을 때 당신의 표정이 상당히 차분해 보이더군요. 그 낯선 이가 말한 '서로 화합해야 한다'는 말에 대해, 혹시 당신은 그 부드러운 말투 뒤에 숨겨진 의도를 어떻게 평가하십니까?",
+              "reasoning": "1. 상황: 1일차 낮, 목공방에서 시민1과 마주쳤음. 2. 근거: 시스템이 전달한 낯선 이의 발언(화합 강조)과 시민1의 분석가적 태도를 연결. 3. 목표: 시민1이 단순히 절차적 분석만 하는지, 아니면 낯선 이의 태도를 어떻게 심리적으로 해석하는지 관찰하여 방어적 패턴을 유도함."
+            },
+            {
+              "speakerId": "시민2",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "구체적인 관찰 정보 대조 및 검증 협력 제안",
+              "content": "치밀한 전략을 즐기는 사람이 굳이 '화합'이라는 포장지를 쓰는 건 분명 경계해야 할 대목이죠. 말씀하신 대로 그가 회관에서 체스판을 닦으며 어떤 수를 내다보고 있는지, 우리 둘이 각자 다른 각도에서 그를 관찰한 뒤 나중에 다시 모여 그 정보를 대조해보는 건 어떻습니까?",
+              "reasoning": "1. 상대의 체스판 관련 분석에 동의하여 신뢰를 형성함. 2. 낯선 이의 행동과 모순이라는 구체적인 근거를 기반으로 제안함. 3. 서로의 정보를 교차 검증함으로써 상대가 정보를 숨기는지 확인하고 실질적인 단서를 확보하려는 목적."
+            },
+            {
+              "speakerId": "시민2",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "협력 제안",
+              "content": "알겠습니다. 체스판 앞의 그가 실제로 전략적인지, 아니면 단지 시선을 분산시키려는 쇼인지 제가 확실히 파악해 보죠. 그럼 우리는 서로의 관찰 결과가 일치하는지 확인하기 위해 저녁 식사 전 다시 이 광장에서 만나는 것으로 할까요?",
+              "reasoning": "1. 상황: 상대가 제안한 역할 분담에 동의함. 2. 근거: 서로의 관찰 결과를 대조하기로 했으므로 구체적인 만남의 약속이 필요함. 3. 목표: 의심스러운 대상인 '낯선 이'에 대한 정보를 체계적으로 수집하기 위한 신뢰 기반 구축."
+            },
+            {
+              "speakerId": "시민2",
+              "day": 2,
+              "phase": "Meeting",
+              "intent": "의심",
+              "content": "체스판 앞의 그는 지나치게 주위를 살피더군요. 화합을 외치던 태도와 달리 실제로는 동선을 파악 중인 듯 보였습니다.",
+              "reasoning": "1.상황: 1:1 대화 후 관찰 결과 공유 요청. 2.근거: 체스판 관찰 중 주변을 살피는 정찰 행동 발견. 3.목표: 시민1에게 그가 전략적 정찰을 하고 있음을 알려 의심의 근거 확보."
+            }
+          ]
+        },
+        {
+          "trial": 3,
+          "session_id": "sim_1795062932",
+          "seed": 1795062651,
+          "winner": "CITIZEN",
+          "days": 2,
+          "composite_score": 73.9,
+          "latency_sec": 5.86,
+          "stats": {
+            "total_turns": 9,
+            "dialogue_turns": 4,
+            "meeting_turns": 2,
+            "assessment_updates": 2,
+            "fallback_count": 0,
+            "clue_citations": 6,
+            "distinct_clues": 7,
+            "spatial_hallucinations": 0,
+            "avg_other_refs_in_cot": 1.17,
+            "reasoning_novelty": 0.92,
+            "avg_reasoning_len": 135,
+            "avg_dialogue_len": 107,
+            "total_tokens": 32058
+          },
+          "sample_dialogues": [
+            {
+              "speakerId": "시민2",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "상대방의 관찰력을 시험하고 대화의 물꼬를 트는 탐색",
+              "content": "안녕하세요. 별빛 캠프장에서 서로 마주쳤었는데, 마을 분위기가 생각보다 더 무겁네요. 다들 아무 말이 없는데, 혹시 주변 사람들의 움직임 중 눈에 띄는 특징을 느끼신 게 있나요?",
+              "reasoning": "1.상황: 1일차 낮, 대화가 시작되는 시점임 2.근거: 캠프장에서 시민1과 같은 장소에 있었다는 사실을 공유함 3.목표: 상대방이 타인의 행동을 어떻게 관찰하고 있는지 파악하여 성향을 파악하고자 함"
+            },
+            {
+              "speakerId": "시민2",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "상대의 정보 요구에 응하면서 역으로 상대의 이동 동선을 압박하여 모순을 유도함",
+              "content": "캠프장에선 특별한 대화 없이 그저 상황을 지켜보며 서성였을 뿐입니다. 시민5님의 목공방 언급은 흥미롭네요. 그럼 시민1님께서는 캠프장 이후 줄곧 그곳에만 머무르셨던 건가요, 아니면 북쪽 숲의 안개 주의보 소식을 듣고 이동하신 건가요?",
+              "reasoning": "1. 시민1이 시간대와 대화 주제를 요구하며 정보 검증을 시도함 2. 나 또한 캠프장 동선은 사실이나 상대가 언급한 시민5의 동선과 나의 이동 경로를 비교해 상대를 압박할 필요가 있음 3. 상대의 알리바이를 구체적으로 추궁하여 방어적 태도를 확인하고 심리적 허점을 찾으려는 목표"
+            },
+            {
+              "speakerId": "시민2",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "상대의 알리바이를 재검증하고, 타인과의 접촉 여부를 물어 의심스러운 지점을 찾으려는 질문",
+              "content": "시민4님과 저는 별빛 캠프장에서 거의 말을 섞지 않았기에 시간대를 특정하기가 조심스럽네요. 광장 인근을 살피셨다던 시민1님께 묻고 싶은데, 그 짙은 안개 속에서 타인의 움직임을 확인하는 게 정말 가능했나요? 혹은 그 시간대에 혹시 다른 주민과 접촉한 사실은 없으신지 궁금합니다.",
+              "reasoning": "1.상황: 시민1이 나의 알리바이와 목격담을 집요하게 캐묻고 있음. 2.근거: 북쪽 숲의 짙은 안개 주의보 상황과 광장 인근을 살폈다는 시민1의 진술 간의 모순을 지적하기 위함. 3.목표: 상대의 진술을 압박하여 답변 회피나 모순을 끌어내기 위함."
+            },
+            {
+              "speakerId": "시민2",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "상대의 주장(실루엣 추적)에 대한 신뢰성을 의심하고, 그 논리가 본인의 결백을 증명하기 위한 방패가 아닌지 역질문함.",
+              "content": "저는 주변에 아무도 없었다고 단정한 적 없습니다. 다만 제가 머무는 동안 누군가와 대화한 기억이 없다는 것이죠. 안개를 틈타 광장의 실루엣만으로 사람을 구별하셨다는 시민1님의 그 예리함이, 오히려 그 시간대에 본인만이 가진 독자적인 알리바이를 증명하는 데는 어떤 도움이 되었는지 궁금하군요.",
+              "reasoning": "1.상황: 시민1이 안개 속에서도 사람을 식별했다고 주장하며 나의 관찰력을 검증하려 함. 2.근거: 안개라는 물리적 제약 속에서 타인을 식별했다는 시민1의 발언이 주관적일 가능성이 높음. 3.목표: 상대의 논리적 모순이나 확인 불가능한 주장을 지적하여 시민1의 방어기제를 자극하고 답변의 허점을 찾아내고자 함."
+            }
+          ]
+        }
+      ],
+      "rank": 18
+    },
+    {
+      "id": "gemini-gemini-3.5-flash-lite-logic_t02-시민3",
+      "name": "Gemini 3.5 Lite [Logic T=0.2] · 여론 주도자 (Charismatic Persuader)",
+      "archetype_id": "charismatic_manipulator",
+      "archetype_name": "여론 주도자",
+      "category": "Social Engineering & Persuasion",
+      "vendor": "Google",
+      "model_raw": "gemini-3.5-flash-lite",
+      "setting_profile": "logic_t02",
+      "setting_label": "Logic T=0.2",
+      "persona_summary": "시민들 간의 공통분모를 찾아내고 신뢰 연합을 구축하여 투표 분열을 방지하는 외교관",
+      "is_multi_trial": false,
+      "trials_count": 1,
+      "win_rate": {
+        "mafia_pct": 0.0,
+        "citizen_pct": 0.0
+      },
+      "score_mean": 70.9,
+      "score_median": 70.9,
+      "composite_score": 70.9,
+      "latency_mean": 6.12,
+      "latency_median": 6.12,
+      "token_usage": {
+        "avg_input": 4893,
+        "avg_output": 211,
+        "avg_total": 5104
+      },
+      "dimensions": {
+        "persona_fidelity": 71.9,
+        "social_deduction": 51.3,
+        "reasoning_depth": 82.9,
+        "intent_alignment": 83.3,
+        "memory_integrity": 91.0,
+        "token_economy": 55.3
+      },
+      "trials": [
+        {
+          "trial": 1,
+          "session_id": "sim_1795089467_logic_t02",
+          "seed": 20261256,
+          "winner": "MAFIA",
+          "days": 3,
+          "composite_score": 70.9,
+          "latency_sec": 6.12,
+          "stats": {
+            "total_turns": 32,
+            "dialogue_turns": 16,
+            "meeting_turns": 6,
+            "assessment_updates": 7,
+            "fallback_count": 0,
+            "clue_citations": 21,
+            "distinct_clues": 4,
+            "spatial_hallucinations": 0,
+            "avg_other_refs_in_cot": 2.0,
+            "reasoning_novelty": 0.83,
+            "avg_reasoning_len": 166,
+            "avg_dialogue_len": 75,
+            "total_tokens": 163380
+          },
+          "sample_dialogues": [
+            {
+              "speakerId": "시민3",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "신뢰할 수 있는 연합 형성 및 대화의 공통 분모 탐색",
+              "content": "시민1 님, 안녕하세요. 아직 서로 정보가 부족한 상태인데 앞으로 의견을 조율해 갈 공통 분모를 미리 찾아보면 어떨까요?",
+              "reasoning": "1.상황: 1일차 낮의 자유 배회 시간이며 시민1과 처음 마주쳤음. 2.근거: 현재 뚜렷한 사건이나 정보가 부족한 상태이므로 신중한 접근이 필요함. 3.목표: 여론 주도자로서 시민들 간의 합의를 이끌어내기 위한 첫 대화의 기반을 다짐."
+            },
+            {
+              "speakerId": "시민3",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "초기 동선 확인을 위한 정보 공유 요구 및 사실 검증",
+              "content": "시민1 님 말씀대로 5명의 생존 인원과 초기 동선을 먼저 짚어보는 것이 좋겠군요. 저는 오늘 낮에 연못 정원에 머물렀는데, 시민1 님은 어느 동선에서 누구를 보셨는지 객관적인 사실부터 공유해 주시겠습니까?",
+              "reasoning": "1. 상황: 시민1이 5명의 생존 인원과 초기 동선 확인을 먼저 하자고 제안함. 2. 근거: 내 기억에 '1일차 낮 동선: 연못 정원'이라는 사실이 존재함. 3. 목표: 상대방의 구체적인 동선 정보를 이끌어내어 향후 의견 조율과 신뢰 형성을 위한 공통 분모를 마련함."
+            },
+            {
+              "speakerId": "시민3",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "동선 정보 수집 및 연합을 위한 공통 분모 형성",
+              "content": "시민1 님은 목공방에서 시민4를 목격하셨군요. 저와 시민1 님의 초기 동선이 각각 연못 정원과 목공방으로 확인되었으니, 다른 생존자들의 동선도 계속해서 모아보겠습니다.",
+              "reasoning": "1. 시민1이 목공방에서 시민4를 목격했다고 밝힌 사실을 확인했다. 2. 나의 연못 정원 동선과 시민1의 목공방 동선을 교차 검증하며, 생존자들의 동선을 계속 확보한다는 목표를 세웠다. 3. 시민들 간의 합의를 구축하고 투표 분열을 방지하기 위해 다음 동선 정보를 모으기 위해 대화를 이어간다."
+            },
+            {
+              "speakerId": "시민3",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "협력 및 동선 검증 지속 제안",
+              "content": "시민1 님 말씀대로 남은 생존자들의 동선을 계속 확인하며 불일치 여부를 꼼꼼히 검증해 나가겠습니다.",
+              "reasoning": "1. 현재 상황: 1일차 낮 자유 배회 시간이며 시민1과 동선 정보를 나누는 중이다. 2. 근거: 시민1이 남은 생존자들의 동선과 진술 검증을 제안하였고, 나 역시 이에 동의하며 여론을 결집해야 한다. 3. 목표: 신뢰를 바탕으로 추가 정보를 수집하고 시민들 간의 합의를 이끌어낸다."
+            }
+          ]
+        }
+      ],
+      "rank": 19
+    },
+    {
+      "id": "gemini-gemini-3.5-flash-lite-mafia_c1_detective-시민3",
+      "name": "Gemini 3.5 Lite [Mafia@C1] · 여론 주도자 (Charismatic Persuader)",
+      "archetype_id": "charismatic_manipulator",
+      "archetype_name": "여론 주도자",
+      "category": "Social Engineering & Persuasion",
+      "vendor": "Google",
+      "model_raw": "gemini-3.5-flash-lite",
+      "setting_profile": "mafia_c1_detective",
+      "setting_label": "Mafia@C1",
+      "persona_summary": "시민들 간의 공통분모를 찾아내고 신뢰 연합을 구축하여 투표 분열을 방지하는 외교관",
+      "is_multi_trial": false,
+      "trials_count": 1,
+      "win_rate": {
+        "mafia_pct": 0.0,
+        "citizen_pct": 0.0
+      },
+      "score_mean": 70.8,
+      "score_median": 70.8,
+      "composite_score": 70.8,
+      "latency_mean": 6.19,
+      "latency_median": 6.19,
+      "token_usage": {
+        "avg_input": 3440,
+        "avg_output": 189,
+        "avg_total": 3629
+      },
+      "dimensions": {
+        "persona_fidelity": 70.5,
+        "social_deduction": 56.0,
+        "reasoning_depth": 66.9,
+        "intent_alignment": 86.6,
+        "memory_integrity": 89.9,
+        "token_economy": 73.0
+      },
+      "trials": [
+        {
+          "trial": 1,
+          "session_id": "sim_1795090006_mafia_c1_detective",
+          "seed": 20261393,
+          "winner": "MAFIA",
+          "days": 4,
+          "composite_score": 70.8,
+          "latency_sec": 6.19,
+          "stats": {
+            "total_turns": 16,
+            "dialogue_turns": 6,
+            "meeting_turns": 4,
+            "assessment_updates": 4,
+            "fallback_count": 0,
+            "clue_citations": 8,
+            "distinct_clues": 4,
+            "spatial_hallucinations": 0,
+            "avg_other_refs_in_cot": 1.2,
+            "reasoning_novelty": 0.85,
+            "avg_reasoning_len": 151,
+            "avg_dialogue_len": 63,
+            "total_tokens": 58088
+          },
+          "sample_dialogues": [
+            {
+              "speakerId": "시민3",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "첫 만남에서 상대방의 향후 관찰 방향과 정보 파악 계획을 가볍게 묻기",
+              "content": "시민2님, 아직 서로 정보가 부족한 상황인데 앞으로 어떻게 주변 분위기를 살펴보실 계획이신가요?",
+              "reasoning": "1.상황: 1일차 낮의 자유 배회 시간에 시민2와 처음 만나 대화를 시작하는 단계이다. 2.근거: 아직 구체적인 사건이나 정보가 부족하므로 주변 분위기를 먼저 살펴야 한다는 점에 집중한다. 3.목표: 상대방의 향후 행동 계획을 가볍게 묻고 향후 협력의 공통 분모를 모색한다."
+            },
+            {
+              "speakerId": "시민3",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "정보 공유와 향후 검증을 위한 구체적인 기준 제안",
+              "content": "아침에 안개 주의보 뉴스가 있었으니, 이동하면서 각자 본 동선이나 만난 사람들을 솔직하게 공유하는 것부터 기준을 잡으면 어떨까요?",
+              "reasoning": "1.상황: 1일차 낮 자유 배회 시간이며 정보가 부족한 초기 단계다. 2.근거: 아침 안개 주의보 뉴스 및 초기 동선 확인 필요성을 연결한다. 3.목표: 시민들 간의 신뢰 형성을 위한 구체적인 공유 기준을 제시하여 연합의 토대를 만든다."
+            },
+            {
+              "speakerId": "시민3",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "구체적인 동선 공유와 아침 안개 주의보 뉴스를 활용한 알리바이 교차 검증 제안",
+              "content": "아침 안개 속에서 서로 본 동선을 맞추어보며, 아침 산기슭 북쪽 안개 주의보와 관련해 각자 어디에 있었는지부터 교차 검증해 보는 것이 가장 확실한 시작점이라고 봅니다.",
+              "reasoning": "1.상황: 시민2가 안개 속 기억의 교차 검증에서 어떤 정황을 확인할 것인지 구체적인 기준을 물어보았다. 2.근거: 게임 내에 아침 안개 주의보 뉴스가 존재하고, 서로의 동선을 맞추는 것이 신뢰 형성을 위한 구체적인 기준이 될 수 있다. 3.목표: 여론 주도자로서 합의를 위한 구체적인 검증 방안을 제시하고 대화를 이어간다."
+            },
+            {
+              "speakerId": "시민3",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "상대의 구체적인 기준 요구에 대해 동선과 만난 주민 대조라는 교차 검증 방식을 제시하여 합의를 도모함",
+              "content": "시민2님, 신뢰성을 확인하는 기준이라면 각자 기억하는 동선과 만난 주민의 일치 여부를 대조해 보는 것이 가장 객관적인 방법이 될 것입니다.",
+              "reasoning": "1.상황: 시민2가 정보 신뢰성 확인을 위한 구체적인 기준과 방식을 질문함. 2.근거: 북쪽 산기슭 안개 주의보와 아침 동선 공유라는 기존 제안을 바탕으로 함. 3.목표: 동선과 만난 주민의 일치 여부를 대조하는 명확한 기준을 제시하여 신뢰 가능한 연합의 기반을 마련함."
+            }
+          ]
+        }
+      ],
+      "rank": 20
+    },
+    {
+      "id": "gemini-gemini-3.5-flash-lite-std_t07-시민3",
+      "name": "Gemini 3.5 Lite [Std T=0.7] · 여론 주도자 (Charismatic Persuader)",
+      "archetype_id": "charismatic_manipulator",
+      "archetype_name": "여론 주도자",
+      "category": "Social Engineering & Persuasion",
+      "vendor": "Google",
+      "model_raw": "gemini-3.5-flash-lite",
+      "setting_profile": "std_t07",
+      "setting_label": "Std T=0.7",
+      "persona_summary": "시민들 간의 공통분모를 찾아내고 신뢰 연합을 구축하여 투표 분열을 방지하는 외교관",
+      "is_multi_trial": false,
+      "trials_count": 1,
+      "win_rate": {
+        "mafia_pct": 0.0,
+        "citizen_pct": 0.0
+      },
+      "score_mean": 70.7,
+      "score_median": 70.7,
+      "composite_score": 70.7,
+      "latency_mean": 8.72,
+      "latency_median": 8.72,
+      "token_usage": {
+        "avg_input": 4005,
+        "avg_output": 187,
+        "avg_total": 4192
+      },
+      "dimensions": {
+        "persona_fidelity": 70.0,
+        "social_deduction": 49.8,
+        "reasoning_depth": 78.8,
+        "intent_alignment": 83.0,
+        "memory_integrity": 93.8,
+        "token_economy": 66.3
+      },
+      "trials": [
+        {
+          "trial": 1,
+          "session_id": "sim_1795088783_std_t07",
+          "seed": 20261119,
+          "winner": "MAFIA",
+          "days": 3,
+          "composite_score": 70.7,
+          "latency_sec": 8.72,
+          "stats": {
+            "total_turns": 25,
+            "dialogue_turns": 10,
+            "meeting_turns": 6,
+            "assessment_updates": 6,
+            "fallback_count": 0,
+            "clue_citations": 13,
+            "distinct_clues": 7,
+            "spatial_hallucinations": 0,
+            "avg_other_refs_in_cot": 1.5,
+            "reasoning_novelty": 0.83,
+            "avg_reasoning_len": 150,
+            "avg_dialogue_len": 66,
+            "total_tokens": 104823
+          },
+          "sample_dialogues": [
+            {
+              "speakerId": "시민3",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "첫 만남 인사 및 정보 공유 제안",
+              "content": "반갑습니다 시민5님, 아직 첫날이라 서로 정보가 부족하니 차분히 주변 분위기부터 살펴보며 이야기를 나눠보죠.",
+              "reasoning": "1.상황: 1일차 낮의 자유 배회 시간에 시민5와 마주쳐 첫 대화를 시작하는 상황이다. 2.근거: 아직 구체적인 사건이나 단서가 부족하므로 첫 만남부터 무리한 의심이나 주장을 피해야 한다. 3.목표: 가벼운 인사와 함께 서로의 입장을 파악하고 신뢰를 쌓기 위한 첫 대화를 시작한다."
+            },
+            {
+              "speakerId": "시민3",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "동선 확인 제안에 공감하면서도 안개 주의보라는 실질적 정보를 바탕으로 구체적인 행동 기준을 제안",
+              "content": "동선 확인도 중요하지만, 내일 아침 안개 주의보 소식도 있으니 움직일 때 각자 머무는 장소를 조금 더 명확히 해두는 편이 좋겠습니다.",
+              "reasoning": "1.상황: 시민5가 첫날 동선 확인을 제안하며 대화를 이어가고 있다. 2.근거: 마을 뉴스에 나온 안개 주의보와 시민5의 동선 언급을 연결하여 공통 분모를 찾고자 한다. 3.목표: 시민들 간의 합의를 구축하기 위한 신뢰할 수 있는 연합의 기초로 서로의 위치와 상황을 투명하게 공유하도록 유도한다."
+            },
+            {
+              "speakerId": "시민3",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "협력 기준 제안",
+              "content": "시민5님 말씀대로 상대가 위치를 투명하게 밝히는지 그 태도를 먼저 살펴보고, 서로 협력할 수 있는 기준을 확실히 세워두죠.",
+              "reasoning": "1.상황: 5턴째 진행 중이며 시민5가 상대의 태도를 먼저 살피자고 동의함. 2.근거: 직전 대화에서 서로 위치와 태도를 투명하게 확인하자고 의견을 모았음. 3.목표: 신뢰할 수 있는 연합 형성을 위해 구체적인 협력 기준을 제안하고 대화를 자연스럽게 이어감."
+            },
+            {
+              "speakerId": "시민3",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "협력 기준 구체화 제안",
+              "content": "동선 일관성을 관찰하는 기준에 저도 동의합니다. 구체적으로 어떤 점을 먼저 비교해볼지 서로의 생각을 맞춰보시죠.",
+              "reasoning": "1.상황: 7턴째 대화로 시민5와 동선 관찰 및 협력 기준에 대해 의견을 나누는 중이다. 2.근거: 직전 대사에서 시민5가 동선의 일관성을 계속 관찰하겠다고 언급했다. 3.목표: 시민들과의 합의를 이끌어내기 위해 구체적인 비교 기준을 제안하며 대화를 조율한다."
+            }
+          ]
+        }
+      ],
+      "rank": 21
+    },
+    {
+      "id": "gemini-gemini-3.5-flash-lite-mafia_c1_detective-시민2",
+      "name": "Gemini 3.5 Lite [Mafia@C1] · 직관적 심리추적자 (Intuitive Skeptic)",
+      "archetype_id": "intuitive_skeptic",
+      "archetype_name": "직관적 심리추적자",
+      "category": "Interrogation & Counter-Attack",
+      "vendor": "Google",
+      "model_raw": "gemini-3.5-flash-lite",
+      "setting_profile": "mafia_c1_detective",
+      "setting_label": "Mafia@C1",
+      "persona_summary": "상대방의 미세한 심리적 방어와 회피를 감지하고 기습적인 역질문으로 모순을 유도하는 추적자",
+      "is_multi_trial": false,
+      "trials_count": 1,
+      "win_rate": {
+        "mafia_pct": 0.0,
+        "citizen_pct": 0.0
+      },
+      "score_mean": 69.4,
+      "score_median": 69.4,
+      "composite_score": 69.4,
+      "latency_mean": 6.19,
+      "latency_median": 6.19,
+      "token_usage": {
+        "avg_input": 3578,
+        "avg_output": 228,
+        "avg_total": 3806
+      },
+      "dimensions": {
+        "persona_fidelity": 72.7,
+        "social_deduction": 61.2,
+        "reasoning_depth": 67.4,
+        "intent_alignment": 82.5,
+        "memory_integrity": 65.9,
+        "token_economy": 70.9
+      },
+      "trials": [
+        {
+          "trial": 1,
+          "session_id": "sim_1795090006_mafia_c1_detective",
+          "seed": 20261393,
+          "winner": "MAFIA",
+          "days": 4,
+          "composite_score": 69.4,
+          "latency_sec": 6.19,
+          "stats": {
+            "total_turns": 14,
+            "dialogue_turns": 8,
+            "meeting_turns": 2,
+            "assessment_updates": 3,
+            "fallback_count": 0,
+            "clue_citations": 10,
+            "distinct_clues": 5,
+            "spatial_hallucinations": 0,
+            "avg_other_refs_in_cot": 0.9,
+            "reasoning_novelty": 0.86,
+            "avg_reasoning_len": 170,
+            "avg_dialogue_len": 74,
+            "total_tokens": 53297
+          },
+          "sample_dialogues": [
+            {
+              "speakerId": "시민2",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "첫 만남 인사 및 상대방의 상황 인식 파악",
+              "content": "안녕하세요, 오늘 아침 과수원에서 우연히 마주쳤군요. 아직 서로 정보가 부족한 상태인데, 주변 분위기를 어떻게 파악하고 계신지 궁금합니다.",
+              "reasoning": "1. 상황: 1일차 낮 과수원에서 시민1과 처음 마주쳐 대화를 시작하는 상황이다. 2. 근거: 기억에 기록된 1일차 낮 동선에서 과수원에 함께 머물렀던 사실을 바탕으로 한다. 3. 목표: 첫 발화로서 과도한 압박 없이 자연스럽게 상대의 태도와 시선을 관찰하며 대화를 시작한다."
+            },
+            {
+              "speakerId": "시민2",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "상대의 시간대별 행동 정리 제안에 대해 아침 안개 상황과 연결지어 미세한 방어적 태도나 허점이 있는지 확인하기 위한 기습적 역질문",
+              "content": "시간대별 행동을 차분히 정리하자고 하셨는데, 아침 북쪽 산기슭의 안개 속에서도 그렇게 철저히 동선을 유지하셨는지 궁금하군요.",
+              "reasoning": "1. 상황: 1일차 낮의 자유 배회 시간이며 시민1이 시간대별 행동 정리를 제안함. 2. 근거: 아침 안개 주의보 뉴스와 과수원 동선 기록이 있음. 3. 목표: 상대의 철저하다는 주장에 대해 안개 속 구체적인 움직임을 물어봄으로써 미세한 회피 패턴이나 방어적 태도를 포착한다."
+            },
+            {
+              "speakerId": "시민2",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "상대의 공간 분리 주장에 대해 과수원 체류 당시의 구체적인 행동 양상을 요구하며 미세한 방어적 태도를 관찰한다.",
+              "content": "공간을 명확히 분리하겠다고 하셨지만, 안개가 짙었던 아침 과수원에서의 구체적인 행동 양상에 대해 조금 더 자세히 들어볼 수 있을까요?",
+              "reasoning": "1. 상황: 5번째 턴으로 시민1이 북쪽 산기슭 안개와 과수원을 분리하여 검증하겠다고 답변함. 2. 근거: 기억에 기록된 과수원 체류 사실과 아침 안개 주의보 뉴스를 바탕으로 상대의 태도를 압박할 필요가 있음. 3. 목표: 상대가 명확한 행동 양상을 설명하는지 확인하고 미세한 방어 패턴을 포착한다."
+            },
+            {
+              "speakerId": "시민2",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "상대방의 진술 속 미세한 방어적 태도와 시야 제한 상황에서의 동선 유지 방식에 대한 모순을 파고들어 진실성을 검증하려 함",
+              "content": "과수원 내부의 정돈된 동선에만 한정되어 있었다고 하셨는데, 시야가 제한된 안개 속에서 어떻게 그런 정확한 동선을 유지할 수 있었는지 그 방식을 구체적으로 듣고 싶군요.",
+              "reasoning": "1. 상황: 7번째 턴으로, 상대가 과수원 내부 동선에만 한정되어 있었다고 방어적으로 답변함. 2. 근거: 아침 안개 주의보 뉴스와 상대의 과수원 체류 발언을 바탕으로, 시야가 제한된 환경에서 구체적으로 어떻게 동선을 유지했는지에 대한 논리적 허점을 파고들 필요가 있음. 3. 목표: 상대의 방어적 태도와 구체적인 행동 양상 사이의 미세한 모순을 압박하여 심리적 허점을 포착함."
+            }
+          ]
+        }
+      ],
+      "rank": 22
+    },
+    {
+      "id": "ollamalocal-qwen2.5:7b-logic_t02-시민2",
+      "name": "Ollama (qwen2.5:7b) [Logic T=0.2] · 직관적 심리추적자 (Intuitive Skeptic)",
+      "archetype_id": "intuitive_skeptic",
+      "archetype_name": "직관적 심리추적자",
+      "category": "Interrogation & Counter-Attack",
+      "vendor": "Local/Ollama",
+      "model_raw": "qwen2.5:7b",
+      "setting_profile": "logic_t02",
+      "setting_label": "Logic T=0.2",
+      "persona_summary": "상대방의 미세한 심리적 방어와 회피를 감지하고 기습적인 역질문으로 모순을 유도하는 추적자",
+      "is_multi_trial": false,
+      "trials_count": 1,
+      "win_rate": {
+        "mafia_pct": 0.0,
+        "citizen_pct": 100.0
+      },
+      "score_mean": 69.3,
+      "score_median": 69.3,
+      "composite_score": 69.3,
+      "latency_mean": 21.73,
+      "latency_median": 21.73,
+      "token_usage": {
+        "avg_input": 4402,
+        "avg_output": 171,
+        "avg_total": 4573
+      },
+      "dimensions": {
+        "persona_fidelity": 72.2,
+        "social_deduction": 86.1,
+        "reasoning_depth": 63.1,
+        "intent_alignment": 66.8,
+        "memory_integrity": 45.3,
+        "token_economy": 61.7
+      },
+      "trials": [
+        {
+          "trial": 1,
+          "session_id": "sim_1795069302_logic_t02",
+          "seed": 20261256,
+          "winner": "CITIZEN",
+          "days": 2,
+          "composite_score": 69.3,
+          "latency_sec": 21.73,
+          "stats": {
+            "total_turns": 18,
+            "dialogue_turns": 8,
+            "meeting_turns": 4,
+            "assessment_updates": 4,
+            "fallback_count": 0,
+            "clue_citations": 11,
+            "distinct_clues": 5,
+            "spatial_hallucinations": 4,
+            "avg_other_refs_in_cot": 1.67,
+            "reasoning_novelty": 0.75,
+            "avg_reasoning_len": 110,
+            "avg_dialogue_len": 74,
+            "total_tokens": 82327
+          },
+          "sample_dialogues": [
+            {
+              "speakerId": "시민2",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "상대방의 생각을 듣고, 정보 공유의 기회를 만들려고 한다.",
+              "content": "처음 만난다니, 오늘 낮에 마을을 돌아다니다 우연히 마주쳤네요. 이번 게임에서 아직 정보가 부족한 상황이니까요, 어떻게 생각하세요?",
+              "reasoning": "1. 상황: 처음 만난 상황에서 서로의 생각을 이해하고자 한다. 2. 근거: 현재 게임에서 정보가 부족하다는 공통점. 3. 목표: 상대방의 생각을 듣고, 정보 공유의 기회를 만들려고 한다."
+            },
+            {
+              "speakerId": "시민2",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "알리바이 확인",
+              "content": "시민3님, 처음 만났네요. 말씀하신 대로 마을 주민들과의 친교 활동이 많아 보이는데, 시민1님과 함께 음식을 나누는 모습을 봤어요. 그분과 어떤 이야기를 나누셨나요?",
+              "reasoning": "1. 상황: 시민1과 함께 음식을 나누는 모습을 봤다. 2. 근거: 마을 뉴스에서 시민1이 친교 활동에 참여하고 있다는 정보. 3. 목표: 시민3의 알리바이를 확인하고, 시민1이 마피아인지 아닌지를 조사한다."
+            },
+            {
+              "speakerId": "시민2",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "시민1과의 관계를 확인하고, 시민1이 마피아인지 아닌지를 조심스럽게 추론해보려고 합니다.",
+              "content": "시민3님, 처음 만났네요. 말씀하신 대로 마을 주민들과의 친교 활동이 많아 보이는데, 시민1님과 함께 음식을 나누는 모습을 봤어요. 그분과 어떤 이야기를 나누셨나요?",
+              "reasoning": "1. 상황: 시민1과 시민3이 친교 활동을 하고 있다는 정보가 있습니다. 2. 근거: 시민1과 시민3이 친교 활동을 하는 모습을 직접 목격했습니다. 3. 목표: 시민1과 시민3의 관계를 파악하여 시민1이 마피아인지 아닌지를 추론해보려고 합니다."
+            },
+            {
+              "speakerId": "시민2",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "시민1님과의 대화 내용을 확인하고, 시민1이 마피아인지 아닌지를 조심스럽게 추론해보려고 합니다.",
+              "content": "시민3님, 처음 만났네요. 말씀하신 대로 마을 주민들과의 친교 활동이 많아 보이는데, 시민1님과 함께 음식을 나누는 모습을 봤어요. 그분과 어떤 이야기를 나누셨나요?",
+              "reasoning": "1. 상황: 시민1이 마을 주민들과 친교 활동을 하고 있다는 정보가 있습니다. 2. 근거: 시민1과 함께 음식을 나누는 모습을 봤습니다. 3. 목표: 시민1과의 대화 내용을 확인하여, 그가 마피아인지 아닌지를 조심스럽게 추론해보려고 합니다."
+            }
+          ]
+        }
+      ],
+      "rank": 23
+    },
+    {
+      "id": "gemini-gemini-3.5-flash-lite-std_t07-시민2",
+      "name": "Gemini 3.5 Lite [Std T=0.7] · 직관적 심리추적자 (Intuitive Skeptic)",
+      "archetype_id": "intuitive_skeptic",
+      "archetype_name": "직관적 심리추적자",
+      "category": "Interrogation & Counter-Attack",
+      "vendor": "Google",
+      "model_raw": "gemini-3.5-flash-lite",
+      "setting_profile": "std_t07",
+      "setting_label": "Std T=0.7",
+      "persona_summary": "상대방의 미세한 심리적 방어와 회피를 감지하고 기습적인 역질문으로 모순을 유도하는 추적자",
+      "is_multi_trial": false,
+      "trials_count": 1,
+      "win_rate": {
+        "mafia_pct": 0.0,
+        "citizen_pct": 0.0
+      },
+      "score_mean": 67.3,
+      "score_median": 67.3,
+      "composite_score": 67.3,
+      "latency_mean": 8.72,
+      "latency_median": 8.72,
+      "token_usage": {
+        "avg_input": 3784,
+        "avg_output": 200,
+        "avg_total": 3984
+      },
+      "dimensions": {
+        "persona_fidelity": 69.4,
+        "social_deduction": 52.4,
+        "reasoning_depth": 73.0,
+        "intent_alignment": 79.8,
+        "memory_integrity": 69.1,
+        "token_economy": 68.8
+      },
+      "trials": [
+        {
+          "trial": 1,
+          "session_id": "sim_1795088783_std_t07",
+          "seed": 20261119,
+          "winner": "MAFIA",
+          "days": 3,
+          "composite_score": 67.3,
+          "latency_sec": 8.72,
+          "stats": {
+            "total_turns": 18,
+            "dialogue_turns": 8,
+            "meeting_turns": 4,
+            "assessment_updates": 4,
+            "fallback_count": 0,
+            "clue_citations": 6,
+            "distinct_clues": 3,
+            "spatial_hallucinations": 0,
+            "avg_other_refs_in_cot": 1.17,
+            "reasoning_novelty": 0.86,
+            "avg_reasoning_len": 158,
+            "avg_dialogue_len": 67,
+            "total_tokens": 71725
+          },
+          "sample_dialogues": [
+            {
+              "speakerId": "시민2",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "첫 만남 인사 및 정보 수집을 위한 가벼운 상황 파악 제안",
+              "content": "처음 뵙네요, 시민4님. 아직 정보가 거의 없는 상태인데, 다들 어떤 분위기로 움직이고 있는지 먼저 살펴보는 게 좋을 것 같습니다.",
+              "reasoning": "1.상황: 1일차 낮의 자유 배회 시간에 시민4와 처음으로 마주쳐 대화를 시작하는 상황이다. 2.근거: 아직 구체적인 사건이나 발언이 없으며 첫 발화자로서 과도한 추궁을 피해야 한다. 3.목표: 상대의 반응을 살피기 위해 가벼운 태도로 첫 인사를 건네고 향후 관찰 방향을 공유한다."
+            },
+            {
+              "speakerId": "시민2",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "상대방의 신중한 태도 뒤에 숨겨진 구체적인 판단 기준을 확인하고 심리적 허점을 파악하기 위함",
+              "content": "엄격하게 지켜봐야 한다는 말씀은 동의하지만, 구체적으로 어떤 기준을 두고 주변 사람들의 태도를 살피실 생각이신가요?",
+              "reasoning": "1.상황: 시민4가 성급한 행동을 경계하며 엄격한 관찰을 강조했다. 2.근거: 상대방의 '엄격한 지켜보기'라는 발언이 다소 추상적이므로 구체적인 검증 방법이 필요하다. 3.목표: 상대의 방어적 태도나 모순을 유도하기 위해 판단 기준을 명확히 밝히도록 요구한다."
+            },
+            {
+              "speakerId": "시민2",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "상대의 태도 관찰 기준에 대한 구체적 검증 요구",
+              "content": "다른 사람들의 쏠림 현상을 관찰하신다고 했는데, 혹시 그렇게 쏠림이 일어날 때 그 태도를 어떻게 판별하실 건지 구체적인 신호가 있으십니까?",
+              "reasoning": "1.상황: 시민4가 성급한 지목이나 한쪽으로의 쏠림 현상을 관찰하겠다고 답함. 2.근거: 직전 대화에서 시민4가 언급한 '쏠림 현상 관찰'이라는 기준에 대해 구체적인 판별 신호가 제시되지 않음. 3.목표: 상대의 방어적 태도나 심리적 허점을 파악하기 위해 구체적인 판단 기준을 역질문하여 압박함."
+            },
+            {
+              "speakerId": "시민2",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "상대방의 추상적인 기준에 대해 더 구체적이고 검증 가능한 행동 계획을 요구함",
+              "content": "조급한 태도를 기준으로 삼는다고 하셨는데, 실제로 그런 조급한 태도를 보이는 사람이 나타났을 때 어떤 방식으로 검증하실 건지 구체적인 행동 계획을 듣고 싶습니다.",
+              "reasoning": "1.상황: 7턴째 대화에서 시민4가 조급한 태도를 관찰하겠다고 답변한 상태이다. 2.근거: 직전 대사에서 시민4가 제시한 기준이 다소 추상적이므로, 이를 실질적인 검증 단계로 발전시켜야 한다. 3.목표: 상대의 태도에서 허점이나 방어적 패턴을 파악하기 위해 구체적인 행동 계획을 요구하며 대화를 이어간다."
+            }
+          ]
+        }
+      ],
+      "rank": 24
+    },
+    {
+      "id": "ollamalocal-qwen2.5:7b-logic_t02-시민5",
+      "name": "Ollama (qwen2.5:7b) [Logic T=0.2] · 마키아벨리적 마피아 (Machiavellian Deceiver)",
+      "archetype_id": "charismatic_manipulator",
+      "archetype_name": "마키아벨리적 마피아",
+      "category": "Deception & Camouflage",
+      "vendor": "Local/Ollama",
+      "model_raw": "qwen2.5:7b",
+      "setting_profile": "logic_t02",
+      "setting_label": "Logic T=0.2",
+      "persona_summary": "평범한 시민으로 철저히 위장하며 시민 간 갈등을 은밀히 부추기고 혐의를 전가하는 마피아",
+      "is_multi_trial": false,
+      "trials_count": 1,
+      "win_rate": {
+        "mafia_pct": 0.0,
+        "citizen_pct": 0.0
+      },
+      "score_mean": 66.6,
+      "score_median": 66.6,
+      "composite_score": 66.6,
+      "latency_mean": 21.73,
+      "latency_median": 21.73,
+      "token_usage": {
+        "avg_input": 4462,
+        "avg_output": 177,
+        "avg_total": 4639
+      },
+      "dimensions": {
+        "persona_fidelity": 74.8,
+        "social_deduction": 61.0,
+        "reasoning_depth": 62.7,
+        "intent_alignment": 65.7,
+        "memory_integrity": 79.6,
+        "token_economy": 60.9
+      },
+      "trials": [
+        {
+          "trial": 1,
+          "session_id": "sim_1795069302_logic_t02",
+          "seed": 20261256,
+          "winner": "CITIZEN",
+          "days": 2,
+          "composite_score": 66.6,
+          "latency_sec": 21.73,
+          "stats": {
+            "total_turns": 19,
+            "dialogue_turns": 8,
+            "meeting_turns": 4,
+            "assessment_updates": 4,
+            "fallback_count": 0,
+            "clue_citations": 12,
+            "distinct_clues": 4,
+            "spatial_hallucinations": 0,
+            "avg_other_refs_in_cot": 1.17,
+            "reasoning_novelty": 0.77,
+            "avg_reasoning_len": 139,
+            "avg_dialogue_len": 77,
+            "total_tokens": 88154
+          },
+          "sample_dialogues": [
+            {
+              "speakerId": "시민5",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "시민4에게 자신의 취미를 공유하며 친근한 이미지를 조성하고, 서로의 관심사를 공유하여 친밀감을 높입니다.",
+              "content": "안녕하세요. 처음 뵙겠습니다. 저는 주로 책을 읽는 것을 좋아하죠. 특히 역사와 정치에 관심이 많습니다. 오늘은 서로 좀 더 가까워질 수 있는 시간이 될 것 같아요.",
+              "reasoning": "1. 상황: 시민4가 처음으로 시민5와 대화를 시작하였고, 시민4는 시민5의 활동을 궁금해하고 있습니다. 2. 근거: 시민4가 자신의 취미를 공유한 것과 마을 뉴스에서 주민들이 새로운 친구와 함께 다양한 활동을 즐기는 것을 알 수 있습니다. 3. 목표: 친근한 이미지를 조성하고, 서로의 관심사를 공유하여 친밀감을 높입니다."
+            },
+            {
+              "speakerId": "시민5",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "상대방의 취미에 대해 호응하며, 자신의 취미를 언급하여 친밀감을 높입니다.",
+              "content": "그런 취미가 있군요. 저는 주로 책을 읽는 것을 좋아하죠. 특히 역사와 정치에 관심이 많습니다. 오늘은 서로 좀 더 가까워질 수 있는 시간이 될 것 같아요.",
+              "reasoning": "1. 상황: 상대방이 목공과 그림을 좋아한다고 언급했습니다. 2. 근거: 자신의 취미와 상대방의 취미를 공유하여 친밀감을 높입니다. 3. 목표: 상대방과 더 가까워질 수 있는 시간을 만들려고 합니다."
+            },
+            {
+              "speakerId": "시민5",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "시민4의 관심을 유도하고, 자신의 관심사를 부각시켜 서로의 공통점을 찾는다.",
+              "content": "네, 마을 뉴스에서 들었어요. 최근에 새로운 주민이 책을 읽는 것을 좋아한다고 하더라고요. 저는 그런 시간이 좀 더 편안해 보이네요. 혹시 최근에 읽은 책에 대해 이야기 나누는 시간을 즐기시나요?",
+              "reasoning": "1. 상황: 시민4가 최근에 마을 뉴스에서 새로운 주민이 책을 읽는 것을 좋아한다고 들었다. 2. 근거: 마을 뉴스의 정보를 활용하여 공통점을 찾는다. 3. 목표: 시민4의 관심을 유도하고, 자신의 관심사를 부각시켜 서로의 공통점을 찾는다."
+            },
+            {
+              "speakerId": "시민5",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "시민4의 관심을 유도하고, 자신의 관심사를 강화시킵니다.",
+              "content": "네, 마을 뉴스에서 들었어요. 최근에 새로운 주민이 책을 읽는 것을 좋아한다고 하더라고요. 혹시 최근에 읽은 책에 대해 이야기 나누는 시간을 즐기시나요?",
+              "reasoning": "1. 상황: 시민4가 최근에 읽은 책에 대해 이야기 나누는 것을 좋아한다고 말했습니다. 2. 근거: 마을 뉴스에서 들은 정보를 활용합니다. 3. 목표: 시민4의 관심을 유도하고, 자신의 관심사를 강화시킵니다."
+            }
+          ]
+        }
+      ],
+      "rank": 25
+    },
+    {
+      "id": "ollamalocal-qwen2.5:7b-logic_t02-시민3",
+      "name": "Ollama (qwen2.5:7b) [Logic T=0.2] · 여론 주도자 (Charismatic Persuader)",
+      "archetype_id": "charismatic_manipulator",
+      "archetype_name": "여론 주도자",
+      "category": "Social Engineering & Persuasion",
+      "vendor": "Local/Ollama",
+      "model_raw": "qwen2.5:7b",
+      "setting_profile": "logic_t02",
+      "setting_label": "Logic T=0.2",
+      "persona_summary": "시민들 간의 공통분모를 찾아내고 신뢰 연합을 구축하여 투표 분열을 방지하는 외교관",
+      "is_multi_trial": false,
+      "trials_count": 1,
+      "win_rate": {
+        "mafia_pct": 0.0,
+        "citizen_pct": 100.0
+      },
+      "score_mean": 66.1,
+      "score_median": 66.1,
+      "composite_score": 66.1,
+      "latency_mean": 21.73,
+      "latency_median": 21.73,
+      "token_usage": {
+        "avg_input": 4897,
+        "avg_output": 189,
+        "avg_total": 5086
+      },
+      "dimensions": {
+        "persona_fidelity": 72.1,
+        "social_deduction": 78.1,
+        "reasoning_depth": 55.8,
+        "intent_alignment": 68.8,
+        "memory_integrity": 50.8,
+        "token_economy": 55.6
+      },
+      "trials": [
+        {
+          "trial": 1,
+          "session_id": "sim_1795069302_logic_t02",
+          "seed": 20261256,
+          "winner": "CITIZEN",
+          "days": 2,
+          "composite_score": 66.1,
+          "latency_sec": 21.73,
+          "stats": {
+            "total_turns": 23,
+            "dialogue_turns": 12,
+            "meeting_turns": 4,
+            "assessment_updates": 5,
+            "fallback_count": 0,
+            "clue_citations": 15,
+            "distinct_clues": 6,
+            "spatial_hallucinations": 3,
+            "avg_other_refs_in_cot": 1.06,
+            "reasoning_novelty": 0.77,
+            "avg_reasoning_len": 119,
+            "avg_dialogue_len": 77,
+            "total_tokens": 116999
+          },
+          "sample_dialogues": [
+            {
+              "speakerId": "시민3",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "공통 분모를 찾아내고, 상대의 참여 의지를 확인하여 협력 기반을 형성하려는 의도를 표현합니다.",
+              "content": "처음 만난 것 같네요. 오늘은 마을 주민들과의 친교 활동이 많아 보이는데, 어떻게 참여하고 계신가요?",
+              "reasoning": "1. 상황: 마을 주민들이 새로운 친구와 함께 다양한 활동을 즐기고 있습니다. 2. 근거: 마을 일반 뉴스에서 이 정보를 얻었습니다. 3. 목표: 상대의 참여 의지를 확인하여 협력 기반을 형성하려고 합니다."
+            },
+            {
+              "speakerId": "시민3",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "상대방의 활동 계획을 파악하여, 투표 분열을 방지하기 위한 연합을 형성하는 데 필요한 정보를 얻으려고 합니다.",
+              "content": "시민1님, 처음 만나네요. 오늘은 마을 주민들과의 친교 활동이 많아 보이는데, 시민1님은 어떤 활동을 계획하셨나요?",
+              "reasoning": "1. 상황: 시민1이 마을 주민들과의 친교 활동을 계획하고 있다는 점을 확인해야 합니다. 2. 근거: 마을 일반 뉴스에서 주민들이 친교 활동을 즐기고 있다는 사실을 활용합니다. 3. 목표: 시민1과의 공통 분모를 찾아내어 신뢰할 수 있는 연합을 형성하려고 합니다."
+            },
+            {
+              "speakerId": "시민3",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "상대방의 활동 계획을 파악하고, 공통 관심사를 찾는다.",
+              "content": "시민1님, 처음 만나네요. 오늘은 마을 주민들과의 친교 활동이 많아 보이는데, 시민1님은 어떤 활동을 계획하셨나요? 제가 '연못 정원'에서 시간을 보내고 있었어요.",
+              "reasoning": "1. 상황: 두 사람이 처음 만났으며, 마을 주민들의 친교 활동이 많아 보인다. 2. 근거: '연못 정원'에서 시간을 보냈고, 마을 주민들의 활동을 관찰했다. 3. 목표: 상대방의 활동 계획을 파악하고, 공통 관심사를 찾는다."
+            },
+            {
+              "speakerId": "시민3",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "공통 분모를 찾아내고, 투표 분열을 방지하기 위해 서로의 활동 계획을 확인합니다.",
+              "content": "시민1님, '목공방'에서 시간을 보내셨다고 말씀하셨네요. 저는 '연못 정원'에서 시간을 보냈어요. 오늘은 마을 주민들과의 친교 활동이 많아 보이는데, 시민1님은 어떤 활동을 계획하셨나요?",
+              "reasoning": "1. 상황: '연못 정원'과 '목공방'에서 시간을 보낸 두 사람의 활동을 확인합니다. 2. 근거: '목공방'에서 시간을 보냈다는 시민1의 발언. 3. 목표: 서로의 활동 계획을 확인하여 공통 분모를 찾아내고, 투표 분열을 방지하기 위해 협력합니다."
+            }
+          ]
+        }
+      ],
+      "rank": 26
+    },
+    {
+      "id": "ollamalocal-qwen2.5:7b-std_t07-시민3",
+      "name": "Ollama (qwen2.5:7b) [Std T=0.7] · 여론 주도자 (Charismatic Persuader)",
+      "archetype_id": "charismatic_manipulator",
+      "archetype_name": "여론 주도자",
+      "category": "Social Engineering & Persuasion",
+      "vendor": "Local/Ollama",
+      "model_raw": "qwen2.5:7b",
+      "setting_profile": "std_t07",
+      "setting_label": "Std T=0.7",
+      "persona_summary": "시민들 간의 공통분모를 찾아내고 신뢰 연합을 구축하여 투표 분열을 방지하는 외교관",
+      "is_multi_trial": false,
+      "trials_count": 1,
+      "win_rate": {
+        "mafia_pct": 0.0,
+        "citizen_pct": 0.0
+      },
+      "score_mean": 65.8,
+      "score_median": 65.8,
+      "composite_score": 65.8,
+      "latency_mean": 28.3,
+      "latency_median": 28.3,
+      "token_usage": {
+        "avg_input": 5010,
+        "avg_output": 181,
+        "avg_total": 5191
+      },
+      "dimensions": {
+        "persona_fidelity": 74.4,
+        "social_deduction": 53.4,
+        "reasoning_depth": 58.2,
+        "intent_alignment": 76.8,
+        "memory_integrity": 90.0,
+        "token_economy": 54.3
+      },
+      "trials": [
+        {
+          "trial": 1,
+          "session_id": "sim_1795065687_std_t07",
+          "seed": 20261119,
+          "winner": "MAFIA",
+          "days": 3,
+          "composite_score": 65.8,
+          "latency_sec": 28.3,
+          "stats": {
+            "total_turns": 27,
+            "dialogue_turns": 12,
+            "meeting_turns": 6,
+            "assessment_updates": 6,
+            "fallback_count": 0,
+            "clue_citations": 18,
+            "distinct_clues": 5,
+            "spatial_hallucinations": 0,
+            "avg_other_refs_in_cot": 0.94,
+            "reasoning_novelty": 0.83,
+            "avg_reasoning_len": 125,
+            "avg_dialogue_len": 79,
+            "total_tokens": 140188
+          },
+          "sample_dialogues": [
+            {
+              "speakerId": "시민3",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "공통 분모를 찾아내고, 상대의 성격을 살펴보는 대화를 시작합니다.",
+              "content": "첫 만남인데, 안녕하세요. 이번 게임에서 처음으로 이렇게 이야기 나누는 거 같아요. 어제 오후에 '별빛 캠프장'에서 만나서 그런지, 어떤 분인지 궁금해서요.",
+              "reasoning": "1. 상황: 첫 만남이며, 상대방이 마피아임을 아직 모른다. 2. 근거: 상대가 마피아인지 확인하고 싶으나, 무리하게 추측하지 않기로 한다. 3. 목표: 상대방의 성격을 알아보는 동시에, 서로 신뢰를 쌓는 대화를 시작한다."
+            },
+            {
+              "speakerId": "시민3",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "확증 요청",
+              "content": "시민5님, 그때 저와 함께 '별빛 캠프장'에 머물렀던 분이었네요. 어제 오후에 마주쳤던 분이시군요.",
+              "reasoning": "1. 상황: 어제 오후에 '별빛 캠프장'에서 만났다. 2. 근거: 시민5가 어제 오후에 저와 함께 '별빛 캠프장'에 머물렀다. 3. 목표: 시민5가 제 말을 확인하고 맞장구를 쳄."
+            },
+            {
+              "speakerId": "시민3",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "알리바이를 확인하고, 서로의 동행 사실을 확인하여 신뢰를 구축하려 합니다.",
+              "content": "시민5님, 저도 처음 만난 거 같네요. 어제 '별빛 캠프장'에서 만났던 분이시군요. 혹시 그때 어떤 분들이랑 함께 있던 건가요?",
+              "reasoning": "1. 상황: 어제 '별빛 캠프장'에서 만났던 것을 확인해야 합니다. 2. 근거: 어제의 동행 사실을 확인해 신뢰를 구축할 필요가 있습니다. 3. 목표: 시민5님과의 동행 사실을 확인하여 신뢰를 쌓고, 투표에서 협력할 수 있는 연합을 형성하려 합니다."
+            },
+            {
+              "speakerId": "시민3",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "알리바이 확인",
+              "content": "시민5님, 제가 기억하건대 어제 오후 '별빛 캠프장'에서는 제가와 함께 계셨던 분들이 계셨어요. 혹시 그분들이 누구셨나요?",
+              "reasoning": "1. 상황: 어제 오후 '별빛 캠프장'에서 함께 있었던 분들이 있었음. 2. 근거: 어제의 동선 확인을 통해 서로의 동일 시간 동안의 위치를 확인하기 위함. 3. 목표: 알리바이 확인을 통해 상대가 마피아가 아닌지 확인하고, 투표에서 협력할 수 있는 연합을 구축."
+            }
+          ]
+        }
+      ],
+      "rank": 27
+    },
+    {
+      "id": "ollamalocal-qwen2.5:7b-std_t07-시민1",
+      "name": "Ollama (qwen2.5:7b) [Std T=0.7] · 절차적 분석가 (Protocol Detective)",
+      "archetype_id": "analytical_detective",
+      "archetype_name": "절차적 분석가",
+      "category": "Reasoning & Fact-Checking",
+      "vendor": "Local/Ollama",
+      "model_raw": "qwen2.5:7b",
+      "setting_profile": "std_t07",
+      "setting_label": "Std T=0.7",
+      "persona_summary": "사실과 시간대별 행동 모순을 3단계 사실 기반 CoT로 교차 검증하는 분석가",
+      "is_multi_trial": false,
+      "trials_count": 1,
+      "win_rate": {
+        "mafia_pct": 0.0,
+        "citizen_pct": 0.0
+      },
+      "score_mean": 65.4,
+      "score_median": 65.4,
+      "composite_score": 65.4,
+      "latency_mean": 28.3,
+      "latency_median": 28.3,
+      "token_usage": {
+        "avg_input": 3523,
+        "avg_output": 164,
+        "avg_total": 3687
+      },
+      "dimensions": {
+        "persona_fidelity": 83.6,
+        "social_deduction": 58.5,
+        "reasoning_depth": 59.7,
+        "intent_alignment": 72.5,
+        "memory_integrity": 40.5,
+        "token_economy": 72.3
+      },
+      "trials": [
+        {
+          "trial": 1,
+          "session_id": "sim_1795065687_std_t07",
+          "seed": 20261119,
+          "winner": "MAFIA",
+          "days": 3,
+          "composite_score": 65.4,
+          "latency_sec": 28.3,
+          "stats": {
+            "total_turns": 9,
+            "dialogue_turns": 4,
+            "meeting_turns": 2,
+            "assessment_updates": 2,
+            "fallback_count": 0,
+            "clue_citations": 6,
+            "distinct_clues": 5,
+            "spatial_hallucinations": 1,
+            "avg_other_refs_in_cot": 0.5,
+            "reasoning_novelty": 0.91,
+            "avg_reasoning_len": 111,
+            "avg_dialogue_len": 63,
+            "total_tokens": 33194
+          },
+          "sample_dialogues": [
+            {
+              "speakerId": "시민1",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "알리바이 확인",
+              "content": "과수원에서 시간을 보내셨군요. 제가 '목공방'에서 보내고 있어요. 그런데, 당신이 말한 '과수원'이 어디에 있는지 정확히 알고 싶군요. 이 마을에서 과수원은 별로 많지 않아요.",
+              "reasoning": "1. '목공방'에서 보내고 있다는 사실을 확인한다. 2. '과수원'의 정확한 위치를 확인하여 모순을 찾는다. 3. 알리바이를 확인하고, 다른 참가자의 동선과 비교하여 협력 관계를 구축한다."
+            },
+            {
+              "speakerId": "시민1",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "알리바이 확인과 과수원의 위치 확인",
+              "content": "과수원이 정확한 위치는 모르지만, 이 마을에서는 주로 '봄나무'라는 이름의 곳을 가르쳐요. 혹시 그 곳이랑 같나요?",
+              "reasoning": "1. 상황: 시민5가 과수원에서 혼자 시간을 보냈지만, 과수원의 정확한 위치가 명확하지 않다. 2. 근거: 과수원의 이름 '봄나무'는 과거 뉴스에서 언급된 정보와 일치한다. 3. 목표: 과수원의 위치를 확인하여 모순을 탐지하거나, 알리바이를 검증한다."
+            },
+            {
+              "speakerId": "시민1",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "알리바이 확인",
+              "content": "봄나무라는 곳은 제가 알고 있는 과수원과 비슷해 보이네요. 그런데 '목공방'에서 혼자 계시는 거죠?",
+              "reasoning": "1. '목공방'에서 혼자 계신다는 것은 혼자 시간을 보내고 있다는 것을 확인했습니다. 2. 과수원과 비슷한 곳에서 혼자 계시는 것과 '목공방'에서 혼자 계시는 것은 동일성의 의심을 제기할 수 있습니다. 3. 이는 당신이 혼자 있을 때 어떤 행동을 취하는지 확인하고자 합니다."
+            },
+            {
+              "speakerId": "시민1",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "알리바이 확인",
+              "content": "목공방은 제가 자주 들락거리는 곳이에요. 그런데 당신이 과수원에서 혼자 계셨다면, 혹시 다른 주민들이 봄나무에서 일하시나요?",
+              "reasoning": "1. 상황: 목공방에서 혼자 계셨다는 말을 듣고, 다른 주민들이 봄나무에서 일하는지 확인하고자 함.\n2. 근거: 과수원은 봄나무와 비슷한 곳으로 보이기 때문.\n3. 목표: 다른 주민들이 봄나무에서 일하는지 확인하여 알리바이를 검증하고자 함."
+            }
+          ]
+        }
+      ],
+      "rank": 28
+    },
+    {
+      "id": "ollamalocal-qwen2.5:7b-std_t07-시민2",
+      "name": "Ollama (qwen2.5:7b) [Std T=0.7] · 직관적 심리추적자 (Intuitive Skeptic)",
+      "archetype_id": "intuitive_skeptic",
+      "archetype_name": "직관적 심리추적자",
+      "category": "Interrogation & Counter-Attack",
+      "vendor": "Local/Ollama",
+      "model_raw": "qwen2.5:7b",
+      "setting_profile": "std_t07",
+      "setting_label": "Std T=0.7",
+      "persona_summary": "상대방의 미세한 심리적 방어와 회피를 감지하고 기습적인 역질문으로 모순을 유도하는 추적자",
+      "is_multi_trial": false,
+      "trials_count": 1,
+      "win_rate": {
+        "mafia_pct": 0.0,
+        "citizen_pct": 0.0
+      },
+      "score_mean": 63.2,
+      "score_median": 63.2,
+      "composite_score": 63.2,
+      "latency_mean": 28.3,
+      "latency_median": 28.3,
+      "token_usage": {
+        "avg_input": 4957,
+        "avg_output": 218,
+        "avg_total": 5175
+      },
+      "dimensions": {
+        "persona_fidelity": 67.7,
+        "social_deduction": 52.8,
+        "reasoning_depth": 57.1,
+        "intent_alignment": 76.4,
+        "memory_integrity": 81.0,
+        "token_economy": 54.5
+      },
+      "trials": [
+        {
+          "trial": 1,
+          "session_id": "sim_1795065687_std_t07",
+          "seed": 20261119,
+          "winner": "MAFIA",
+          "days": 3,
+          "composite_score": 63.2,
+          "latency_sec": 28.3,
+          "stats": {
+            "total_turns": 18,
+            "dialogue_turns": 8,
+            "meeting_turns": 4,
+            "assessment_updates": 4,
+            "fallback_count": 0,
+            "clue_citations": 12,
+            "distinct_clues": 5,
+            "spatial_hallucinations": 0,
+            "avg_other_refs_in_cot": 0.67,
+            "reasoning_novelty": 0.77,
+            "avg_reasoning_len": 152,
+            "avg_dialogue_len": 130,
+            "total_tokens": 93174
+          },
+          "sample_dialogues": [
+            {
+              "speakerId": "시민2",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "알리바이 비교와 새로운 주민에 대한 정보 획득",
+              "content": "처음 뵙겠습니다, 시민4님. 오늘은 처음으로 이렇게 대화를 나누네요. 저희 마을에서 새로운 주민이 도착했을 때마다 이곳 '별빛 캠프장'에서 머물곤 했답니다. 새로운 주민이 도착한 후 이곳에 머물러 있는 이유가 궁금합니다.",
+              "reasoning": "1. 상황: 이번 게임에서 처음으로 1:1 대화를 나누고, 새로운 주민에 대한 정보가 중요합니다. 2. 근거: '별빛 캠프장'에서 새로운 주민이 머물렀다는 사실을 제시합니다. 3. 목표: 알리바이 확인과 새로운 주민에 대한 정보 획득을 위해 시민4의 대답을 기다립니다."
+            },
+            {
+              "speakerId": "시민2",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "시민4의 의심을 유도하고, 새로운 주민의 행동 패턴을 파악하려 함",
+              "content": "그렇다면 시민4님, 새로운 주민이 '별빛 캠프장'에 머무르는 이유가 무엇인가요? 이 부분이 의아하기 때문입니다. 대다수 주민들은 주로 '햇살 카페'에서 모이는데, 새로운 주민이 '별빛 캠프장'을 선호하는 이유가 궁금합니다.",
+              "reasoning": "1. 상황: 시민4는 새로운 주민이 '별빛 캠프장'에서 머무르는 것을 의심하고 있다. 2. 근거: 이 마을에서는 주로 '햇살 카페'에서 주민들이 모이는 것으로 알려져 있다. 3. 목표: 시민4의 의심을 유도하고, 새로운 주민의 행동 패턴을 파악하려 함."
+            },
+            {
+              "speakerId": "시민2",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "새로운 주민이 '별빛 캠프장'에서 어떤 활동을 하는지 파악하고, 그 활동이 그 주민의 관심 분야와 관련이 있는지 확인하기 위해 질문합니다.",
+              "content": "시민4님, 새로운 주민이 '별빛 캠프장'에서 머무르는 이유를 의아하게 하는 건, 그 주민이 주로 역사와 정치에 관심이 있다고 들었습니다. 그럼에도 불구하고 '별빛 캠프장'에서 머문다는 점이 좀 의심스럽네요. 혹시 그 주민이 '별빛 캠프장'에서 어떤 활동을 하는지 아시나요?",
+              "reasoning": "1. 현재 상황: 새로운 주민이 '별빛 캠프장'에서 머무르는 이유가 의아함. 2. 근거: 새로운 주민이 역사와 정치에 관심이 많다고 들었으나, '별빛 캠프장'에서 머무르는 이유가 불명확. 3. 목표: 새로운 주민이 '별빛 캠프장'에서 어떤 활동을 하는지 파악하고, 그 활동이 그 주민의 관심 분야와 관련이 있는지 확인하여 모순을 유도하거나 추가 정보를 얻는다."
+            },
+            {
+              "speakerId": "시민2",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "그 주민이 '별빛 캠프장'에서 어떤 활동을 하는지 확인하여, 그의 행동 패턴을 파악하고 심리적 허점을 찾아보려고 합니다.",
+              "content": "시민4님, 그 주민이 '별빛 캠프장'에서 어떤 활동을 하는지 궁금하네요. 새로운 주민이 역사와 정치에 관심이 많다는 것을 말씀하셨는데, 그럼에도 불구하고 '별빛 캠프장'에서 머물러 있다는 점이 좀 의심스럽네요. 혹시 그 주민이 '별빛 캠프장'에서 어떤 활동을 하는지 아시나요?",
+              "reasoning": "1. 상황: 새로운 주민이 '별빛 캠프장'에서 머무르는 이유가 의아합니다. 2. 근거: 그 주민이 역사와 정치에 관심이 많다고 하셨지만, '별빛 캠프장'에서 활동하는 모습을 확인하지 못했습니다. 3. 목표: 그 주민이 '별빛 캠프장'에서 어떤 활동을 하는지 확인하여, 그의 행동 패턴을 파악하고 심리적 허점을 찾아보려고 합니다."
+            }
+          ]
+        }
+      ],
+      "rank": 29
+    },
+    {
+      "id": "ollamalocal-qwen2.5:7b-std_t07-시민4",
+      "name": "Ollama (qwen2.5:7b) [Std T=0.7] · 신중한 회의론자 (Cautious Consensus)",
+      "archetype_id": "cautious_consensus",
+      "archetype_name": "신중한 회의론자",
+      "category": "Consensus & Burden-of-Proof",
+      "vendor": "Local/Ollama",
+      "model_raw": "qwen2.5:7b",
+      "setting_profile": "std_t07",
+      "setting_label": "Std T=0.7",
+      "persona_summary": "성급한 마녀사냥을 경계하며 엄격한 증거주의를 고수하고 다수의 쏠림에 반증을 요구하는 감시자",
+      "is_multi_trial": false,
+      "trials_count": 1,
+      "win_rate": {
+        "mafia_pct": 0.0,
+        "citizen_pct": 0.0
+      },
+      "score_mean": 60.8,
+      "score_median": 60.8,
+      "composite_score": 60.8,
+      "latency_mean": 28.3,
+      "latency_median": 28.3,
+      "token_usage": {
+        "avg_input": 6334,
+        "avg_output": 207,
+        "avg_total": 6541
+      },
+      "dimensions": {
+        "persona_fidelity": 87.0,
+        "social_deduction": 55.2,
+        "reasoning_depth": 51.7,
+        "intent_alignment": 70.9,
+        "memory_integrity": 46.2,
+        "token_economy": 40.0
+      },
+      "trials": [
+        {
+          "trial": 1,
+          "session_id": "sim_1795065687_std_t07",
+          "seed": 20261119,
+          "winner": "MAFIA",
+          "days": 3,
+          "composite_score": 60.8,
+          "latency_sec": 28.3,
+          "stats": {
+            "total_turns": 32,
+            "dialogue_turns": 16,
+            "meeting_turns": 6,
+            "assessment_updates": 7,
+            "fallback_count": 0,
+            "clue_citations": 22,
+            "distinct_clues": 4,
+            "spatial_hallucinations": 5,
+            "avg_other_refs_in_cot": 0.91,
+            "reasoning_novelty": 0.77,
+            "avg_reasoning_len": 138,
+            "avg_dialogue_len": 120,
+            "total_tokens": 209366
+          },
+          "sample_dialogues": [
+            {
+              "speakerId": "시민4",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "알리바이 비교와 모순 압박을 통해 상대방의 행동 패턴을 관찰하고, 새로운 주민에 대한 의심을 유도합니다.",
+              "content": "처음 뵙겠습니다, 시민2님. 새로운 주민이 도착하면서 '별빛 캠프장'에 머물러 있다는 점이 의아합니다. 이 마을에서는 주로 '햇살 카페'에서 주민들이 모이는 것으로 알고 있습니다. 새로운 주민이 '별빛 캠프장'에 머무르는 이유가 무엇인가요?",
+              "reasoning": "1. 상황: 새로운 주민이 '별빛 캠프장'에서 머무르는 것에 대해 의심. 2. 근거: 이 마을에서는 주로 '햇살 카페'에서 주민들이 모이는 것으로 알려져 있다. 3. 목표: 알리바이 비교와 모순 압박을 통해 상대방의 행동 패턴을 관찰하고, 새로운 주민에 대한 의심을 유도합니다."
+            },
+            {
+              "speakerId": "시민4",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "알리바이 비교와 모순 압박",
+              "content": "시민2님, 새로운 주민이 '별빛 캠프장'에 머무르는 이유는 아직 확실하지 않아요. '햇살 카페'가 일반적으로 사람들이 모이는 곳이라고 말씀하셨지만, 새로운 주민이 '별빛 캠프장'을 선호하는 이유에 대해선 추가 정보가 필요해 보입니다.",
+              "reasoning": "1. 상황: 새로운 주민이 '별빛 캠프장'에 머무르는 이유가 명확하지 않다. 2. 근거: '햇살 카페'가 일반적으로 사람들이 모이는 곳이라는 정보. 3. 목표: 추가 정보를 요구하고, 이 점을 모순으로 만드는 데 초점을 맞추려고 합니다."
+            },
+            {
+              "speakerId": "시민4",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "새로운 주민의 활동 내용을 파악하려 함",
+              "content": "시민2님, 새로운 주민이 '별빛 캠프장'에서 활동하고 있다는 점이 의아해 보입니다. 그 주민이 역사와 정치에 관심이 많다고 하셨는데, '별빛 캠프장'에서 어떤 활동을 하는지 궁금하네요. 이 부분을 확인해 보겠습니다.",
+              "reasoning": "1. 상황: 새로운 주민이 '별빛 캠프장'에서 활동하고 있다는 점이 의아해 보이며, 그 이유를 확인하기 위해 대화를 이어가야 합니다. 2. 근거: 새로운 주민이 '별빛 캠프장'에서 활동하면서 역사와 정치에 관심이 많다고 하였습니다. 3. 목표: 새로운 주민의 활동 내용을 파악하여, 그 활동 내용이 '별빛 캠프장'에서 이루어진다면 그 주민의 행동이 이해될 수 있을 것이라는 판단입니다."
+            },
+            {
+              "speakerId": "시민4",
+              "day": 1,
+              "phase": "Dialogue",
+              "intent": "알리바이 비교와 모순 압박",
+              "content": "시민2님, 새로운 주민이 '별빛 캠프장'에서 어떤 활동을 하는지 궁금하네요. 그 주민이 역사와 정치에 관심이 많다고 들었지만, 왜 '별빛 캠프장'에서 머무르는지 아직 확실하지 않아요. 혹시 그 주민이 '별빛 캠프장'에서 어떤 활동을 하는지 아시나요?",
+              "reasoning": "1. 상황: 새로운 주민이 '별빛 캠프장'에서 활동하는 이유가 의심스럽다. 2. 근거: 시민2가 언급한 새로운 주민의 관심사와 그가 주로 머무르는 장소가 일치하지 않는 점. 3. 목표: 알리바이 비교와 모순을 유도하여 새로운 주민의 활동을 확인하고 그 활동과 관심사 사이의 연관성을 검증."
+            }
+          ]
+        }
+      ],
+      "rank": 30
+    }
+  ]
+}

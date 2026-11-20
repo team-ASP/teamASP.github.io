@@ -135,7 +135,20 @@ export function getSessionFromRequest(request) {
   };
 }
 
+export function verifySameOrigin(request) {
+  const origin = request.headers.get("origin");
+  if (!origin) return true;
+  const host = (request.headers.get("x-forwarded-host") || request.headers.get("host") || "").split(",")[0].trim().toLowerCase();
+  if (!host) return false;
+  try {
+    return new URL(origin).host.toLowerCase() === host;
+  } catch {
+    return false;
+  }
+}
+
 export function verifyCsrf(request) {
+  if (!verifySameOrigin(request)) return false;
   const cookieToken = request.cookies.get(csrfCookieName)?.value || "";
   const headerToken = request.headers.get("x-csrf-token") || "";
   if (!cookieToken || !headerToken) return false;

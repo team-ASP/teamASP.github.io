@@ -140,6 +140,7 @@ export async function ensureSchema() {
     )
   `;
   await sql`alter table backlog_items add column if not exists deleted_at timestamptz`;
+  await sql`alter table backlog_items add column if not exists tags text not null default ''`;
   await sql`create index if not exists backlog_items_project_idx on backlog_items (project_id, status, updated_at desc)`;
 
   await sql`
@@ -387,6 +388,11 @@ export function toPublicTaskUpdate(row) {
 }
 
 export function toPublicBacklogItem(row) {
+  const tags = String(row.tags || "")
+    .split(",")
+    .map((tag) => tag.trim())
+    .filter(Boolean)
+    .slice(0, 6);
   return {
     id: row.id,
     projectId: row.project_id,
@@ -395,6 +401,7 @@ export function toPublicBacklogItem(row) {
     type: row.type,
     status: row.status,
     priority: row.priority,
+    tags,
     ownerLogin: row.owner_login,
     authorLogin: row.author_login,
     authorName: row.author_name,

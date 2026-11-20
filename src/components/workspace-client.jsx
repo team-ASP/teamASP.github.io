@@ -147,7 +147,7 @@ function renderInlineMarkdown(value, keyPrefix) {
       const href = safeMarkdownHref(linkMatch?.[2]);
       nodes.push(
         href ? (
-          <a key={key} href={href} target={href.startsWith("http") ? "_blank" : undefined} rel={href.startsWith("http") ? "noreferrer" : undefined}>
+          <a key={key} href={href} target={href.startsWith("http") ? "_blank" : undefined} rel={href.startsWith("http") ? "noopener noreferrer" : undefined}>
             {renderInlineMarkdown(linkMatch[1], `${key}-link`)}
           </a>
         ) : (
@@ -164,10 +164,45 @@ function renderInlineMarkdown(value, keyPrefix) {
 }
 
 function isMarkdownBlockStart(line) {
-  return /^(```|#{1,3}\s+|[-*]\s+|\d+\.\s+|>\s+)/.test(line.trim());
+  return /^(```|#{1,3}\s+|[-*]\s+|\d+\.\s+|>\s+|\|.+\|$)/.test(line.trim());
 }
 
-function MarkdownText({ value, compact = false }) {
+function countChecklist(markdown) {
+  const lines = String(markdown || "").split(/\r?\n/);
+  let total = 0;
+  let checked = 0;
+  for (const line of lines) {
+    const match = line.trim().match(/^[-*]\s+\[([ xX])\]\s+/);
+    if (match) {
+      total += 1;
+      if (match[1].toLowerCase() === "x") checked += 1;
+    }
+  }
+  return { total, checked };
+}
+
+function stripMarkdownSnippet(markdown, maxLen = 96) {
+  const plain = String(markdown || "")
+    .replace(/```[\s\S]*?```/g, " ")
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+    .replace(/^[#>*\-\s|]+/gm, " ")
+    .replace(/[*`_~]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+  if (!plain) return "";
+  return plain.length > maxLen ? `${plain.slice(0, maxLen)}…` : plain;
+}
+
+function parseTableRow(line) {
+  return line
+    .trim()
+    .replace(/^\|/, "")
+    .replace(/\|$/, "")
+    .split("|")
+    .map((cell) => cell.trim());
+}
+
+function MarkdownText({ value, compact = false, onToggleChecklist = null }) {
   const normalized = String(value || "").replace(/\r\n/g, "\n").trim();
   if (!normalized) return null;
 
@@ -201,6 +236,39 @@ function MarkdownText({ value, compact = false }) {
       continue;
     }
 
+    if (trimmed.startsWith("|") && trimmed.endsWith("|") && index + 1 < lines.length && /^\|[\s:-]+\|$/.test(lines[index + 1].trim().replace(/\|/g, "|"))) {
+      const headers = parseTableRow(trimmed);
+      index += 2;
+      const rows = [];
+      while (index < lines.length && lines[index].trim().startsWith("|") && lines[index].trim().endsWith("|")) {
+        rows.push(parseTableRow(lines[index]));
+        index += 1;
+      }
+      blocks.push(
+        <div key={key} className="md-table-scroll">
+          <table className="md-table">
+            <thead>
+              <tr>
+                {headers.map((cell, ci) => (
+                  <th key={`${key}-h-${ci}`}>{renderInlineMarkdown(cell, `${key}-h-${ci}`)}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((row, ri) => (
+                <tr key={`${key}-r-${ri}`}>
+                  {headers.map((_, ci) => (
+                    <td key={`${key}-r-${ri}-c-${ci}`}>{renderInlineMarkdown(row[ci] || "", `${key}-r-${ri}-c-${ci}`)}</td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>,
+      );
+      continue;
+    }
+
     const heading = trimmed.match(/^(#{1,3})\s+(.+)$/);
     if (heading) {
       const Tag = compact ? "p" : `h${Math.min(heading[1].length + 3, 6)}`;
@@ -213,12 +281,39 @@ function MarkdownText({ value, compact = false }) {
       continue;
     }
 
+    const checklistMatch = trimmed.match(/^[-*]\s+\[([ xX])\]\s+(.+)$/);
+    if (checklistMatch) {
+      const items = [];
+      while (index < lines.length) {
+        const m = lines[index].trim().match(/^[-*]\s+\[([ xX])\]\s+(.+)$/);
+        if (!m) break;
+        items.push({ lineIndex: index, checked: m[1].toLowerCase() === "x", text: m[2] });
+        index += 1;
+      }
+      blocks.push(
+        <ul key={key} className="md-checklist">
+          {items.map((item) => (
+            <li key={`${key}-chk-${item.lineIndex}`} className={item.checked ? "checked" : ""}>
+              <input
+                type="checkbox"
+                checked={item.checked}
+                readOnly={!onToggleChecklist}
+                onChange={() => onToggleChecklist?.(item.lineIndex)}
+              />
+              <span>{renderInlineMarkdown(item.text, `${key}-chk-${item.lineIndex}`)}</span>
+            </li>
+          ))}
+        </ul>,
+      );
+      continue;
+    }
+
     const unordered = trimmed.match(/^[-*]\s+(.+)$/);
     if (unordered) {
       const items = [];
       while (index < lines.length) {
         const item = lines[index].trim().match(/^[-*]\s+(.+)$/);
-        if (!item) break;
+        if (!item || /^[-*]\s+\[([ xX])\]\s+/.test(lines[index].trim())) break;
         items.push(item[1]);
         index += 1;
       }
@@ -548,6 +643,75 @@ export function WorkspaceClient({ data }) {
     setMessage(`백로그에 추가했습니다: ${response.item.title}`);
   }
 
+  async function quickCreateBacklogItem(status, title) {
+    const cleanTitle = String(title || "").trim();
+    if (!cleanTitle) return false;
+    setMessage("");
+    const response = await mutate(
+      "/api/backlog-items",
+      "POST",
+      { projectId: project.id, title: cleanTitle, description: "", type: "task", status, priority: "medium" },
+      session,
+    );
+    if (!response.ok) {
+      setMessage(response.error || "빠른 작업 추가에 실패했습니다.");
+      return false;
+    }
+    setBacklogItems((items) => [response.item, ...items]);
+    setTaskStatuses((items) => ({ ...items, [response.item.id]: response.item.status }));
+    setMessage(`빠르게 추가했습니다: ${response.item.title}`);
+    return true;
+  }
+
+  async function quickMoveTask(task, nextStatus) {
+    if (!canEdit || !nextStatus || nextStatus === task.status) return;
+    const prevStatus = taskStatuses[task.id] || task.status;
+    setTaskStatuses((items) => ({ ...items, [task.id]: nextStatus }));
+    setMessage("");
+    const isBacklogItem = task.source === "backlog";
+    const payload = isBacklogItem
+      ? { id: task.id, status: nextStatus }
+      : { taskId: task.id, status: nextStatus, note: "" };
+    const response = await mutate(
+      isBacklogItem ? "/api/backlog-items" : "/api/task-updates",
+      isBacklogItem ? "PATCH" : "POST",
+      payload,
+      session,
+    );
+    if (!response.ok) {
+      setTaskStatuses((items) => ({ ...items, [task.id]: prevStatus }));
+      setMessage(response.error || "상태 변경에 실패했습니다.");
+      return;
+    }
+    if (isBacklogItem) {
+      setBacklogItems((items) => items.map((item) => (item.id === response.item.id ? response.item : item)));
+    } else {
+      setTaskUpdates((items) => [response.item, ...items.filter((item) => item.taskId !== response.item.taskId)]);
+    }
+    setMessage(`상태를 변경했습니다: ${task.title} → ${getStatusLabel(nextStatus)}`);
+  }
+
+  async function promoteTaskToArchive(item) {
+    if (!canEdit || !item) return;
+    setMessage("");
+    const response = await mutate(
+      "/api/archive-items",
+      "POST",
+      {
+        projectId: project.id,
+        title: item.title,
+        kind: item.type === "research" ? "report" : "artifact",
+        status: "ready",
+        url: "",
+        notes: item.description || `${item.title} 완료 기록 (Kanban에서 승격됨)`,
+      },
+      session,
+    );
+    if (!response.ok) return setMessage(response.error || "아카이브 승격에 실패했습니다.");
+    setArchiveItems((items) => [response.item, ...items]);
+    setMessage(`아카이브로 승격했습니다: ${response.item.title}`);
+  }
+
   async function saveRoadmapItem(event) {
     event.preventDefault();
     setMessage("");
@@ -659,6 +823,7 @@ export function WorkspaceClient({ data }) {
           type: itemModal.type,
           status: itemModal.status,
           priority: itemModal.priority,
+          tags: itemModal.tagsText !== undefined ? itemModal.tagsText : (itemModal.tags || []),
           due: itemModal.due || null,
         }
       : { taskId: itemModal.id, status: itemModal.status, note: itemModal.note || "" };
@@ -818,6 +983,7 @@ export function WorkspaceClient({ data }) {
             <p>{project.summary}</p>
           </div>
           <div className="workspace-header-actions">
+            <Link href="/benchmark">Benchmark 6D</Link>
             <Link href={`/projects/${project.id}`}>Project page</Link>
             <Link href="/">Project hub</Link>
             <Link href="/admin/audit">Audit</Link>
@@ -857,9 +1023,10 @@ export function WorkspaceClient({ data }) {
             backlogForm={backlogForm}
             taskStatuses={taskStatuses}
             createBacklogItem={createBacklogItem}
+            quickCreateBacklogItem={quickCreateBacklogItem}
+            quickMoveTask={quickMoveTask}
             setBacklogForm={setBacklogForm}
             setItemModal={setItemModal}
-            setTaskStatuses={setTaskStatuses}
           />
         )}
         {active === "editor" && (
@@ -907,8 +1074,10 @@ export function WorkspaceClient({ data }) {
         <BoardItemModal
           data={data}
           item={itemModal}
+          canEdit={canEdit}
           canDelete={itemModal.source === "backlog" || (itemModal.source === "seed" && canAdmin)}
           deleteTask={deleteTask}
+          promoteTaskToArchive={promoteTaskToArchive}
           saveBoardModal={saveBoardModal}
           setItemModal={setItemModal}
           taskNotes={taskNotes}
@@ -1275,21 +1444,96 @@ function DecisionModal({ form, projectId, saveDecisionRecord, setForm, setOpen }
   );
 }
 
-function BoardPanel({ data, tasks, canEdit, projectId, backlogForm, taskStatuses, createBacklogItem, setBacklogForm, setItemModal, setTaskStatuses }) {
+function BoardPanel({
+  data,
+  tasks,
+  canEdit,
+  projectId,
+  backlogForm,
+  taskStatuses,
+  createBacklogItem,
+  quickCreateBacklogItem,
+  quickMoveTask,
+  setBacklogForm,
+  setItemModal,
+}) {
+  const [search, setSearch] = useState("");
+  const [typeFilter, setTypeFilter] = useState("all");
+  const [priorityFilter, setPriorityFilter] = useState("all");
+  const [showFullComposer, setShowFullComposer] = useState(false);
+  const [quickTitles, setQuickTitles] = useState({});
+
   const updateBacklogForm = (patch) => setBacklogForm((item) => ({ ...item, projectId, ...patch }));
 
+  const filteredTasks = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return tasks.filter((task) => {
+      if (typeFilter !== "all" && (task.type || "task") !== typeFilter) return false;
+      if (priorityFilter !== "all" && (task.priority || "medium") !== priorityFilter) return false;
+      if (!q) return true;
+      const tagsText = Array.isArray(task.tags) ? task.tags.join(" ") : "";
+      return (
+        String(task.title || "").toLowerCase().includes(q) ||
+        String(task.description || "").toLowerCase().includes(q) ||
+        tagsText.toLowerCase().includes(q)
+      );
+    });
+  }, [priorityFilter, search, tasks, typeFilter]);
+
+  async function handleQuickAdd(event, columnId) {
+    event.preventDefault();
+    const title = quickTitles[columnId] || "";
+    const ok = await quickCreateBacklogItem(columnId, title);
+    if (ok) {
+      setQuickTitles((prev) => ({ ...prev, [columnId]: "" }));
+    }
+  }
+
   return (
-    <div className="workspace-board-layout">
-      <section className="workspace-section backlog-create-panel">
-        <div className="workspace-section-head">
-          <div>
-            <span className="eyebrow">Backlog</span>
-            <h2>작업 추가</h2>
-          </div>
-          <span className="workspace-hint">{canEdit ? "편집 가능" : "읽기 전용"}</span>
+    <div className="v2-board-stack">
+      <section className="v2-board-toolbar">
+        <div className="v2-board-filters">
+          <input
+            type="search"
+            className="compact-search"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="작업 제목 · 내용 · 태그 검색..."
+            aria-label="칸반 작업 검색"
+          />
+          <select className="compact-select" value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)} aria-label="유형 필터">
+            <option value="all">모든 유형</option>
+            {itemTypes.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
+          </select>
+          <select className="compact-select" value={priorityFilter} onChange={(e) => setPriorityFilter(e.target.value)} aria-label="우선순위 필터">
+            <option value="all">모든 우선순위</option>
+            {priorities.map((p) => <option key={p.value} value={p.value}>{p.label}</option>)}
+          </select>
+          <span className="workspace-hint mono">{filteredTasks.length} / {tasks.length}</span>
         </div>
-        {canEdit ? (
-          <form className="backlog-create-form" onSubmit={createBacklogItem}>
+        {canEdit && (
+          <button type="button" className="action-button compact" onClick={() => setShowFullComposer((v) => !v)}>
+            <Plus size={14} aria-hidden="true" />
+            {showFullComposer ? "상세 작성 닫기" : "상세 문서로 추가"}
+          </button>
+        )}
+      </section>
+
+      {canEdit && showFullComposer && (
+        <section className="workspace-section v2-full-composer">
+          <div className="workspace-section-head">
+            <div>
+              <span className="eyebrow">Kanban Detail Composer</span>
+              <h2>상세 작업 등록 (Markdown · 체크리스트 · 태그 지원)</h2>
+            </div>
+          </div>
+          <form
+            className="backlog-create-form"
+            onSubmit={async (e) => {
+              await createBacklogItem(e);
+              setShowFullComposer(false);
+            }}
+          >
             <input
               value={backlogForm.title}
               onChange={(event) => updateBacklogForm({ title: event.target.value })}
@@ -1304,168 +1548,274 @@ function BoardPanel({ data, tasks, canEdit, projectId, backlogForm, taskStatuses
                 {priorities.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
               </select>
               <input type="date" value={backlogForm.due} onChange={(event) => updateBacklogForm({ due: event.target.value })} />
+              <input
+                value={backlogForm.tags || ""}
+                onChange={(event) => updateBacklogForm({ tags: event.target.value })}
+                placeholder="태그 (쉼표 구분: benchmark, ui)"
+              />
             </div>
             <textarea
+              rows={5}
               value={backlogForm.description}
               onChange={(event) => updateBacklogForm({ description: event.target.value })}
-              placeholder="완료 조건, 참고 링크, 논의 맥락"
+              placeholder={"## 배경 / 완료 조건\n- [ ] 체크리스트 항목 1\n- [ ] 체크리스트 항목 2"}
             />
-            <button className="action-button compact" type="submit">
-              <Plus aria-hidden="true" />
-              추가
-            </button>
+            <div className="workspace-row-actions">
+              <button className="action-button compact" type="submit">저장</button>
+              <button className="subtle-button" type="button" onClick={() => setShowFullComposer(false)}>취소</button>
+            </div>
           </form>
-        ) : (
-          <p className="muted">GitHub 로그인한 team-ASP 멤버만 백로그를 추가할 수 있습니다.</p>
-        )}
-      </section>
+        </section>
+      )}
 
-      <section className="workspace-section">
-        <div className="workspace-section-head">
-          <div>
-            <span className="eyebrow">Board</span>
-            <h2>작업 흐름</h2>
-          </div>
-          <span className="workspace-hint">{tasks.length} items</span>
-        </div>
-        <div className="process-board">
-          {boardColumns.map((column) => {
-            const columnTasks = tasks.filter((task) => column.statuses.includes(task.status));
-            return (
-              <article key={column.id} className="process-column">
-                <header>
+      <div className="v2-kanban-grid">
+        {boardColumns.map((column) => {
+          const columnTasks = filteredTasks.filter((task) => column.statuses.includes(taskStatuses[task.id] || task.status));
+          return (
+            <article key={column.id} className="v2-kanban-col">
+              <header className="v2-kanban-col-head">
+                <div>
                   <h3>{column.title}</h3>
                   <p>{column.description}</p>
-                </header>
-                <div className="process-card-list">
-                  {columnTasks.map((task) => (
-                    <div key={task.id} className={`process-card priority-${task.priority || "medium"}`}>
-                      <div className="process-card-topline">
-                        <span>{task.type || task.milestoneId}</span>
-                        <span>{getStatusLabel(task.status)}</span>
+                </div>
+                <span className="v2-col-count mono">{columnTasks.length}</span>
+              </header>
+
+              <div className="v2-kanban-cards">
+                {columnTasks.map((task) => {
+                  const checklist = countChecklist(task.description);
+                  const snippet = stripMarkdownSnippet(task.description, 88);
+                  const currentStatus = taskStatuses[task.id] || task.status;
+                  const tags = Array.isArray(task.tags) ? task.tags : [];
+                  return (
+                    <div
+                      key={task.id}
+                      className={`v2-agile-card priority-${task.priority || "medium"}`}
+                      onClick={() =>
+                        setItemModal({
+                          ...task,
+                          status: currentStatus,
+                          tagsText: tags.join(", "),
+                          note: "",
+                        })
+                      }
+                      role="button"
+                      tabIndex={0}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          setItemModal({ ...task, status: currentStatus, tagsText: tags.join(", "), note: "" });
+                        }
+                      }}
+                    >
+                      <div className="v2-card-top">
+                        <span className={`v2-priority-dot ${task.priority || "medium"}`} title={`Priority: ${task.priority || "medium"}`} />
+                        <span className="v2-tag">{task.type || "task"}</span>
+                        {tags.slice(0, 2).map((tag) => (
+                          <span key={tag} className="v2-tag accent">{tag}</span>
+                        ))}
                       </div>
-                      <strong>{task.title}</strong>
-                      <p>{task.source === "backlog" ? task.ownerLogin : memberName(data, task.ownerId)} · {formatDate(task.due)}</p>
-                      {task.description && <MarkdownText value={task.description} compact />}
-                      {task.latestUpdate?.note && <small>{task.latestUpdate.note}</small>}
-                      <div className="process-edit inline">
+                      <strong className="v2-card-title">{task.title}</strong>
+                      {snippet && <p className="v2-card-snippet">{snippet}</p>}
+                      <div className="v2-card-foot" onClick={(e) => e.stopPropagation()}>
+                        <span className="v2-card-meta">
+                          {task.source === "backlog" ? task.ownerLogin : memberName(data, task.ownerId)} · {formatDate(task.due)}
+                          {checklist.total > 0 && (
+                            <span className="v2-checklist-badge mono"> · {checklist.checked}/{checklist.total}</span>
+                          )}
+                        </span>
                         {canEdit && (
-                          <select value={taskStatuses[task.id] || task.status} onChange={(event) => setTaskStatuses((items) => ({ ...items, [task.id]: event.target.value }))}>
-                            {boardColumns.map((option) => <option key={option.id} value={option.id}>{option.title}</option>)}
+                          <select
+                            className="v2-status-select"
+                            aria-label={`${task.title} 상태 변경`}
+                            value={currentStatus}
+                            onChange={(e) => quickMoveTask(task, e.target.value)}
+                          >
+                            {boardColumns.map((option) => (
+                              <option key={option.id} value={option.id}>{option.title}</option>
+                            ))}
                           </select>
                         )}
-                        <button type="button" onClick={() => setItemModal({ ...task, status: taskStatuses[task.id] || task.status, note: "" })}>
-                          상세
-                        </button>
                       </div>
                     </div>
-                  ))}
-                  {columnTasks.length === 0 && <p className="workspace-empty">아직 항목이 없습니다.</p>}
-                </div>
-              </article>
-            );
-          })}
-        </div>
-      </section>
+                  );
+                })}
+                {columnTasks.length === 0 && <p className="workspace-empty">항목 없음</p>}
+              </div>
+
+              {canEdit && (
+                <form className="v2-quick-add" onSubmit={(e) => handleQuickAdd(e, column.id)}>
+                  <input
+                    value={quickTitles[column.id] || ""}
+                    onChange={(e) => setQuickTitles((prev) => ({ ...prev, [column.id]: e.target.value }))}
+                    placeholder={`+ ${column.title}에 1줄 빠른 추가 (Enter)`}
+                    aria-label={`${column.title} 빠른 작업 추가`}
+                  />
+                </form>
+              )}
+            </article>
+          );
+        })}
+      </div>
     </div>
   );
 }
 
-function BoardItemModal({ data, item, canDelete, deleteTask, saveBoardModal, setItemModal, taskNotes, setTaskNotes }) {
+function BoardItemModal({ data, item, canEdit, canDelete, deleteTask, promoteTaskToArchive, saveBoardModal, setItemModal, taskNotes, setTaskNotes }) {
   const isBacklog = item.source === "backlog";
+  const [editorMode, setEditorMode] = useState(isBacklog && canEdit ? "split" : "preview");
+
+  function toggleChecklistLine(lineIndex) {
+    if (!isBacklog || !canEdit) return;
+    const lines = String(item.description || "").replace(/\r\n/g, "\n").split("\n");
+    if (lineIndex < 0 || lineIndex >= lines.length) return;
+    lines[lineIndex] = lines[lineIndex].replace(
+      /^(\s*[-*]\s+\[)([ xX])(\]\s+)/,
+      (_, pre, mark, post) => `${pre}${mark.toLowerCase() === "x" ? " " : "x"}${post}`,
+    );
+    setItemModal((current) => ({ ...current, description: lines.join("\n") }));
+  }
+
   return (
-    <div className="modal-backdrop" role="presentation">
-      <section className="modal-panel" role="dialog" aria-modal="true" aria-label="작업 상세 편집">
-        <header className="modal-header">
+    <div className="v2-drawer-backdrop" role="presentation" onClick={(e) => { if (e.target === e.currentTarget) setItemModal(null); }}>
+      <aside className="v2-drawer wide" role="dialog" aria-modal="true" aria-label="작업 상세 문서">
+        <header className="v2-drawer-head">
           <div>
-            <span className="eyebrow">{isBacklog ? "Backlog item" : "Template task"}</span>
+            <span className="eyebrow">{isBacklog ? "Kanban Document" : "Template Task"}</span>
             <h2>{item.title}</h2>
           </div>
           <button className="icon-button" type="button" onClick={() => setItemModal(null)} aria-label="닫기">
-            <X aria-hidden="true" />
+            <X size={16} aria-hidden="true" />
           </button>
         </header>
-        <form className="workspace-form" onSubmit={saveBoardModal}>
+
+        <form className="v2-drawer-body workspace-form" onSubmit={saveBoardModal}>
           {isBacklog ? (
             <>
               <label>
                 <span>제목</span>
-                <input value={item.title} onChange={(event) => setItemModal((current) => ({ ...current, title: event.target.value }))} required />
+                <input
+                  value={item.title}
+                  readOnly={!canEdit}
+                  onChange={(event) => setItemModal((current) => ({ ...current, title: event.target.value }))}
+                  required
+                />
               </label>
-              <label>
-                <span>상세 내용</span>
-                <textarea value={item.description || ""} onChange={(event) => setItemModal((current) => ({ ...current, description: event.target.value }))} />
-              </label>
-              {item.description && (
-                <div className="markdown-preview">
-                  <span>Markdown preview</span>
-                  <MarkdownText value={item.description} />
-                </div>
-              )}
-              <div className="modal-grid">
+
+              <div className="v2-meta-row-4">
+                <label>
+                  <span>상태</span>
+                  <select value={item.status} disabled={!canEdit} onChange={(event) => setItemModal((current) => ({ ...current, status: event.target.value }))}>
+                    {boardColumns.map((column) => <option key={column.id} value={column.id}>{column.title}</option>)}
+                  </select>
+                </label>
                 <label>
                   <span>종류</span>
-                  <select value={item.type} onChange={(event) => setItemModal((current) => ({ ...current, type: event.target.value }))}>
+                  <select value={item.type} disabled={!canEdit} onChange={(event) => setItemModal((current) => ({ ...current, type: event.target.value }))}>
                     {itemTypes.map((type) => <option key={type.value} value={type.value}>{type.label}</option>)}
                   </select>
                 </label>
                 <label>
                   <span>우선순위</span>
-                  <select value={item.priority} onChange={(event) => setItemModal((current) => ({ ...current, priority: event.target.value }))}>
+                  <select value={item.priority} disabled={!canEdit} onChange={(event) => setItemModal((current) => ({ ...current, priority: event.target.value }))}>
                     {priorities.map((priority) => <option key={priority.value} value={priority.value}>{priority.label}</option>)}
                   </select>
                 </label>
+                <label>
+                  <span>기한</span>
+                  <input type="date" disabled={!canEdit} value={item.due ? String(item.due).slice(0, 10) : ""} onChange={(event) => setItemModal((current) => ({ ...current, due: event.target.value }))} />
+                </label>
+              </div>
+
+              <label>
+                <span>태그 (쉼표 구분, 최대 6개)</span>
+                <input
+                  value={item.tagsText ?? (Array.isArray(item.tags) ? item.tags.join(", ") : "")}
+                  readOnly={!canEdit}
+                  onChange={(event) => setItemModal((current) => ({ ...current, tagsText: event.target.value }))}
+                  placeholder="예: mafia-sim, v3-rubric, frontend"
+                />
+              </label>
+
+              <div className="v2-doc-head">
+                <span>상세 문서 (Markdown · 표 · 체크리스트 지원, 최대 8,000자)</span>
+                {canEdit && (
+                  <div className="segmented-control">
+                    <button type="button" className={editorMode === "write" ? "active" : ""} onClick={() => setEditorMode("write")}>Write</button>
+                    <button type="button" className={editorMode === "split" ? "active" : ""} onClick={() => setEditorMode("split")}>Split</button>
+                    <button type="button" className={editorMode === "preview" ? "active" : ""} onClick={() => setEditorMode("preview")}>Preview</button>
+                  </div>
+                )}
+              </div>
+
+              <div className={`v2-md-workbench mode-${editorMode}`}>
+                {canEdit && editorMode !== "preview" && (
+                  <textarea
+                    className="v2-md-textarea mono"
+                    rows={12}
+                    value={item.description || ""}
+                    onChange={(event) => setItemModal((current) => ({ ...current, description: event.target.value }))}
+                    placeholder={"## 목표\n\n- [ ] 체크리스트 항목\n\n| 항목 | 결과 |\n| --- | --- |\n| 테스트 | 통과 |"}
+                  />
+                )}
+                {editorMode !== "write" && (
+                  <div className="v2-md-reader">
+                    {item.description ? (
+                      <MarkdownText value={item.description} onToggleChecklist={canEdit ? toggleChecklistLine : null} />
+                    ) : (
+                      <p className="muted">작성된 상세 문서가 없습니다.</p>
+                    )}
+                  </div>
+                )}
               </div>
             </>
           ) : (
             <>
               {item.description && (
-                <div className="markdown-preview">
-                  <span>상세 설명</span>
+                <div className="v2-md-reader">
                   <MarkdownText value={item.description} />
                 </div>
               )}
-              <p className="muted">초기 설계 태스크는 제목과 설명을 코드 데이터로 관리합니다. 여기서는 진행 상태와 변경 메모만 저장합니다.</p>
+              <label>
+                <span>상태</span>
+                <select value={item.status} disabled={!canEdit} onChange={(event) => setItemModal((current) => ({ ...current, status: event.target.value }))}>
+                  {boardColumns.map((column) => <option key={column.id} value={column.id}>{column.title}</option>)}
+                </select>
+              </label>
+              <label>
+                <span>변경 메모</span>
+                <input
+                  value={taskNotes[item.id] || item.note || ""}
+                  readOnly={!canEdit}
+                  onChange={(event) => {
+                    setTaskNotes((items) => ({ ...items, [item.id]: event.target.value }));
+                    setItemModal((current) => ({ ...current, note: event.target.value }));
+                  }}
+                  placeholder={`${memberName(data, item.ownerId)}에게 공유할 변경 맥락`}
+                />
+              </label>
             </>
           )}
-          <div className="modal-grid">
-            <label>
-              <span>상태</span>
-              <select value={item.status} onChange={(event) => setItemModal((current) => ({ ...current, status: event.target.value }))}>
-                {boardColumns.map((column) => <option key={column.id} value={column.id}>{column.title}</option>)}
-              </select>
-            </label>
-            {isBacklog && (
-              <label>
-                <span>기한</span>
-                <input type="date" value={item.due ? String(item.due).slice(0, 10) : ""} onChange={(event) => setItemModal((current) => ({ ...current, due: event.target.value }))} />
-              </label>
-            )}
-          </div>
-          {!isBacklog && (
-            <label>
-              <span>변경 메모</span>
-              <input
-                value={taskNotes[item.id] || item.note || ""}
-                onChange={(event) => {
-                  setTaskNotes((items) => ({ ...items, [item.id]: event.target.value }));
-                  setItemModal((current) => ({ ...current, note: event.target.value }));
-                }}
-                placeholder={`${memberName(data, item.ownerId)}에게 공유할 변경 맥락`}
-              />
-            </label>
-          )}
-          <div className="modal-actions">
-            {canDelete && (
-              <button className="danger-button" type="button" onClick={() => deleteTask(item)}>
-                <Trash2 aria-hidden="true" />
-                삭제
-              </button>
-            )}
-            <button className="action-button compact" type="submit">저장</button>
+
+          <div className="modal-actions v2-drawer-actions">
+            <div className="v2-drawer-actions-left">
+              {canDelete && (
+                <button className="danger-button" type="button" onClick={() => deleteTask(item)}>
+                  <Trash2 size={14} aria-hidden="true" />
+                  삭제
+                </button>
+              )}
+              {canEdit && (
+                <button className="subtle-button" type="button" onClick={() => promoteTaskToArchive(item)}>
+                  <Archive size={14} aria-hidden="true" />
+                  아카이브로 승격
+                </button>
+              )}
+            </div>
+            {canEdit && <button className="action-button compact" type="submit">변경 저장</button>}
           </div>
         </form>
-      </section>
+      </aside>
     </div>
   );
 }
@@ -1597,20 +1947,84 @@ function ArchivePanel({
   saveArchiveItem,
   setArchiveForm,
 }) {
+  const [search, setSearch] = useState("");
+  const [kindFilter, setKindFilter] = useState("all");
+  const [showComposer, setShowComposer] = useState(false);
+  const [readingItem, setReadingItem] = useState(null);
+
   const projectLogs = data.logs.filter((log) => log.projectId === project.id);
   const checklistItems = (archive?.required || []).filter((item) => !hiddenArchiveChecklistIds.has(archiveChecklistTargetId(project.id, item)));
+
+  const filteredArchive = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return archiveItems.filter((item) => {
+      if (kindFilter !== "all" && item.kind !== kindFilter) return false;
+      if (!q) return true;
+      return (
+        String(item.title || "").toLowerCase().includes(q) ||
+        String(item.notes || "").toLowerCase().includes(q)
+      );
+    });
+  }, [archiveItems, kindFilter, search]);
+
   return (
-    <div className="workspace-editor-grid">
-      <section className="workspace-section">
-        <div className="workspace-section-head">
-          <div>
-            <span className="eyebrow">Archive</span>
-            <h2>산출물 관리</h2>
+    <div className="v2-archive-stack">
+      <section className="v2-board-toolbar">
+        <div className="v2-board-filters">
+          <input
+            type="search"
+            className="compact-search"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="아카이브 제목 · 본문 검색..."
+            aria-label="아카이브 검색"
+          />
+          <div className="chip-row">
+            <button type="button" className={`filter-chip ${kindFilter === "all" ? "active" : ""}`} onClick={() => setKindFilter("all")}>
+              All ({archiveItems.length})
+            </button>
+            {archiveKinds.map((kind) => (
+              <button
+                key={kind.value}
+                type="button"
+                className={`filter-chip ${kindFilter === kind.value ? "active" : ""}`}
+                onClick={() => setKindFilter(kind.value)}
+              >
+                {kind.label}
+              </button>
+            ))}
           </div>
-          <CheckCircle2 aria-hidden="true" className="panel-icon" />
         </div>
-        {canEdit ? (
-          <form className="workspace-form" onSubmit={saveArchiveItem}>
+        {canEdit && (
+          <button
+            type="button"
+            className="action-button compact"
+            onClick={() => {
+              if (!showComposer) setArchiveForm(emptyArchiveItem(project.id));
+              setShowComposer((v) => !v);
+            }}
+          >
+            <Plus size={14} aria-hidden="true" />
+            {showComposer ? "등록 폼 닫기" : "산출물 등록"}
+          </button>
+        )}
+      </section>
+
+      {canEdit && showComposer && (
+        <section className="workspace-section v2-full-composer">
+          <div className="workspace-section-head">
+            <div>
+              <span className="eyebrow">Archive</span>
+              <h2>{archiveForm.id ? "산출물 수정" : "새 아카이브 산출물 등록"}</h2>
+            </div>
+          </div>
+          <form
+            className="workspace-form"
+            onSubmit={async (e) => {
+              await saveArchiveItem(e);
+              setShowComposer(false);
+            }}
+          >
             <label>
               <span>제목</span>
               <input value={archiveForm.title} onChange={(event) => setArchiveForm((item) => ({ ...item, title: event.target.value }))} required />
@@ -1630,73 +2044,150 @@ function ArchivePanel({
               </label>
             </div>
             <label>
-              <span>URL</span>
+              <span>참고 URL (http/https만 허용)</span>
               <input value={archiveForm.url} onChange={(event) => setArchiveForm((item) => ({ ...item, url: event.target.value }))} placeholder="https://..." />
             </label>
             <label>
-              <span>노트</span>
-              <textarea value={archiveForm.notes} onChange={(event) => setArchiveForm((item) => ({ ...item, notes: event.target.value }))} />
+              <span>상세 노트 (Markdown 지원)</span>
+              <textarea rows={6} value={archiveForm.notes} onChange={(event) => setArchiveForm((item) => ({ ...item, notes: event.target.value }))} />
             </label>
             <div className="workspace-row-actions">
-              <button className="action-button compact" type="submit">{archiveForm.id ? "수정" : "추가"}</button>
-              {archiveForm.id && <button className="subtle-button" type="button" onClick={() => setArchiveForm(emptyArchiveItem(project.id))}>취소</button>}
+              <button className="action-button compact" type="submit">{archiveForm.id ? "수정 저장" : "등록"}</button>
+              <button className="subtle-button" type="button" onClick={() => setShowComposer(false)}>취소</button>
             </div>
           </form>
-        ) : (
-          <p className="muted">로그인한 팀 멤버만 아카이브 항목을 관리할 수 있습니다.</p>
-        )}
-        <div className="archive-checklist">
-          {checklistItems.map((item) => {
-            const missing = archive.missing.includes(item);
-            return (
-              <article key={item} className={missing ? "missing" : "ready"}>
-                <div>
-                  <strong>{item}</strong>
-                  <span>{missing ? "필요" : "준비됨"}</span>
-                </div>
-                {canAdmin && (
-                  <button type="button" onClick={() => deleteArchiveChecklistItem(item)}>
-                    삭제
-                  </button>
-                )}
-              </article>
-            );
-          })}
-          {checklistItems.length === 0 && <p className="workspace-empty">남아 있는 기본 체크리스트 항목이 없습니다.</p>}
-        </div>
-      </section>
+        </section>
+      )}
 
-      <section className="workspace-section">
-        <span className="eyebrow">Artifacts</span>
-        <h2>발표와 회고 산출물</h2>
-        <div className="workspace-list">
-          {archiveItems.map((item) => (
-            <article key={item.id}>
-              <BookOpen aria-hidden="true" />
-              <strong>{item.title}</strong>
-              <span>{archiveKinds.find((kind) => kind.value === item.kind)?.label || item.kind} · {getStatusLabel(item.status)}</span>
-              {item.url && <a href={item.url} target="_blank" rel="noreferrer">{item.url}</a>}
-              {item.notes && <p>{item.notes}</p>}
-              {canEdit && (
-                <div className="workspace-row-actions">
-                  <button type="button" onClick={() => setArchiveForm(item)}>편집</button>
-                  <button type="button" onClick={() => deleteArchiveItem(item.id)}>삭제</button>
+      <div className="v2-archive-grid">
+        <section className="workspace-section">
+          <div className="workspace-section-head">
+            <div>
+              <span className="eyebrow">Knowledge Library</span>
+              <h2>산출물 &amp; 아카이브 문서</h2>
+            </div>
+            <Link href="/benchmark" className="subtle-button">
+              Mafia Benchmark 6D 열기 →
+            </Link>
+          </div>
+
+          <div className="v2-archive-cards">
+            {filteredArchive.map((item) => {
+              const safeUrl = safeMarkdownHref(item.url);
+              const snippet = stripMarkdownSnippet(item.notes, 140);
+              return (
+                <article key={item.id} className="v2-archive-card">
+                  <div className="v2-card-top">
+                    <span className="v2-tag accent">{archiveKinds.find((kind) => kind.value === item.kind)?.label || item.kind}</span>
+                    <span className="v2-tag">{getStatusLabel(item.status)}</span>
+                    <span className="v2-card-meta mono" style={{ marginLeft: "auto" }}>{formatDate(item.updatedAt || item.createdAt)}</span>
+                  </div>
+                  <strong className="v2-archive-title">{item.title}</strong>
+                  {snippet && <p className="v2-archive-snippet">{snippet}</p>}
+                  <div className="v2-archive-actions">
+                    <button type="button" className="subtle-button" onClick={() => setReadingItem(item)}>
+                      <BookOpen size={13} aria-hidden="true" />
+                      열람
+                    </button>
+                    {safeUrl && (
+                      <a href={safeUrl} target="_blank" rel="noopener noreferrer" className="subtle-button">
+                        외부 링크 ↗
+                      </a>
+                    )}
+                    {canEdit && (
+                      <>
+                        <button
+                          type="button"
+                          className="subtle-button"
+                          onClick={() => {
+                            setArchiveForm(item);
+                            setShowComposer(true);
+                          }}
+                        >
+                          편집
+                        </button>
+                        <button type="button" className="subtle-button" onClick={() => deleteArchiveItem(item.id)}>
+                          삭제
+                        </button>
+                      </>
+                    )}
+                  </div>
+                </article>
+              );
+            })}
+            {filteredArchive.length === 0 && <p className="workspace-empty">조건에 맞는 아카이브 산출물이 없습니다.</p>}
+          </div>
+        </section>
+
+        <section className="workspace-section">
+          <div className="workspace-section-head">
+            <div>
+              <span className="eyebrow">Checklist &amp; Logs</span>
+              <h2>필수 산출물 점검 &amp; 스터디 로그</h2>
+            </div>
+            <CheckCircle2 aria-hidden="true" className="panel-icon" />
+          </div>
+          <div className="archive-checklist">
+            {checklistItems.map((item) => {
+              const missing = archive.missing.includes(item);
+              return (
+                <article key={item} className={missing ? "missing" : "ready"}>
+                  <div>
+                    <strong>{item}</strong>
+                    <span>{missing ? "필요" : "준비됨"}</span>
+                  </div>
+                  {canAdmin && (
+                    <button type="button" onClick={() => deleteArchiveChecklistItem(item)}>
+                      삭제
+                    </button>
+                  )}
+                </article>
+              );
+            })}
+            {checklistItems.length === 0 && <p className="workspace-empty">남아 있는 기본 체크리스트 항목이 없습니다.</p>}
+          </div>
+          <div className="workspace-list compact" style={{ marginTop: "14px" }}>
+            {projectLogs.map((log) => (
+              <article key={log.id}>
+                <strong>{log.title}</strong>
+                <span>{log.type} · {formatDate(log.date)}</span>
+                <p>{log.summary}</p>
+              </article>
+            ))}
+          </div>
+        </section>
+      </div>
+
+      {readingItem && (
+        <div className="v2-drawer-backdrop" role="presentation" onClick={(e) => { if (e.target === e.currentTarget) setReadingItem(null); }}>
+          <aside className="v2-drawer wide" role="dialog" aria-modal="true" aria-label="아카이브 문서 열람">
+            <header className="v2-drawer-head">
+              <div>
+                <span className="eyebrow">
+                  {archiveKinds.find((k) => k.value === readingItem.kind)?.label || readingItem.kind} · {getStatusLabel(readingItem.status)}
+                </span>
+                <h2>{readingItem.title}</h2>
+              </div>
+              <button type="button" className="icon-button" onClick={() => setReadingItem(null)} aria-label="닫기">
+                <X size={16} aria-hidden="true" />
+              </button>
+            </header>
+            <div className="v2-drawer-body">
+              {safeMarkdownHref(readingItem.url) && (
+                <div className="v2-reader-link-box">
+                  <span>Reference Link</span>
+                  <a href={safeMarkdownHref(readingItem.url)} target="_blank" rel="noopener noreferrer">
+                    {safeMarkdownHref(readingItem.url)}
+                  </a>
                 </div>
               )}
-            </article>
-          ))}
-          {archiveItems.length === 0 && <p className="workspace-empty">아직 등록된 산출물이 없습니다.</p>}
+              <div className="v2-md-reader reader-prose">
+                {readingItem.notes ? <MarkdownText value={readingItem.notes} /> : <p className="muted">작성된 노트가 없습니다.</p>}
+              </div>
+            </div>
+          </aside>
         </div>
-        <div className="workspace-list compact">
-          {projectLogs.map((log) => (
-            <article key={log.id}>
-              <strong>{log.title}</strong>
-              <span>{log.type} · {formatDate(log.date)}</span>
-              <p>{log.summary}</p>
-            </article>
-          ))}
-        </div>
-      </section>
+      )}
     </div>
   );
 }
