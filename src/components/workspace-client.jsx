@@ -2,17 +2,23 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   BarChart3,
   BookOpen,
+  Calendar,
+  CheckCircle2,
+  ChevronDown,
+  ChevronRight,
   ClipboardList,
   Command,
   FileText,
+  Folder,
   FolderPlus,
   Inbox,
   LayoutDashboard,
   Plus,
+  RotateCcw,
   Search,
   ShieldCheck,
   Trash2,
@@ -23,11 +29,12 @@ import { AgilePanel } from "@/components/agile-panel";
 import { BenchmarkViewer } from "@/components/benchmark-viewer";
 import { DocsWikiPanel } from "@/components/docs-wiki-panel";
 import { countChecklist, MarkdownRenderer, stripMarkdownSnippet } from "@/components/markdown-renderer";
+import { formatBenchmarkIdentity } from "@/lib/benchmark-format";
 
 const WORKSPACE_TABS = [
   { id: "overview", label: "Overview", desc: "프로젝트 현황 · 로드맵 · 의사결정", icon: LayoutDashboard },
   { id: "agile", label: "Agile", desc: "빠른 메모 · 스탠드업 · 회의 스크랩", icon: Zap },
-  { id: "kanban", label: "Kanban", desc: "작업 보드 · 진행 상태 · 상세 문서", icon: ClipboardList },
+  { id: "kanban", label: "Kanban", desc: "진행 보드 · 상세 모달 · 완료 아카이브 트리", icon: ClipboardList },
   { id: "docs", label: "Docs", desc: "Confluence/Notion 팀 위키 · 아카이브", icon: BookOpen },
   { id: "benchmark", label: "Benchmark", desc: "6D AI 에이전트 성능 리더보드", icon: BarChart3 },
   { id: "review", label: "Review", desc: "검수 큐 · 거버넌스", icon: Inbox },
@@ -35,12 +42,18 @@ const WORKSPACE_TABS = [
 
 const VALID_TABS = new Set(WORKSPACE_TABS.map((t) => t.id));
 
-const BOARD_COLUMNS = [
+const ACTIVE_BOARD_COLUMNS = [
   { id: "todo", title: "Todo", description: "예정된 작업", statuses: ["todo", "planned"] },
   { id: "in-progress", title: "In progress", description: "진행 중", statuses: ["in-progress", "active"] },
   { id: "ready-for-review", title: "Review", description: "검수 · 피드백", statuses: ["ready-for-review", "review"] },
-  { id: "done", title: "Done", description: "완료", statuses: ["done", "published"] },
 ];
+
+const BOARD_COLUMNS = [
+  ...ACTIVE_BOARD_COLUMNS,
+  { id: "done", title: "Done", description: "완료 (하위 트리 보관)", statuses: ["done", "published"] },
+];
+
+const DONE_STATUSES = new Set(["done", "published"]);
 
 const ITEM_TYPES = [
   { value: "task", label: "Task" },
@@ -153,7 +166,6 @@ export function WorkspaceClient({ data, initialBenchmark = null }) {
   const [reviewPayload, setReviewPayload] = useState({ items: data.reviewQueue, permissions: { canReview: false } });
   const [contentOverrides, setContentOverrides] = useState([]);
   const [taskStatuses, setTaskStatuses] = useState({});
-  const [taskNotes, setTaskNotes] = useState({});
   const [reviewNotes, setReviewNotes] = useState({});
   const [selectedDocId, setSelectedDocId] = useState("");
 
@@ -374,8 +386,16 @@ export function WorkspaceClient({ data, initialBenchmark = null }) {
     if (!res.ok) return setToast(res.error || "Kanban 승격 실패");
     setBacklogItems((prev) => [res.item, ...prev]);
     setTaskStatuses((prev) => ({ ...prev, [res.item.id]: res.item.status }));
-    setToast(`Kanban Todo로 승격했습니다: ${res.item.title}`);
+    setToast(`Kanban Todo로 승격했습니다. 모달에서 상세 내용을 추가하세요: ${res.item.title}`);
     navigateWorkspace("kanban");
+    setItemModal({
+      ...res.item,
+      ownerId: res.item.ownerLogin,
+      source: "backlog",
+      status: res.item.status,
+      tagsText: (res.item.tags || []).join(", "),
+      note: "",
+    });
   }
 
   async function promoteAgileToDocs(note) {
@@ -456,8 +476,8 @@ export function WorkspaceClient({ data, initialBenchmark = null }) {
   }
 
   async function quickMoveTask(task, nextStatus) {
-    if (!canEdit || !nextStatus || nextStatus === task.status) return;
-    const prevStatus = taskStatuses[task.id] || task.status;
+    const curStatus = taskStatuses[task.id] || task.status;
+    if (!canEdit || !nextStatus || nextStatus === curStatus) return;
     setTaskStatuses((prev) => ({ ...prev, [task.id]: nextStatus }));
     const isBacklog = task.source === "backlog";
     const res = await mutate(
@@ -467,7 +487,7 @@ export function WorkspaceClient({ data, initialBenchmark = null }) {
       session,
     );
     if (!res.ok) {
-      setTaskStatuses((prev) => ({ ...prev, [task.id]: prevStatus }));
+      setTaskStatuses((prev) => ({ ...prev, [task.id]: curStatus }));
       return setToast(res.error || "상태 변경 실패");
     }
     if (isBacklog) {
@@ -475,35 +495,50 @@ export function WorkspaceClient({ data, initialBenchmark = null }) {
     } else {
       setTaskUpdates((prev) => [res.item, ...prev.filter((i) => i.taskId !== res.item.taskId)]);
     }
+    if (nextStatus === "done") {
+      setToast(`완료 처리했습니다. 하단 완료 아카이브 트리에서 확인하세요: ${task.title}`);
+    } else if (DONE_STATUSES.has(curStatus)) {
+      setToast(`Kanban 보드(${getStatusLabel(nextStatus)})로 복원했습니다: ${task.title}`);
+    }
   }
 
   async function saveBoardModal(event) {
     event.preventDefault();
     if (!itemModal) return;
     const isBacklog = itemModal.source === "backlog";
-    const payload = isBacklog
-      ? {
-          id: itemModal.id,
-          title: itemModal.title,
-          description: itemModal.description,
-          type: itemModal.type,
-          status: itemModal.status,
-          priority: itemModal.priority,
-          tags: itemModal.tagsText !== undefined ? itemModal.tagsText : (itemModal.tags || []),
-          due: itemModal.due || null,
-        }
-      : { taskId: itemModal.id, status: itemModal.status, note: itemModal.note || "" };
-    const res = await mutate(isBacklog ? "/api/backlog-items" : "/api/task-updates", isBacklog ? "PATCH" : "POST", payload, session);
+    const commonItem = {
+      title: itemModal.title,
+      description: itemModal.description || "",
+      type: itemModal.type || "task",
+      status: itemModal.status || "todo",
+      priority: itemModal.priority || "medium",
+      tags: itemModal.tagsText !== undefined ? itemModal.tagsText : (itemModal.tags || []),
+      due: itemModal.due || null,
+    };
+
+    const res = isBacklog
+      ? await mutate("/api/backlog-items", "PATCH", { id: itemModal.id, ...commonItem }, session)
+      : await mutate(
+          "/api/static-content/promote",
+          "POST",
+          { projectId: project.id, targetType: "task", targetId: itemModal.id, item: commonItem },
+          session,
+        );
+
     if (!res.ok) return setToast(res.error || "저장 실패");
     if (isBacklog) {
       setBacklogItems((prev) => prev.map((i) => (i.id === res.item.id ? res.item : i)));
     } else {
-      setTaskUpdates((prev) => [res.item, ...prev.filter((i) => i.taskId !== res.item.taskId)]);
-      setTaskNotes((prev) => ({ ...prev, [itemModal.id]: "" }));
+      setBacklogItems((prev) => [res.item, ...prev]);
+      if (res.override) setContentOverrides((prev) => [res.override, ...prev]);
     }
-    setTaskStatuses((prev) => ({ ...prev, [itemModal.id]: res.item.status }));
+    setTaskStatuses((prev) => ({ ...prev, [res.item.id]: res.item.status }));
     setItemModal(null);
-    setToast("작업을 저장했습니다.");
+    setToast(
+      res.item.status === "done"
+        ? `작업을 완료 처리하여 하단 완료 아카이브 트리에 보관했습니다: ${res.item.title}`
+        : `작업을 저장했습니다: ${res.item.title}`,
+    );
   }
 
   async function deleteTask(item) {
@@ -798,6 +833,7 @@ export function WorkspaceClient({ data, initialBenchmark = null }) {
             canEdit={canEdit}
             createBacklogItem={createBacklogItem}
             data={data}
+            deleteTask={deleteTask}
             projectId={project.id}
             quickCreateBacklogItem={quickCreateBacklogItem}
             quickMoveTask={quickMoveTask}
@@ -835,19 +871,17 @@ export function WorkspaceClient({ data, initialBenchmark = null }) {
         )}
       </main>
 
-      {/* Kanban Slide-Over Detail Drawer */}
+      {/* Kanban Detail Modal Window */}
       {itemModal && (
-        <KanbanDetailDrawer
-          canDelete={itemModal.source === "backlog" || (itemModal.source === "seed" && canAdmin)}
+        <KanbanDetailModal
+          canDelete={canEdit}
           canEdit={canEdit}
-          data={data}
           deleteTask={deleteTask}
           item={itemModal}
           promoteTaskToDocs={promoteTaskToDocs}
+          quickMoveTask={quickMoveTask}
           saveBoardModal={saveBoardModal}
           setItemModal={setItemModal}
-          setTaskNotes={setTaskNotes}
-          taskNotes={taskNotes}
         />
       )}
 
@@ -1015,6 +1049,7 @@ function OverviewTab({
   const decisions = [...decisionRecords, ...seedDecisions];
 
   const topBench = benchmarkTop3[0];
+  const topBenchIdentity = topBench ? formatBenchmarkIdentity(topBench) : null;
 
   return (
     <div className="v2-overview-stack">
@@ -1023,7 +1058,7 @@ function OverviewTab({
         <button type="button" className="v2-kpi-card" onClick={() => navigateWorkspace("kanban")}>
           <span>Kanban Progress</span>
           <strong className="mono">{progress}%</strong>
-          <small>{counts.done} done · {counts["in-progress"]} active · {counts.todo} todo</small>
+          <small>{counts.done} archived · {counts["in-progress"]} active · {counts.todo} todo</small>
         </button>
         <button type="button" className="v2-kpi-card" onClick={() => navigateWorkspace("agile")}>
           <span>Agile Stream</span>
@@ -1038,7 +1073,7 @@ function OverviewTab({
         <button type="button" className="v2-kpi-card" onClick={() => navigateWorkspace("benchmark")}>
           <span>Benchmark Leader</span>
           <strong className="mono">{topBench ? `${topBench.score_mean} pts` : "-"}</strong>
-          <small>{topBench ? `${topBench.model_raw} (${topBench.setting_label || "default"})` : "6D 리더보드 보기"}</small>
+          <small title={topBenchIdentity?.mainTitle}>{topBenchIdentity ? topBenchIdentity.mainTitle : "6D 리더보드 보기"}</small>
         </button>
       </section>
 
@@ -1068,18 +1103,24 @@ function OverviewTab({
           <div className="v2-panel-head">
             <div>
               <span className="v2-eyebrow">BENCHMARK 6D</span>
-              <h3>Top 3 에이전트 설정</h3>
+              <h3>Top 3 실험 결과</h3>
             </div>
             <button type="button" className="v2-link-btn" onClick={() => navigateWorkspace("benchmark")}>대시보드 →</button>
           </div>
           <div className="v2-mini-list">
-            {benchmarkTop3.map((entry, idx) => (
-              <div key={entry.id} className="v2-mini-row">
-                <span className="mono v2-rank-mini">#{idx + 1}</span>
-                <p><strong>{entry.archetype_name}</strong> · <span className="mono">{entry.model_raw}</span></p>
-                <strong className="mono">{entry.score_mean}</strong>
-              </div>
-            ))}
+            {benchmarkTop3.map((entry, idx) => {
+              const ident = formatBenchmarkIdentity(entry);
+              return (
+                <div key={entry.id} className="v2-mini-row">
+                  <span className="mono v2-rank-mini">#{idx + 1}</span>
+                  <div className="v2-mini-stack">
+                    <strong>{ident.mainTitle}</strong>
+                    <span className="v2-muted mono">{ident.subtitle}</span>
+                  </div>
+                  <strong className="mono">{entry.score_mean}</strong>
+                </div>
+              );
+            })}
             {benchmarkTop3.length === 0 && <p className="v2-muted">동기화된 벤치마크 결과가 없습니다.</p>}
           </div>
         </article>
@@ -1176,11 +1217,33 @@ function OverviewTab({
   );
 }
 
+function getCompletedDateKey(task) {
+  const raw = task.updatedAt || task.latestUpdate?.createdAt || task.due || "";
+  if (!raw) return "0000-00-00";
+  const d = new Date(raw);
+  if (Number.isNaN(d.getTime())) return "0000-00-00";
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
+function formatDateGroupLabel(key) {
+  if (!key || key === "0000-00-00") return "날짜 미기록";
+  const [y, m, d] = key.split("-").map(Number);
+  const dateObj = new Date(y, m - 1, d);
+  const now = new Date();
+  const todayKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+  const formatted = new Intl.DateTimeFormat("ko-KR", { year: "numeric", month: "long", day: "numeric", weekday: "short" }).format(dateObj);
+  return key === todayKey ? `${formatted} (오늘)` : formatted;
+}
+
 function KanbanTab({
   backlogForm,
   canEdit,
   createBacklogItem,
   data,
+  deleteTask,
   projectId,
   quickCreateBacklogItem,
   quickMoveTask,
@@ -1194,6 +1257,9 @@ function KanbanTab({
   const [priorityFilter, setPriorityFilter] = useState("all");
   const [showComposer, setShowComposer] = useState(false);
   const [quickTitles, setQuickTitles] = useState({});
+  const [archiveOpen, setArchiveOpen] = useState(true);
+  const [archiveGroupBy, setArchiveGroupBy] = useState("date");
+  const [collapsedGroups, setCollapsedGroups] = useState({});
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -1204,6 +1270,53 @@ function KanbanTab({
       return `${t.title} ${t.description || ""} ${(t.tags || []).join(" ")}`.toLowerCase().includes(q);
     });
   }, [priorityFilter, search, tasks, typeFilter]);
+
+  const activeTasks = useMemo(
+    () => filtered.filter((t) => !DONE_STATUSES.has(taskStatuses[t.id] || t.status)),
+    [filtered, taskStatuses],
+  );
+
+  const completedTasks = useMemo(
+    () => filtered.filter((t) => DONE_STATUSES.has(taskStatuses[t.id] || t.status)),
+    [filtered, taskStatuses],
+  );
+
+  const completedGroups = useMemo(() => {
+    const map = new Map();
+    if (archiveGroupBy === "date") {
+      for (const task of completedTasks) {
+        const key = getCompletedDateKey(task);
+        if (!map.has(key)) map.set(key, []);
+        map.get(key).push(task);
+      }
+      return [...map.entries()]
+        .sort(([a], [b]) => b.localeCompare(a))
+        .map(([key, items]) => ({ key, label: formatDateGroupLabel(key), items }));
+    }
+    const order = ITEM_TYPES.map((t) => t.value);
+    for (const task of completedTasks) {
+      const key = task.type || "task";
+      if (!map.has(key)) map.set(key, []);
+      map.get(key).push(task);
+    }
+    return [...map.entries()]
+      .sort(([a], [b]) => (order.indexOf(a) === -1 ? 99 : order.indexOf(a)) - (order.indexOf(b) === -1 ? 99 : order.indexOf(b)))
+      .map(([key, items]) => ({
+        key,
+        label: ITEM_TYPES.find((t) => t.value === key)?.label || key,
+        items,
+      }));
+  }, [archiveGroupBy, completedTasks]);
+
+  function openTaskModal(task) {
+    const curStatus = taskStatuses[task.id] || task.status;
+    const tags = Array.isArray(task.tags) ? task.tags : [];
+    setItemModal({ ...task, status: curStatus, tagsText: tags.join(", "), note: "" });
+  }
+
+  function toggleGroup(groupKey) {
+    setCollapsedGroups((prev) => ({ ...prev, [groupKey]: !prev[groupKey] }));
+  }
 
   async function onQuickAdd(event, colId) {
     event.preventDefault();
@@ -1224,7 +1337,7 @@ function KanbanTab({
             <option value="all">모든 우선순위</option>
             {PRIORITIES.map((p) => <option key={p.value} value={p.value}>{p.label}</option>)}
           </select>
-          <span className="v2-muted mono">{filtered.length} / {tasks.length}</span>
+          <span className="v2-muted mono">진행 {activeTasks.length} · 완료 {completedTasks.length}</span>
         </div>
         {canEdit && (
           <button type="button" className="v2-btn-primary compact" onClick={() => setShowComposer((v) => !v)}>
@@ -1259,9 +1372,10 @@ function KanbanTab({
         </section>
       )}
 
-      <div className="v2-kanban-grid">
-        {BOARD_COLUMNS.map((col) => {
-          const colTasks = filtered.filter((t) => col.statuses.includes(taskStatuses[t.id] || t.status));
+      {/* 3-Column Active Kanban Board */}
+      <div className="v2-kanban-grid cols-3">
+        {ACTIVE_BOARD_COLUMNS.map((col) => {
+          const colTasks = activeTasks.filter((t) => col.statuses.includes(taskStatuses[t.id] || t.status));
           return (
             <article key={col.id} className="v2-kanban-col">
               <header className="v2-kanban-col-head">
@@ -1274,7 +1388,7 @@ function KanbanTab({
               <div className="v2-kanban-cards">
                 {colTasks.map((task) => {
                   const chk = countChecklist(task.description);
-                  const snippet = stripMarkdownSnippet(task.description, 84);
+                  const snippet = stripMarkdownSnippet(task.description, 88);
                   const curStatus = taskStatuses[task.id] || task.status;
                   const tags = Array.isArray(task.tags) ? task.tags : [];
                   return (
@@ -1283,11 +1397,11 @@ function KanbanTab({
                       className="v2-agile-card"
                       role="button"
                       tabIndex={0}
-                      onClick={() => setItemModal({ ...task, status: curStatus, tagsText: tags.join(", "), note: "" })}
+                      onClick={() => openTaskModal(task)}
                       onKeyDown={(e) => {
                         if (e.key === "Enter" || e.key === " ") {
                           e.preventDefault();
-                          setItemModal({ ...task, status: curStatus, tagsText: tags.join(", "), note: "" });
+                          openTaskModal(task);
                         }
                       }}
                     >
@@ -1304,15 +1418,26 @@ function KanbanTab({
                           {chk.total > 0 && <span className="v2-checklist-badge mono"> · {chk.checked}/{chk.total}</span>}
                         </span>
                         {canEdit && (
-                          <select className="v2-status-select" value={curStatus} aria-label={`${task.title} 상태`} onChange={(e) => quickMoveTask(task, e.target.value)}>
-                            {BOARD_COLUMNS.map((opt) => <option key={opt.id} value={opt.id}>{opt.title}</option>)}
-                          </select>
+                          <div className="v2-card-controls">
+                            <button
+                              type="button"
+                              className="v2-complete-chip"
+                              title="완료 처리 (하단 완료 아카이브로 이동)"
+                              onClick={() => quickMoveTask(task, "done")}
+                            >
+                              <CheckCircle2 size={12} aria-hidden="true" />
+                              <span>완료</span>
+                            </button>
+                            <select className="v2-status-select" value={curStatus} aria-label={`${task.title} 상태`} onChange={(e) => quickMoveTask(task, e.target.value)}>
+                              {ACTIVE_BOARD_COLUMNS.map((opt) => <option key={opt.id} value={opt.id}>{opt.title}</option>)}
+                            </select>
+                          </div>
                         )}
                       </div>
                     </div>
                   );
                 })}
-                {colTasks.length === 0 && <p className="v2-muted" style={{ fontSize: "0.78rem", padding: "6px 2px" }}>항목 없음</p>}
+                {colTasks.length === 0 && <p className="v2-muted" style={{ fontSize: "0.78rem", padding: "6px 2px" }}>진행 중인 항목 없음</p>}
               </div>
               {canEdit && (
                 <form className="v2-quick-add" onSubmit={(e) => onQuickAdd(e, col.id)}>
@@ -1328,71 +1453,257 @@ function KanbanTab({
           );
         })}
       </div>
+
+      {/* Completed Tasks Collapsible Subtree (By Date / By Category) */}
+      <section className="v2-completed-tree-panel" aria-label="완료된 작업 하위 트리">
+        <div className="v2-completed-tree-head">
+          <button
+            type="button"
+            className="v2-tree-toggle-btn"
+            onClick={() => setArchiveOpen((v) => !v)}
+            aria-expanded={archiveOpen}
+          >
+            {archiveOpen ? <ChevronDown size={16} aria-hidden="true" /> : <ChevronRight size={16} aria-hidden="true" />}
+            <CheckCircle2 size={15} className="v2-done-icon" aria-hidden="true" />
+            <strong>완료된 작업 하위 트리</strong>
+            <span className="v2-col-count mono">{completedTasks.length}</span>
+          </button>
+
+          <div className="segmented-control" role="tablist" aria-label="완료 항목 분류 방식">
+            <button
+              type="button"
+              className={archiveGroupBy === "date" ? "active" : ""}
+              onClick={() => setArchiveGroupBy("date")}
+            >
+              날짜별
+            </button>
+            <button
+              type="button"
+              className={archiveGroupBy === "category" ? "active" : ""}
+              onClick={() => setArchiveGroupBy("category")}
+            >
+              분류별
+            </button>
+          </div>
+        </div>
+
+        {archiveOpen && (
+          <div className="v2-completed-tree-body">
+            {completedGroups.length === 0 ? (
+              <p className="v2-muted" style={{ padding: "8px 4px" }}>
+                완료 처리된 작업이 아직 없습니다. 보드 카드의 &ldquo;완료&rdquo; 버튼 또는 상세 모달에서 완료 처리하면 이곳에 날짜별 · 분류별로 정리됩니다.
+              </p>
+            ) : (
+              completedGroups.map((group) => {
+                const isCollapsed = Boolean(collapsedGroups[`${archiveGroupBy}-${group.key}`]);
+                return (
+                  <div key={`${archiveGroupBy}-${group.key}`} className="v2-tree-branch">
+                    <button
+                      type="button"
+                      className="v2-tree-branch-head"
+                      onClick={() => toggleGroup(`${archiveGroupBy}-${group.key}`)}
+                    >
+                      {isCollapsed ? <ChevronRight size={14} aria-hidden="true" /> : <ChevronDown size={14} aria-hidden="true" />}
+                      {archiveGroupBy === "date" ? <Calendar size={13} aria-hidden="true" /> : <Folder size={13} aria-hidden="true" />}
+                      <strong>{group.label}</strong>
+                      <span className="v2-muted mono">({group.items.length})</span>
+                    </button>
+
+                    {!isCollapsed && (
+                      <div className="v2-tree-leaves">
+                        {group.items.map((task) => {
+                          const dateKey = getCompletedDateKey(task);
+                          const owner = task.source === "backlog" ? task.ownerLogin : memberName(data, task.ownerId);
+                          return (
+                            <div key={task.id} className="v2-tree-leaf">
+                              <button
+                                type="button"
+                                className="v2-tree-leaf-main"
+                                onClick={() => openTaskModal(task)}
+                              >
+                                <CheckCircle2 size={14} className="v2-done-icon" aria-hidden="true" />
+                                <span className="v2-tag">{task.type || "task"}</span>
+                                <strong className="v2-tree-leaf-title">{task.title}</strong>
+                                <span className="v2-muted mono v2-tree-leaf-meta">
+                                  {owner} · {dateKey === "0000-00-00" ? "완료" : dateKey}
+                                </span>
+                              </button>
+                              {canEdit && (
+                                <div className="v2-tree-leaf-actions">
+                                  <button
+                                    type="button"
+                                    className="v2-micro-btn"
+                                    title="Kanban Todo 보드로 복원"
+                                    onClick={() => quickMoveTask(task, "todo")}
+                                  >
+                                    <RotateCcw size={12} aria-hidden="true" />
+                                    <span>복원</span>
+                                  </button>
+                                  <button
+                                    type="button"
+                                    className="v2-micro-icon danger"
+                                    title="작업 삭제"
+                                    onClick={() => deleteTask(task)}
+                                  >
+                                    <Trash2 size={13} aria-hidden="true" />
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                );
+              })
+            )}
+          </div>
+        )}
+      </section>
     </div>
   );
 }
 
-function KanbanDetailDrawer({ canDelete, canEdit, data, deleteTask, item, promoteTaskToDocs, saveBoardModal, setItemModal, setTaskNotes, taskNotes }) {
-  const isBacklog = item.source === "backlog";
-  const [editorMode, setEditorMode] = useState(isBacklog && canEdit ? "split" : "preview");
+function KanbanDetailModal({ canDelete, canEdit, deleteTask, item, promoteTaskToDocs, quickMoveTask, saveBoardModal, setItemModal }) {
+  const [editorMode, setEditorMode] = useState(canEdit ? "split" : "preview");
+  const textareaRef = useRef(null);
+  const isDone = DONE_STATUSES.has(item.status);
 
   function toggleChecklist(lineIndex) {
-    if (!isBacklog || !canEdit) return;
+    if (!canEdit) return;
     const lines = String(item.description || "").replace(/\r\n/g, "\n").split("\n");
     if (lineIndex < 0 || lineIndex >= lines.length) return;
     lines[lineIndex] = lines[lineIndex].replace(/^(\s*[-*]\s+\[)([ xX])(\]\s+)/, (_, a, m, b) => `${a}${m.toLowerCase() === "x" ? " " : "x"}${b}`);
     setItemModal((cur) => ({ ...cur, description: lines.join("\n") }));
   }
 
+  function insertSnippet(snippet) {
+    if (!canEdit) return;
+    const el = textareaRef.current;
+    const current = item.description || "";
+    if (!el) {
+      setItemModal((c) => ({ ...c, description: `${current}\n${snippet}` }));
+      return;
+    }
+    const start = el.selectionStart ?? current.length;
+    const end = el.selectionEnd ?? start;
+    const next = `${current.slice(0, start)}${snippet}${current.slice(end)}`;
+    setItemModal((c) => ({ ...c, description: next }));
+    requestAnimationFrame(() => {
+      el.focus();
+      el.setSelectionRange(start + snippet.length, start + snippet.length);
+    });
+  }
+
+  async function handleQuickCompleteToggle() {
+    const nextStatus = isDone ? "todo" : "done";
+    await quickMoveTask(item, nextStatus);
+    setItemModal(null);
+  }
+
   return (
-    <div className="v2-drawer-backdrop" role="presentation" onClick={(e) => { if (e.target === e.currentTarget) setItemModal(null); }}>
-      <aside className="v2-drawer wide" role="dialog" aria-modal="true" aria-label="Kanban 작업 상세">
-        <header className="v2-drawer-head">
+    <div className="v2-modal-backdrop" role="presentation" onClick={(e) => { if (e.target === e.currentTarget) setItemModal(null); }}>
+      <section className="v2-modal-window" role="dialog" aria-modal="true" aria-label="Kanban 작업 상세 모달">
+        <header className="v2-modal-head">
           <div>
-            <span className="v2-eyebrow">{isBacklog ? "KANBAN CARD" : "TEMPLATE TASK"}</span>
-            <h2>{item.title}</h2>
+            <div className="v2-card-top">
+              <span className="v2-eyebrow">{item.source === "backlog" ? "KANBAN CARD" : "TEMPLATE CARD"}</span>
+              <span className={`v2-tag${isDone ? " accent" : ""}`}>{getStatusLabel(item.status)}</span>
+            </div>
+            <h2>{item.title || "작업 상세"}</h2>
           </div>
           <button type="button" className="icon-button" onClick={() => setItemModal(null)} aria-label="닫기"><X size={16} /></button>
         </header>
-        <form className="v2-drawer-body workspace-form" onSubmit={saveBoardModal}>
-          {isBacklog ? (
-            <>
-              <label><span>제목</span><input value={item.title} readOnly={!canEdit} onChange={(e) => setItemModal((c) => ({ ...c, title: e.target.value }))} required /></label>
-              <div className="v2-meta-row-4">
-                <label><span>상태</span><select value={item.status} disabled={!canEdit} onChange={(e) => setItemModal((c) => ({ ...c, status: e.target.value }))}>{BOARD_COLUMNS.map((col) => <option key={col.id} value={col.id}>{col.title}</option>)}</select></label>
-                <label><span>유형</span><select value={item.type} disabled={!canEdit} onChange={(e) => setItemModal((c) => ({ ...c, type: e.target.value }))}>{ITEM_TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}</select></label>
-                <label><span>우선순위</span><select value={item.priority} disabled={!canEdit} onChange={(e) => setItemModal((c) => ({ ...c, priority: e.target.value }))}>{PRIORITIES.map((p) => <option key={p.value} value={p.value}>{p.label}</option>)}</select></label>
-                <label><span>기한</span><input type="date" disabled={!canEdit} value={item.due ? String(item.due).slice(0, 10) : ""} onChange={(e) => setItemModal((c) => ({ ...c, due: e.target.value }))} /></label>
-              </div>
-              <label><span>태그</span><input value={item.tagsText ?? ""} readOnly={!canEdit} onChange={(e) => setItemModal((c) => ({ ...c, tagsText: e.target.value }))} placeholder="쉼표 구분" /></label>
-              <div className="v2-doc-head">
-                <span>상세 Markdown 문서 (표 · 체크리스트)</span>
-                {canEdit && (
-                  <div className="segmented-control">
-                    <button type="button" className={editorMode === "write" ? "active" : ""} onClick={() => setEditorMode("write")}>Write</button>
-                    <button type="button" className={editorMode === "split" ? "active" : ""} onClick={() => setEditorMode("split")}>Split</button>
-                    <button type="button" className={editorMode === "preview" ? "active" : ""} onClick={() => setEditorMode("preview")}>Preview</button>
-                  </div>
-                )}
-              </div>
-              <div className={`v2-md-workbench mode-${editorMode}`}>
-                {canEdit && editorMode !== "preview" && (
-                  <textarea className="v2-md-textarea mono" rows={12} value={item.description || ""} onChange={(e) => setItemModal((c) => ({ ...c, description: e.target.value }))} />
-                )}
-                {editorMode !== "write" && (
-                  <div className="v2-md-reader">
-                    {item.description ? <MarkdownRenderer value={item.description} onToggleChecklist={canEdit ? toggleChecklist : null} /> : <p className="v2-muted">상세 설명이 없습니다.</p>}
-                  </div>
-                )}
-              </div>
-            </>
-          ) : (
-            <>
-              {item.description && <div className="v2-md-reader"><MarkdownRenderer value={item.description} /></div>}
-              <label><span>상태</span><select value={item.status} disabled={!canEdit} onChange={(e) => setItemModal((c) => ({ ...c, status: e.target.value }))}>{BOARD_COLUMNS.map((col) => <option key={col.id} value={col.id}>{col.title}</option>)}</select></label>
-              <label><span>변경 메모</span><input value={taskNotes[item.id] || item.note || ""} readOnly={!canEdit} onChange={(e) => { setTaskNotes((p) => ({ ...p, [item.id]: e.target.value })); setItemModal((c) => ({ ...c, note: e.target.value })); }} placeholder={`${memberName(data, item.ownerId)}에게 공유할 변경 맥락`} /></label>
-            </>
+
+        <form className="v2-modal-body workspace-form" onSubmit={saveBoardModal}>
+          {!canEdit && (
+            <div className="v2-viewer-hint">
+              읽기 전용 모드입니다. 내용을 수정·완료·삭제하려면 상단에서 GitHub 로그인을 진행하세요.
+            </div>
           )}
+
+          <label>
+            <span>제목</span>
+            <input
+              value={item.title}
+              readOnly={!canEdit}
+              onChange={(e) => setItemModal((c) => ({ ...c, title: e.target.value }))}
+              required
+            />
+          </label>
+
+          <div className="v2-meta-row-4">
+            <label>
+              <span>상태</span>
+              <select value={item.status} disabled={!canEdit} onChange={(e) => setItemModal((c) => ({ ...c, status: e.target.value }))}>
+                {BOARD_COLUMNS.map((col) => <option key={col.id} value={col.id}>{col.title}</option>)}
+              </select>
+            </label>
+            <label>
+              <span>분류 (유형)</span>
+              <select value={item.type || "task"} disabled={!canEdit} onChange={(e) => setItemModal((c) => ({ ...c, type: e.target.value }))}>
+                {ITEM_TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
+              </select>
+            </label>
+            <label>
+              <span>우선순위</span>
+              <select value={item.priority || "medium"} disabled={!canEdit} onChange={(e) => setItemModal((c) => ({ ...c, priority: e.target.value }))}>
+                {PRIORITIES.map((p) => <option key={p.value} value={p.value}>{p.label}</option>)}
+              </select>
+            </label>
+            <label>
+              <span>기한</span>
+              <input type="date" disabled={!canEdit} value={item.due ? String(item.due).slice(0, 10) : ""} onChange={(e) => setItemModal((c) => ({ ...c, due: e.target.value }))} />
+            </label>
+          </div>
+
+          <label>
+            <span>태그 (쉼표 구분)</span>
+            <input value={item.tagsText ?? ""} readOnly={!canEdit} onChange={(e) => setItemModal((c) => ({ ...c, tagsText: e.target.value }))} placeholder="sprint-4, benchmark, frontend" />
+          </label>
+
+          <div className="v2-doc-head">
+            <span>상세 작업 문서 (Markdown · 체크리스트 · 표 · 코드블록)</span>
+            {canEdit && (
+              <div className="segmented-control">
+                <button type="button" className={editorMode === "write" ? "active" : ""} onClick={() => setEditorMode("write")}>Write</button>
+                <button type="button" className={editorMode === "split" ? "active" : ""} onClick={() => setEditorMode("split")}>Split</button>
+                <button type="button" className={editorMode === "preview" ? "active" : ""} onClick={() => setEditorMode("preview")}>Preview</button>
+              </div>
+            )}
+          </div>
+
+          {canEdit && editorMode !== "preview" && (
+            <div className="v2-md-toolbar" role="toolbar" aria-label="Markdown 서식 도구">
+              <button type="button" onClick={() => insertSnippet("\n## 목표 및 맥락\n")}>H2</button>
+              <button type="button" onClick={() => insertSnippet("\n### 세부 항목\n")}>H3</button>
+              <button type="button" onClick={() => insertSnippet("**강조**")}>Bold</button>
+              <button type="button" onClick={() => insertSnippet("\n- [ ] 체크리스트 항목\n")}>Checklist</button>
+              <button type="button" onClick={() => insertSnippet("\n| 항목 | 내용 |\n| --- | --- |\n| 예시 | 값 |\n")}>Table</button>
+              <button type="button" onClick={() => insertSnippet("\n```text\n코드 / 로그\n```\n")}>Code</button>
+              <button type="button" onClick={() => insertSnippet("\n> 핵심 결정 사항\n")}>Quote</button>
+            </div>
+          )}
+
+          <div className={`v2-md-workbench mode-${editorMode}`}>
+            {canEdit && editorMode !== "preview" && (
+              <textarea
+                ref={textareaRef}
+                className="v2-md-textarea mono"
+                rows={12}
+                value={item.description || ""}
+                onChange={(e) => setItemModal((c) => ({ ...c, description: e.target.value }))}
+                placeholder={"## 배경 및 상세 내용\n여기에 구체적인 작업 계획, 논의 내용, 체크리스트를 작성하세요.\n\n- [ ] 세부 태스크 1"}
+              />
+            )}
+            {editorMode !== "write" && (
+              <div className="v2-md-reader">
+                {item.description ? <MarkdownRenderer value={item.description} onToggleChecklist={canEdit ? toggleChecklist : null} /> : <p className="v2-muted">작성된 상세 설명이 없습니다.</p>}
+              </div>
+            )}
+          </div>
+
           <div className="v2-drawer-actions">
             <div className="v2-drawer-actions-left">
               {canDelete && (
@@ -1408,10 +1719,18 @@ function KanbanDetailDrawer({ canDelete, canEdit, data, deleteTask, item, promot
                 </button>
               )}
             </div>
-            {canEdit && <button type="submit" className="v2-btn-primary compact">저장</button>}
+            <div className="v2-drawer-actions-right">
+              {canEdit && (
+                <button type="button" className="v2-btn-ghost" onClick={handleQuickCompleteToggle}>
+                  {isDone ? <RotateCcw size={13} aria-hidden="true" /> : <CheckCircle2 size={13} aria-hidden="true" />}
+                  <span>{isDone ? "보드로 복원" : "완료 처리"}</span>
+                </button>
+              )}
+              {canEdit && <button type="submit" className="v2-btn-primary compact">변경 사항 저장</button>}
+            </div>
           </div>
         </form>
-      </aside>
+      </section>
     </div>
   );
 }

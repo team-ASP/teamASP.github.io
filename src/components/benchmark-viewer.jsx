@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, X } from "lucide-react";
+import { formatBenchmarkIdentity } from "@/lib/benchmark-format";
 
 const SERIES_COLORS = ["#2563eb", "#0d9488", "#d97706", "#7c3aed", "#e11d48"];
 
@@ -21,11 +22,20 @@ function normalizeEntry(entry) {
   const scoreMedian = Number(clampNum(entry?.score_median ?? scoreMean, 0, 100, scoreMean).toFixed(1));
   const latMean = Number(clampNum(entry?.latency_mean, 0, 3600, 0).toFixed(2));
   const latMedian = Number(clampNum(entry?.latency_median ?? latMean, 0, 3600, latMean).toFixed(2));
+  const identity = formatBenchmarkIdentity(entry);
 
   return {
     id: String(entry?.id || entry?.name || ""),
     name: String(entry?.name || "Agent"),
+    archetypeId: String(entry?.archetype_id || ""),
     archetypeName: String(entry?.archetype_name || entry?.category || "Agent"),
+    mainTitle: identity.mainTitle,
+    subtitle: identity.subtitle,
+    modelShort: identity.modelShort,
+    settingShort: identity.settingShort,
+    settingDetail: identity.settingDetail,
+    roleTag: identity.roleTag,
+    isMafiaRole: identity.isMafiaRole,
     vendor: String(entry?.vendor || "Unknown"),
     modelRaw: String(entry?.model_raw || ""),
     settingProfile: String(entry?.setting_profile || "default"),
@@ -94,6 +104,7 @@ export function BenchmarkViewer({ initialData = null, embedded = false }) {
   const [query, setQuery] = useState("");
   const [sortCol, setSortCol] = useState("score");
   const [sortAsc, setSortAsc] = useState(false);
+  const [hoveredRadarId, setHoveredRadarId] = useState(null);
   const [selected, setSelected] = useState(null);
   const [trialIdx, setTrialIdx] = useState(0);
 
@@ -105,7 +116,7 @@ export function BenchmarkViewer({ initialData = null, embedded = false }) {
 
   const profiles = useMemo(() => {
     const map = new Map();
-    entries.forEach((item) => map.set(item.settingProfile, item.settingLabel));
+    entries.forEach((item) => map.set(item.settingProfile, item.settingDetail));
     return [...map.entries()];
   }, [entries]);
 
@@ -116,8 +127,11 @@ export function BenchmarkViewer({ initialData = null, embedded = false }) {
       if (profileFilter !== "all" && item.settingProfile !== profileFilter) return false;
       if (!q) return true;
       return (
+        item.mainTitle.toLowerCase().includes(q) ||
+        item.subtitle.toLowerCase().includes(q) ||
         item.name.toLowerCase().includes(q) ||
         item.archetypeName.toLowerCase().includes(q) ||
+        item.vendor.toLowerCase().includes(q) ||
         item.modelRaw.toLowerCase().includes(q) ||
         item.settingLabel.toLowerCase().includes(q)
       );
@@ -163,6 +177,7 @@ export function BenchmarkViewer({ initialData = null, embedded = false }) {
   }
 
   const activeTrial = selected?.trials?.[trialIdx] || null;
+  const radarEntries = filtered.slice(0, 5);
 
   const Wrapper = embedded ? "div" : "main";
 
@@ -193,10 +208,10 @@ export function BenchmarkViewer({ initialData = null, embedded = false }) {
           <small>{uniqueModels} model(s) · {profiles.length} setting(s)</small>
         </article>
         <article>
-          <span>Top Ranked</span>
-          <strong className="bench-kpi-title">{topEntry ? `${topEntry.archetypeName} · ${topEntry.modelRaw}` : "-"}</strong>
+          <span>Top Ranked Experiment</span>
+          <strong className="bench-kpi-title" title={topEntry?.mainTitle}>{topEntry ? topEntry.mainTitle : "-"}</strong>
           <small className="mono">
-            {topEntry ? `${scoreMode.toUpperCase()} ${(scoreMode === "median" ? topEntry.scoreMedian : topEntry.scoreMean).toFixed(1)} · ${topEntry.settingLabel}` : "-"}
+            {topEntry ? `${scoreMode.toUpperCase()} ${(scoreMode === "median" ? topEntry.scoreMedian : topEntry.scoreMean).toFixed(1)} · ${topEntry.modelRaw}` : "-"}
           </small>
         </article>
         <article>
@@ -236,9 +251,9 @@ export function BenchmarkViewer({ initialData = null, embedded = false }) {
           </div>
 
           <select className="compact-select" value={profileFilter} onChange={(e) => setProfileFilter(e.target.value)} aria-label="Setting filter">
-            <option value="all">All Settings</option>
+            <option value="all">모든 실험 세팅</option>
             {profiles.map(([id, label]) => (
-              <option key={id} value={id}>Setting: {label}</option>
+              <option key={id} value={id}>{label}</option>
             ))}
           </select>
 
@@ -247,7 +262,7 @@ export function BenchmarkViewer({ initialData = null, embedded = false }) {
             className="compact-search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="모델 · 아키타입 · 세팅 검색..."
+            placeholder="실험명 · 모델 · 파일명 검색..."
             aria-label="Search benchmark entries"
           />
         </div>
@@ -260,7 +275,7 @@ export function BenchmarkViewer({ initialData = null, embedded = false }) {
               <thead>
                 <tr>
                   <th>#</th>
-                  <th>Model &amp; Archetype</th>
+                  <th>Experiment Title &amp; Agent File</th>
                   <th className="num sortable" onClick={() => onSort("score")}>Score{sortCol === "score" ? (sortAsc ? " ↑" : " ↓") : ""}</th>
                   <th className="num sortable" onClick={() => onSort("social")}>Social{sortCol === "social" ? (sortAsc ? " ↑" : " ↓") : ""}</th>
                   <th className="num sortable" onClick={() => onSort("persona")}>Persona{sortCol === "persona" ? (sortAsc ? " ↑" : " ↓") : ""}</th>
@@ -283,14 +298,12 @@ export function BenchmarkViewer({ initialData = null, embedded = false }) {
                       <td>
                         <div className="bench-entity">
                           <div className="bench-entity-top">
-                            <strong>{item.archetypeName}</strong>
-                            <span className="v2-tag accent mono">{item.settingLabel}</span>
+                            <strong className="bench-main-title">{item.mainTitle}</strong>
+                            <span className={`v2-tag ${item.isMafiaRole ? "role-mafia" : "role-citizen"}`}>{item.roleTag}</span>
                             <span className="v2-tag mono">{item.trialsCount}T</span>
                           </div>
-                          <div className="bench-entity-sub">
-                            <span className="mono">{item.modelRaw || item.name}</span>
-                            <span>·</span>
-                            <span>{item.vendor}</span>
+                          <div className="bench-entity-sub mono" title={item.subtitle}>
+                            {item.subtitle}
                           </div>
                         </div>
                       </td>
@@ -319,16 +332,50 @@ export function BenchmarkViewer({ initialData = null, embedded = false }) {
         </section>
       ) : (
         <section className="bench-panel bench-radar-panel">
-          <div className="bench-radar-wrap">
-            <RadarSvg entries={filtered.slice(0, 5)} />
-          </div>
-          <div className="bench-radar-legend">
-            {filtered.slice(0, 5).map((item, idx) => (
-              <div key={item.id} className="bench-legend-item">
-                <span className="bench-legend-swatch" style={{ background: SERIES_COLORS[idx % SERIES_COLORS.length] }} />
-                <span>{item.archetypeName} · <code className="mono">{item.modelRaw}</code> ({item.settingLabel})</span>
+          <div className="bench-radar-studio">
+            <div className="bench-radar-stage">
+              <div className="bench-radar-stage-head">
+                <span className="v2-eyebrow">6D CAPABILITY COMPARISON (TOP 5 FILTERED)</span>
+                <span className="v2-muted">범례에 마우스를 올리면 해당 실험 폴리곤이 강조되고, 클릭하면 CoT 상세가 열립니다.</span>
               </div>
-            ))}
+              <RadarSvg entries={radarEntries} hoveredId={hoveredRadarId} />
+            </div>
+
+            <div className="bench-radar-sidebar">
+              {radarEntries.map((item, idx) => {
+                const color = SERIES_COLORS[idx % SERIES_COLORS.length];
+                const score = scoreMode === "median" ? item.scoreMedian : item.scoreMean;
+                const isHighlighted = hoveredRadarId === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    className={`bench-legend-card${isHighlighted ? " active" : ""}`}
+                    onMouseEnter={() => setHoveredRadarId(item.id)}
+                    onMouseLeave={() => setHoveredRadarId(null)}
+                    onClick={() => openInspector(item)}
+                  >
+                    <div className="bench-legend-card-head">
+                      <span className="bench-legend-swatch" style={{ background: color }} />
+                      <strong className="bench-legend-title">{item.mainTitle}</strong>
+                      <span className="bench-legend-score mono">{score.toFixed(1)}</span>
+                    </div>
+                    <div className="bench-legend-sub mono">{item.subtitle}</div>
+                    <div className="bench-legend-dims mono">
+                      <span>SOC {item.dimensions.social.toFixed(0)}</span>
+                      <span>PER {item.dimensions.persona.toFixed(0)}</span>
+                      <span>RSN {item.dimensions.reasoning.toFixed(0)}</span>
+                      <span>INT {item.dimensions.intent.toFixed(0)}</span>
+                      <span>MEM {item.dimensions.memory.toFixed(0)}</span>
+                      <span>ECO {item.dimensions.economy.toFixed(0)}</span>
+                    </div>
+                  </button>
+                );
+              })}
+              {radarEntries.length === 0 && (
+                <p className="v2-muted" style={{ padding: "12px" }}>표시할 벤치마크 항목이 없습니다.</p>
+              )}
+            </div>
           </div>
         </section>
       )}
@@ -338,8 +385,8 @@ export function BenchmarkViewer({ initialData = null, embedded = false }) {
           <aside className="v2-drawer" role="dialog" aria-modal="true" aria-label="벤치마크 상세">
             <header className="v2-drawer-head">
               <div>
-                <span className="eyebrow mono">{selected.vendor} · {selected.modelRaw} · {selected.settingLabel}</span>
-                <h2>{selected.archetypeName}</h2>
+                <span className="eyebrow mono">{selected.subtitle}</span>
+                <h2>{selected.mainTitle}</h2>
               </div>
               <button type="button" className="icon-button" onClick={() => setSelected(null)} aria-label="닫기">
                 <X size={16} aria-hidden="true" />
@@ -362,6 +409,8 @@ export function BenchmarkViewer({ initialData = null, embedded = false }) {
               {activeTrial && (
                 <div className="bench-kv">
                   <div><span>Session</span><code className="mono">{activeTrial.session_id} (seed {activeTrial.seed}, {activeTrial.days}d)</code></div>
+                  <div><span>Setting</span><code className="mono">{selected.settingDetail} ({selected.settingProfile})</code></div>
+                  <div><span>Persona</span><span>{selected.personaSummary || selected.archetypeName}</span></div>
                   <div><span>V3 Diagnostics</span><code className="mono">Clues {activeTrial.stats?.distinct_clues ?? "-"} · Hallucinations {activeTrial.stats?.spatial_hallucinations ?? 0} · CoT Refs {activeTrial.stats?.avg_other_refs_in_cot ?? "-"} · Fallbacks {activeTrial.stats?.fallback_count ?? 0}</code></div>
                   <div><span>Tokens</span><code className="mono">{selected.tokenUsage.avgTotal} tok/turn (In {selected.tokenUsage.avgInput} / Out {selected.tokenUsage.avgOutput})</code></div>
                 </div>
@@ -388,22 +437,22 @@ export function BenchmarkViewer({ initialData = null, embedded = false }) {
   );
 }
 
-function RadarSvg({ entries }) {
+function RadarSvg({ entries, hoveredId }) {
   const axes = [
-    { key: "social", label: "Social" },
-    { key: "persona", label: "Persona" },
-    { key: "reasoning", label: "Reasoning" },
-    { key: "intent", label: "Intent" },
-    { key: "memory", label: "Memory" },
-    { key: "economy", label: "Economy" },
+    { key: "social", label: "Social", sub: "사회적 추리력" },
+    { key: "persona", label: "Persona", sub: "페르소나 일관성" },
+    { key: "reasoning", label: "Reasoning", sub: "추론 심도" },
+    { key: "intent", label: "Intent", sub: "의도 정합성" },
+    { key: "memory", label: "Memory", sub: "기억 격리도" },
+    { key: "economy", label: "Economy", sub: "토큰 경제성" },
   ];
-  const cx = 240;
-  const cy = 205;
-  const radius = 148;
+  const cx = 340;
+  const cy = 280;
+  const radius = 212;
   const step = (Math.PI * 2) / axes.length;
 
   return (
-    <svg viewBox="0 0 480 410" className="bench-radar-svg" aria-label="6D Performance Radar">
+    <svg viewBox="0 0 680 560" className="bench-radar-svg" aria-label="6D Performance Radar">
       {[0.2, 0.4, 0.6, 0.8, 1.0].map((lvl) => {
         const pts = axes
           .map((_, i) => {
@@ -411,34 +460,62 @@ function RadarSvg({ entries }) {
             return `${(cx + radius * lvl * Math.cos(a)).toFixed(1)},${(cy + radius * lvl * Math.sin(a)).toFixed(1)}`;
           })
           .join(" ");
-        return <polygon key={lvl} points={pts} fill="none" stroke="var(--line)" strokeWidth="1" />;
+        return (
+          <g key={lvl}>
+            <polygon points={pts} fill="none" stroke="var(--line)" strokeWidth={lvl === 1 ? "1.35" : "1"} strokeDasharray={lvl === 1 ? undefined : "3 3"} />
+            <text x={cx + 6} y={cy - radius * lvl + 4} fill="var(--muted)" fontSize="10.5" fontFamily="ui-monospace, monospace">
+              {Math.round(lvl * 100)}
+            </text>
+          </g>
+        );
       })}
       {axes.map((axis, i) => {
         const a = i * step - Math.PI / 2;
         const x2 = cx + radius * Math.cos(a);
         const y2 = cy + radius * Math.sin(a);
-        const lx = cx + (radius + 24) * Math.cos(a);
-        const ly = cy + (radius + 24) * Math.sin(a);
+        const lx = cx + (radius + 32) * Math.cos(a);
+        const ly = cy + (radius + 32) * Math.sin(a);
         const anchor = Math.cos(a) > 0.3 ? "start" : Math.cos(a) < -0.3 ? "end" : "middle";
         return (
           <g key={axis.key}>
-            <line x1={cx} y1={cy} x2={x2} y2={y2} stroke="var(--line)" strokeWidth="1" />
-            <text x={lx} y={ly} fill="var(--muted)" fontSize="11.5" fontWeight="600" textAnchor={anchor} dominantBaseline="central">
+            <line x1={cx} y1={cy} x2={x2} y2={y2} stroke="var(--line-strong)" strokeWidth="1" />
+            <text x={lx} y={ly - 6} fill="var(--text)" fontSize="13.5" fontWeight="700" textAnchor={anchor} dominantBaseline="central">
               {axis.label}
+            </text>
+            <text x={lx} y={ly + 11} fill="var(--muted)" fontSize="11" fontWeight="500" textAnchor={anchor} dominantBaseline="central">
+              {axis.sub}
             </text>
           </g>
         );
       })}
       {entries.map((entry, idx) => {
         const color = SERIES_COLORS[idx % SERIES_COLORS.length];
-        const pts = axes
-          .map((axis, i) => {
-            const val = Math.max(0.05, Math.min(1, (entry.dimensions[axis.key] || 0) / 100));
-            const a = i * step - Math.PI / 2;
-            return `${(cx + radius * val * Math.cos(a)).toFixed(1)},${(cy + radius * val * Math.sin(a)).toFixed(1)}`;
-          })
-          .join(" ");
-        return <polygon key={entry.id} points={pts} fill={color} fillOpacity="0.12" stroke={color} strokeWidth="2" strokeLinejoin="round" />;
+        const dimmed = hoveredId && hoveredId !== entry.id;
+        const emphasized = hoveredId === entry.id;
+        const coords = axes.map((axis, i) => {
+          const val = Math.max(0.05, Math.min(1, (entry.dimensions[axis.key] || 0) / 100));
+          const a = i * step - Math.PI / 2;
+          return {
+            x: cx + radius * val * Math.cos(a),
+            y: cy + radius * val * Math.sin(a),
+          };
+        });
+        const pts = coords.map((c) => `${c.x.toFixed(1)},${c.y.toFixed(1)}`).join(" ");
+        return (
+          <g key={entry.id} style={{ transition: "opacity 0.16s ease" }} opacity={dimmed ? 0.16 : 1}>
+            <polygon
+              points={pts}
+              fill={color}
+              fillOpacity={emphasized ? "0.22" : "0.11"}
+              stroke={color}
+              strokeWidth={emphasized ? "3" : "2.1"}
+              strokeLinejoin="round"
+            />
+            {coords.map((c, ci) => (
+              <circle key={ci} cx={c.x} cy={c.y} r={emphasized ? "4.8" : "3.6"} fill={color} stroke="var(--panel)" strokeWidth="1.5" />
+            ))}
+          </g>
+        );
       })}
     </svg>
   );
