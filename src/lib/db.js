@@ -218,6 +218,45 @@ export async function ensureSchema() {
   await sql`create index if not exists content_overrides_active_idx on content_overrides (project_id, target_type, target_id, action, created_at desc)`;
 
   await sql`
+    create table if not exists agile_notes (
+      id text primary key,
+      project_id text not null,
+      kind text not null default 'memo',
+      body text not null,
+      tags text not null default '',
+      pinned boolean not null default false,
+      resolved boolean not null default false,
+      author_login text not null,
+      author_name text not null,
+      created_at timestamptz not null default now(),
+      updated_at timestamptz not null default now(),
+      deleted_at timestamptz
+    )
+  `;
+  await sql`create index if not exists agile_notes_project_idx on agile_notes (project_id, pinned desc, created_at desc)`;
+
+  await sql`
+    create table if not exists wiki_pages (
+      id text primary key,
+      project_id text not null,
+      parent_id text not null default '',
+      space text not null default 'general',
+      title text not null,
+      content text not null default '',
+      status text not null default 'draft',
+      reference_url text not null default '',
+      tags text not null default '',
+      author_login text not null,
+      author_name text not null,
+      updated_by_login text not null default '',
+      created_at timestamptz not null default now(),
+      updated_at timestamptz not null default now(),
+      deleted_at timestamptz
+    )
+  `;
+  await sql`create index if not exists wiki_pages_project_idx on wiki_pages (project_id, space, updated_at desc)`;
+
+  await sql`
     create table if not exists audit_events (
       id text primary key,
       actor_login text not null,
@@ -476,6 +515,51 @@ export function toPublicContentOverride(row) {
     actorLogin: row.actor_login,
     actorName: row.actor_name,
     createdAt: row.created_at,
+  };
+}
+
+export function toPublicAgileNote(row) {
+  const tags = String(row.tags || "")
+    .split(",")
+    .map((tag) => tag.trim())
+    .filter(Boolean)
+    .slice(0, 6);
+  return {
+    id: row.id,
+    projectId: row.project_id,
+    kind: row.kind,
+    body: row.body,
+    tags,
+    pinned: Boolean(row.pinned),
+    resolved: Boolean(row.resolved),
+    authorLogin: row.author_login,
+    authorName: row.author_name,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
+export function toPublicWikiPage(row) {
+  const tags = String(row.tags || "")
+    .split(",")
+    .map((tag) => tag.trim())
+    .filter(Boolean)
+    .slice(0, 8);
+  return {
+    id: row.id,
+    projectId: row.project_id,
+    parentId: row.parent_id || "",
+    space: row.space || "general",
+    title: row.title,
+    content: row.content || "",
+    status: row.status || "draft",
+    referenceUrl: row.reference_url || "",
+    tags,
+    authorLogin: row.author_login,
+    authorName: row.author_name,
+    updatedByLogin: row.updated_by_login || row.author_login,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
   };
 }
 

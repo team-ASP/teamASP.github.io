@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, X } from "lucide-react";
 
 const SERIES_COLORS = ["#2563eb", "#0d9488", "#d97706", "#7c3aed", "#e11d48"];
@@ -65,10 +65,27 @@ function tierClass(val) {
   return "";
 }
 
-export function BenchmarkViewer({ initialData }) {
+export function BenchmarkViewer({ initialData = null, embedded = false }) {
+  const [liveData, setLiveData] = useState(initialData);
+
+  useEffect(() => {
+    if (initialData && Array.isArray(initialData.leaderboard) && initialData.leaderboard.length > 0) return;
+    let alive = true;
+    fetch("/api/benchmark", { cache: "no-store" })
+      .then((res) => res.json())
+      .then((payload) => {
+        if (alive && payload) setLiveData(payload);
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, [initialData]);
+
+  const dataSource = liveData || initialData;
   const entries = useMemo(
-    () => (Array.isArray(initialData?.leaderboard) ? initialData.leaderboard.map(normalizeEntry) : []),
-    [initialData],
+    () => (Array.isArray(dataSource?.leaderboard) ? dataSource.leaderboard.map(normalizeEntry) : []),
+    [dataSource],
   );
   const [view, setView] = useState("table");
   const [scoreMode, setScoreMode] = useState("mean");
@@ -147,23 +164,27 @@ export function BenchmarkViewer({ initialData }) {
 
   const activeTrial = selected?.trials?.[trialIdx] || null;
 
+  const Wrapper = embedded ? "div" : "main";
+
   return (
-    <main className="route-shell bench-shell">
-      <header className="bench-masthead">
-        <div>
-          <div className="eyebrow">TEAM-ASP · V3 6D SOCIAL DEDUCTION RUBRIC</div>
-          <h1>Mafia AI Agent Benchmark</h1>
-          <p>
-            santamkj (643d3a4) + Option B 테스트베드에서 측정된 멀티모델 × 에이전트 세팅 6차원 정량 평가 대시보드입니다.
-          </p>
-        </div>
-        <div className="bench-masthead-actions">
-          <Link href="/workspace" className="subtle-button">
-            <ArrowLeft size={14} aria-hidden="true" />
-            Workspace로 돌아가기
-          </Link>
-        </div>
-      </header>
+    <Wrapper className={embedded ? "v2-bench-embedded" : "route-shell bench-shell"}>
+      {!embedded && (
+        <header className="bench-masthead">
+          <div>
+            <div className="eyebrow">TEAM-ASP · V3 6D SOCIAL DEDUCTION RUBRIC</div>
+            <h1>Mafia AI Agent Benchmark</h1>
+            <p>
+              santamkj (643d3a4) + Option B 테스트베드에서 측정된 멀티모델 × 에이전트 세팅 6차원 정량 평가 대시보드입니다.
+            </p>
+          </div>
+          <div className="bench-masthead-actions">
+            <Link href="/" className="subtle-button">
+              <ArrowLeft size={14} aria-hidden="true" />
+              Hub로 돌아가기
+            </Link>
+          </div>
+        </header>
+      )}
 
       <section className="bench-kpi-strip" aria-label="Benchmark Summary">
         <article>
@@ -185,8 +206,8 @@ export function BenchmarkViewer({ initialData }) {
         </article>
         <article>
           <span>Last Synced</span>
-          <strong className="mono">{initialData?.generated_at ? initialData.generated_at.slice(0, 10) : "-"}</strong>
-          <small>Free Vercel Hosting via ASP Study Hub</small>
+          <strong className="mono">{dataSource?.generated_at ? dataSource.generated_at.slice(0, 10) : "-"}</strong>
+          <small>V3 6D · Free Vercel Hosting</small>
         </article>
       </section>
 
@@ -363,7 +384,7 @@ export function BenchmarkViewer({ initialData }) {
           </aside>
         </div>
       )}
-    </main>
+    </Wrapper>
   );
 }
 

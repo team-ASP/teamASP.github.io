@@ -65,22 +65,25 @@ export function SessionBanner() {
   const label = session?.authenticated ? `${session.name || session.login} · ${session.role}` : "Viewer";
 
   return (
-    <div className="session-banner">
-      <div className="session-brand-group">
-        <Link href="/" className="session-home">
-          ASP Study Hub
+    <header className="v2-topbar">
+      <div className="v2-topbar-left">
+        <Link href="/" className="v2-topbar-brand">
+          <span className="v2-brand-mark">ASP</span>
+          <span className="v2-brand-name">Study Hub</span>
         </Link>
-        <span className="session-version">v2</span>
-        <nav className="session-quick-nav" aria-label="Primary hub navigation">
-          <Link href="/workspace">Workspace</Link>
-          <Link href="/benchmark">Benchmark</Link>
-          <Link href="/archive">Archive</Link>
+        <span className="v2-version-pill mono">v2.0</span>
+        <nav className="v2-topbar-links" aria-label="Quick tabs">
+          <Link href="/?tab=overview">Overview</Link>
+          <Link href="/?tab=agile">Agile</Link>
+          <Link href="/?tab=kanban">Kanban</Link>
+          <Link href="/?tab=docs">Docs</Link>
+          <Link href="/?tab=benchmark">Benchmark</Link>
         </nav>
       </div>
-      <div className="session-state" aria-live="polite">
+      <div className="v2-topbar-right" aria-live="polite">
         <button
           type="button"
-          className="theme-toggle-btn"
+          className="v2-topbar-btn"
           onClick={toggleTheme}
           aria-label="테마 전환"
           title={theme === "dark" ? "라이트 모드로 전환" : "다크 모드로 전환"}
@@ -88,18 +91,24 @@ export function SessionBanner() {
           {theme === "dark" ? <Sun size={14} aria-hidden="true" /> : <Moon size={14} aria-hidden="true" />}
           <span>{theme === "dark" ? "Light" : "Dark"}</span>
         </button>
-        <span className="session-actor">{session ? label : "Session 확인 중"}</span>
+        <span className="v2-topbar-actor">{session ? label : "Checking…"}</span>
         {session?.authenticated ? (
           <>
-            {session.role === "admin" && <Link href="/admin/audit">Audit</Link>}
-            <button type="button" onClick={logout}>
+            {session.role === "admin" && (
+              <Link href="/admin/audit" className="v2-topbar-btn">
+                Audit
+              </Link>
+            )}
+            <button type="button" className="v2-topbar-btn" onClick={logout}>
               로그아웃
             </button>
           </>
         ) : (
-          <a href="/api/auth/start">GitHub 로그인</a>
+          <a href="/api/auth/start" className="v2-topbar-btn primary">
+            GitHub 로그인
+          </a>
         )}
       </div>
-    </div>
+    </header>
   );
 }
