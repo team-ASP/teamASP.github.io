@@ -38,6 +38,8 @@ for (const file of [
   "src/app/api/decision-records/route.js",
   "src/app/api/review-queue/route.js",
   "src/app/api/backlog-items/route.js",
+  "src/app/api/agile-notes/route.js",
+  "src/app/api/wiki-pages/route.js",
   "src/app/api/archive-items/route.js",
   "src/app/api/content-overrides/route.js",
   "src/app/api/projects/route.js",
@@ -56,9 +58,23 @@ assert(meRoute.includes("force-dynamic"), "src/app/api/me/route.js: session API 
 assert(meRoute.includes("jsonResponse"), "src/app/api/me/route.js: session API must send no-store headers");
 
 const nextConfig = read("next.config.mjs");
-for (const header of ["X-Frame-Options", "X-Content-Type-Options", "Referrer-Policy", "Permissions-Policy"]) {
+for (const header of [
+  "Content-Security-Policy",
+  "Strict-Transport-Security",
+  "Cross-Origin-Opener-Policy",
+  "X-Frame-Options",
+  "X-Content-Type-Options",
+  "Referrer-Policy",
+  "Permissions-Policy",
+]) {
   assert(nextConfig.includes(header), `next.config.mjs: missing security header ${header}`);
 }
+
+const authLib = read("src/lib/auth.js");
+assert(authLib.includes("verifySameOrigin"), "src/lib/auth.js: verifyCsrf must verify same-origin header");
+
+const workspaceSrc = read("src/components/workspace-client.jsx");
+assert(!workspaceSrc.includes("href={item.url}"), "workspace-client.jsx: external item.url must be sanitized via safeMarkdownHref");
 
 if (failures.length > 0) {
   console.error("Security checks failed:");

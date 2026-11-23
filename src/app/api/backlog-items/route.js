@@ -53,7 +53,7 @@ export async function POST(request) {
   await ensureSchema();
   const sql = getSql();
   const [item] = await sql`
-    insert into backlog_items (id, project_id, title, description, type, status, priority, owner_login, author_login, author_name, due_date)
+    insert into backlog_items (id, project_id, title, description, type, status, priority, tags, owner_login, author_login, author_name, due_date)
     values (
       ${randomUUID()},
       ${projectId},
@@ -62,6 +62,7 @@ export async function POST(request) {
       ${normalized.type},
       ${normalized.status},
       ${normalized.priority},
+      ${normalized.tags},
       ${session.login},
       ${session.login},
       ${session.name || session.login},
@@ -109,6 +110,7 @@ export async function PATCH(request) {
       type: payload.type ?? existing.type,
       status: payload.status ?? existing.status,
       priority: payload.priority ?? existing.priority,
+      tags: payload.tags ?? existing.tags,
       due: payload.due ?? existing.due_date,
     },
     { allowEmptyDescription: true },
@@ -122,6 +124,7 @@ export async function PATCH(request) {
         type = ${normalized.type},
         status = ${normalized.status},
         priority = ${normalized.priority},
+        tags = ${normalized.tags},
         due_date = ${normalized.due},
         updated_at = now()
     where id = ${payload.id}
@@ -185,7 +188,7 @@ function normalizeBacklogPayload(payload, { allowEmptyDescription = true } = {})
   if (title.error) return { error: title.error, extra: title.max ? { max: title.max } : {} };
 
   const descriptionValue = payload.description || (allowEmptyDescription ? " " : "");
-  const description = normalizeText(descriptionValue, { field: "description", max: 2000 });
+  const description = normalizeText(descriptionValue, { field: "description", max: 8000 });
   if (description.error && !allowEmptyDescription) return { error: description.error, extra: description.max ? { max: description.max } : {} };
   if (description.error && allowEmptyDescription) description.value = "";
 
@@ -196,6 +199,14 @@ function normalizeBacklogPayload(payload, { allowEmptyDescription = true } = {})
   if (!validStatuses.has(status)) return { error: "invalid_status" };
   if (!validPriorities.has(priority)) return { error: "invalid_priority" };
 
+  const rawTags = Array.isArray(payload.tags) ? payload.tags.join(",") : String(payload.tags || "");
+  const cleanTags = rawTags
+    .split(",")
+    .map((item) => item.replace(/[\u0000-\u001F\u007F]/g, "").trim().slice(0, 24))
+    .filter(Boolean)
+    .slice(0, 6)
+    .join(",");
+
   const due = payload.due ? String(payload.due).slice(0, 10) : null;
   if (due && !/^\d{4}-\d{2}-\d{2}$/.test(due)) return { error: "invalid_due" };
 
@@ -205,6 +216,7 @@ function normalizeBacklogPayload(payload, { allowEmptyDescription = true } = {})
     type,
     status,
     priority,
+    tags: cleanTags,
     due,
   };
 }

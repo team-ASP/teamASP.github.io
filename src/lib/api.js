@@ -19,11 +19,33 @@ export function jsonError(error, status = 400, extra = {}, headers = {}) {
   return jsonResponse({ error, ...extra }, { status, headers });
 }
 
+const MAX_JSON_BYTES = 100 * 1024;
+
 export async function readJson(request) {
   try {
-    return await request.json();
+    const raw = await request.text();
+    if (!raw || Buffer.byteLength(raw, "utf8") > MAX_JSON_BYTES) return {};
+    const parsed = JSON.parse(raw, (key, value) => {
+      if (key === "__proto__" || key === "constructor" || key === "prototype") return undefined;
+      return value;
+    });
+    return parsed && typeof parsed === "object" ? parsed : {};
   } catch {
     return {};
+  }
+}
+
+export function sanitizeExternalUrl(rawUrl) {
+  const trimmed = String(rawUrl || "").trim();
+  if (!trimmed) return { value: "" };
+  try {
+    const parsed = new URL(trimmed);
+    if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+      return { error: "invalid_url" };
+    }
+    return { value: parsed.href };
+  } catch {
+    return { error: "invalid_url" };
   }
 }
 

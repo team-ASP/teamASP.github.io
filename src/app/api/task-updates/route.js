@@ -71,7 +71,8 @@ export async function POST(request) {
 
 export async function DELETE(request) {
   const session = getSessionFromRequest(request);
-  if (!can(session.role, "admin")) return jsonError("forbidden", 403);
+  if (!session.authenticated) return jsonError("auth_required", 401);
+  if (!can(session.role, "draft")) return jsonError("forbidden", 403);
   if (!verifyCsrf(request)) return jsonError("csrf_failed", 403);
 
   const limit = checkRateLimit(getRateLimitKey(request, session, "task-updates"), { limit: 20, windowMs: 60_000 });

@@ -1,3 +1,4 @@
+import { timingSafeEqual } from "node:crypto";
 import { NextResponse } from "next/server";
 import {
   buildEditableScopes,
@@ -11,6 +12,13 @@ import {
 } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
+
+function safeStateMatch(a, b) {
+  if (!a || !b) return false;
+  const bufA = Buffer.from(a);
+  const bufB = Buffer.from(b);
+  return bufA.length === bufB.length && timingSafeEqual(bufA, bufB);
+}
 
 async function fetchGitHubJson(url, options) {
   const response = await fetch(url, {
@@ -42,8 +50,10 @@ export async function GET(request) {
   const expectedState = request.cookies.get(getOAuthStateCookieName())?.value;
   const code = url.searchParams.get("code");
 
-  if (!state || !expectedState || state !== expectedState || !code) {
-    return NextResponse.redirect(new URL("/governance?auth=invalid-state", origin));
+  if (!safeStateMatch(state, expectedState) || !code) {
+    const failed = NextResponse.redirect(new URL("/governance?auth=invalid-state", origin));
+    failed.cookies.delete(getOAuthStateCookieName());
+    return failed;
   }
 
   try {
@@ -105,7 +115,9 @@ export async function GET(request) {
     });
     return response;
   } catch (error) {
-    console.error(error);
-    return NextResponse.redirect(new URL("/governance?auth=failed", origin));
+    console.error("OAuth callback failed:", error instanceof Error ? error.message : "unknown_error");
+    const failed = NextResponse.redirect(new URL("/governance?auth=failed", origin));
+    failed.cookies.delete(getOAuthStateCookieName());
+    return failed;
   }
 }

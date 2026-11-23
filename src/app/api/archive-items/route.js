@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { jsonError, jsonResponse, normalizeText, readJson, requireFields } from "@/lib/api";
+import { jsonError, jsonResponse, normalizeText, readJson, requireFields, sanitizeExternalUrl } from "@/lib/api";
 import { can, getSessionFromRequest, verifyCsrf } from "@/lib/auth";
 import { ensureSchema, getSql, isDatabaseConfigured, toPublicArchiveItem, writeAuditEvent } from "@/lib/db";
 import { projectExists } from "@/lib/projects";
@@ -30,6 +30,7 @@ export async function GET(request) {
 
 export async function POST(request) {
   const session = getSessionFromRequest(request);
+  if (!session.authenticated) return jsonError("auth_required", 401);
   if (!can(session.role, "draft")) return jsonError("forbidden", 403);
   if (!verifyCsrf(request)) return jsonError("csrf_failed", 403);
 
@@ -78,6 +79,7 @@ export async function POST(request) {
 
 export async function PATCH(request) {
   const session = getSessionFromRequest(request);
+  if (!session.authenticated) return jsonError("auth_required", 401);
   if (!can(session.role, "draft")) return jsonError("forbidden", 403);
   if (!verifyCsrf(request)) return jsonError("csrf_failed", 403);
 
@@ -130,6 +132,7 @@ export async function PATCH(request) {
 
 export async function DELETE(request) {
   const session = getSessionFromRequest(request);
+  if (!session.authenticated) return jsonError("auth_required", 401);
   if (!can(session.role, "draft")) return jsonError("forbidden", 403);
   if (!verifyCsrf(request)) return jsonError("csrf_failed", 403);
 
@@ -169,7 +172,7 @@ function normalizeArchivePayload(payload) {
   if (title.error) return { error: title.error, extra: title.max ? { max: title.max } : {} };
 
   const notesValue = payload.notes || " ";
-  const notes = normalizeText(notesValue, { field: "notes", max: 4000 });
+  const notes = normalizeText(notesValue, { field: "notes", max: 8000 });
   if (notes.error) notes.value = "";
 
   const kind = payload.kind || "artifact";
@@ -177,14 +180,14 @@ function normalizeArchivePayload(payload) {
   if (!validKinds.has(kind)) return { error: "invalid_kind" };
   if (!validStatuses.has(status)) return { error: "invalid_status" };
 
-  const url = String(payload.url || "").trim();
-  if (url && !/^https?:\/\/[^\s]+$/i.test(url)) return { error: "invalid_url" };
+  const safeUrl = sanitizeExternalUrl(payload.url);
+  if (safeUrl.error) return { error: "invalid_url" };
 
   return {
     title: title.value,
     kind,
     status,
-    url,
+    url: safeUrl.value,
     notes: notes.value || "",
   };
 }
